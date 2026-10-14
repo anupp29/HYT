@@ -36,6 +36,13 @@ class DimensionType(str, Enum):
 
 
 class IntegrityFlag(str, Enum):
+    HIDDEN_TEXT = "HIDDEN_TEXT"
+    OFF_PAGE = "OFF_PAGE"
+    TINY_FONT = "TINY_FONT"
+    METADATA_STUFFED = "METADATA_STUFFED"
+    LAYER_ATTACK = "LAYER_ATTACK"
+    GAMING_DETECTED = "GAMING_DETECTED"
+    INJECTION_ATTEMPT = "INJECTION_ATTEMPT"
     WHITE_FONT_DETECTED = "WHITE_FONT_DETECTED"
     ZERO_PT_FONT_DETECTED = "ZERO_PT_FONT_DETECTED"
     METADATA_SKILL_STUFFING = "METADATA_SKILL_STUFFING"
@@ -86,6 +93,32 @@ class JobDescription(BaseModel):
 # ------------------------------------------------------------------------------
 # 2. Candidate Resume Schemas
 # ------------------------------------------------------------------------------
+
+class PDFTextBlock(BaseModel):
+    """Detailed visual and geometric representation of an extracted PDF text block."""
+    text: str
+    bbox: List[float] = Field(default_factory=list, description="[x0, y0, x1, y1] coordinates")
+    font_size: float = 10.0
+    font_name: Optional[str] = None
+    color_srgb: List[float] = Field(default_factory=lambda: [0.0, 0.0, 0.0], description="[r, g, b] in [0, 1]")
+    page_index: int = 0
+    is_hidden: bool = False
+    is_off_page: bool = False
+    is_tiny: bool = False
+
+
+class PDFData(BaseModel):
+    """Parsed low-level PDF representation extracted prior to text processing."""
+    candidate_id: str
+    pdf_path: str
+    page_count: int
+    metadata: Dict[str, str] = Field(default_factory=dict)
+    raw_text: str = ""
+    blocks: List[PDFTextBlock] = Field(default_factory=list)
+    has_images: bool = False
+    image_count: int = 0
+    file_size_bytes: int = 0
+
 
 class ResumeRaw(BaseModel):
     """Raw candidate resume reference."""
@@ -151,6 +184,7 @@ class Gate0IntegrityReport(BaseModel):
     candidate_id: str
     is_quarantined: bool = False
     flags: List[IntegrityFlag] = Field(default_factory=list)
+    flag_reasons: Dict[str, str] = Field(default_factory=dict, description="Explanations of why each flag was triggered")
     min_contrast_ratio: float = 21.0
     min_font_size_pt: float = 10.0
     metadata_skill_density: float = 0.0

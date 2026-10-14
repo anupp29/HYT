@@ -19,6 +19,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from src.gates.jd_input import process_jd_input
 from src.gates.jd_extraction import extract_job_description
 from src.gates.jd_embedding import embed_job_requirements
+from src.gates.gate0 import evaluate_gate0
 from src.utils.logger import init_logger, get_logger
 from src.utils.config import get_config
 from src.utils.llm_client import get_llm_client
@@ -63,7 +64,10 @@ def main():
     # Command: test-llm
     test_parser = subparsers.add_parser("test-llm", help="Send a diagnostic probe to test LLM provider and model connectivity")
     test_parser.add_argument("--provider", "-p", type=str, default=None, help="Provider to test ('gemini', 'groq', 'ollama', 'openai', 'anthropic')")
-    test_parser.add_argument("--model", "-m", type=str, default=None, help="Model name to test (e.g. 'gemma4', 'swift-12b', 'llama-3.3-70b-versatile')")
+    # Command: check-integrity
+    gate0_parser = subparsers.add_parser("check-integrity", help="Run Gate 0 Integrity Shield on a resume PDF")
+    gate0_parser.add_argument("--pdf", type=str, required=True, help="Path to resume PDF file")
+    gate0_parser.add_argument("--job-id", "-j", type=str, default=None, help="Optional job ID to test for JD copying")
 
     args = parser.parse_args()
 
@@ -78,6 +82,8 @@ def main():
         test_llm_command(args)
     elif args.command == "verify-jd":
         verify_jd_command(args)
+    elif args.command == "check-integrity":
+        check_integrity_command(args)
     else:
         parser.print_help()
 
@@ -266,6 +272,51 @@ def verify_jd_command(args):
     print("NICE-TO-HAVE SKILLS (Secondary / Preferred):")
     for idx, skill in enumerate(structured_jd.nice_to_have_skills, 1):
         print(f"  {idx:2d}. {skill}")
+    print("=" * 70 + "\n")
+
+
+def check_integrity_command(args):
+    """Runs Gate 0 Integrity Shield on candidate resume PDF."""
+    pdf_path = Path(args.pdf)
+    if not pdf_path.exists():
+        print(f"Error: Resume PDF not found at: {pdf_path}")
+        sys.exit(1)
+
+    target_jd_text = None
+    if args.job_id:
+        jd_path = PROJECT_ROOT / "data" / "jds" / f"jd_{args.job_id}.json"
+        if not jd_path.exists():
+            jd_path = PROJECT_ROOT / "data" / "jds" / f"{args.job_id}.json"
+        if jd_path.exists():
+            with open(jd_path, "r", encoding="utf-8") as jf:
+                jd_data = json.load(jf)
+                target_jd_text = jd_data.get("raw_description") or jd_data.get("description", "")
+
+    print(f"\n[HYT ATS] Running Gate 0 Integrity Shield on: {pdf_path.name} ...")
+    report = evaluate_gate0(str(pdf_path), target_jd_text=target_jd_text)
+
+    quarantine_status = "[QUARANTINED] HUMAN REVIEW REQUIRED" if report.is_quarantined else "[PASSED] CLEAN"
+
+    print("\n" + "=" * 70)
+    print(f"GATE 0 INTEGRITY REPORT - CANDIDATE {report.candidate_id.upper()}")
+    print("=" * 70)
+    print(f"Status:                {quarantine_status}")
+    print(f"Total Flags Triggered: {len(report.flags)}")
+    print(f"Page Count:            {report.page_count}")
+    print(f"Min Contrast Ratio:    {report.min_contrast_ratio:.2f}:1 (threshold: >= 4.5:1)")
+    print(f"Min Font Size:         {report.min_font_size_pt:.1f}pt (threshold: >= 3.0pt)")
+    print(f"Metadata Skill Density:{report.metadata_skill_density:.2%} (threshold: <= 25.0%)")
+    if target_jd_text:
+        print(f"JD Copy Similarity:    {report.jd_copy_similarity:.2%} (threshold: <= 82.0%)")
+    print("-" * 70)
+    if report.flags:
+        print("ACTIVE INTEGRITY FLAGS:")
+        for idx, flag in enumerate(report.flags, 1):
+            reason = report.flag_reasons.get(flag.value, "Security anomaly detected")
+            print(f"  {idx}. [{flag.value}]")
+            print(f"     Reason: {reason}")
+    else:
+        print("No adversarial attacks, hidden text, or keyword stuffing detected.")
     print("=" * 70 + "\n")
 
 
