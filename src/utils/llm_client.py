@@ -1,8 +1,21 @@
 """
-HYT ATS - Unified LLM Client Subsystem
-======================================
+HYT ATS - Unified Multi-Provider LLM Client Subsystem
+=====================================================
 Provides deterministic, cached LLM completion with automatic JSON parsing,
-retries with exponential backoff, and multi-provider failover (Gemini / OpenAI).
+retries with exponential backoff, and multi-provider failover.
+
+Supports 4 Primary AI Client Ecosystems:
+  1. Google Gemini (e.g. models/gemini-2.5-flash, models/gemini-2.5-pro)
+  2. Groq Cloud (e.g. llama-3.3-70b-versatile, llama-3.1-8b-instant, gemma2-9b-it, mixtral-8x7b-32768)
+  3. Local Ollama (e.g. swift-12b / gemma4, qwen2.5-coder:1.5b, gemma2:9b)
+  4. OpenAI / Anthropic (e.g. gpt-4o-mini, gpt-4o, claude-3-5-haiku-20241022)
+
+Dynamic Model Selection:
+  - Users can select provider and model via CLI flags (--provider, --model),
+    config.yaml (llm.provider, llm.model), or environment variables (HYT_LLM_PROVIDER, HYT_LLM_MODEL).
+  - Native support for Ollama Gemma 4 (swift-12b) with reasoning/thinking extraction.
+  - Automatic local Ollama model discovery and tag resolution.
+
 Strictly adheres to Principle 1: Deterministic evaluation at temperature 0.0.
 """
 
@@ -10,102 +23,316 @@ import os
 import json
 import time
 import re
-from typing import Dict, Any, Optional, Type
+from typing import Dict, Any, List, Optional, Type
+import requests
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
 from src.utils.config import get_config
 from src.utils.logger import get_logger
 
-# Ensure environment variables are loaded
+# Load environment variables
 load_dotenv()
 
 logger = get_logger("LLM_CLIENT")
 
 
 class LLMClient:
-    """Unified client handling Gemini and OpenAI API completions."""
+    """Unified client handling Gemini, Groq, Ollama, OpenAI, and Anthropic."""
 
-    def __init__(self):
+    def __init__(self, provider: Optional[str] = None, model: Optional[str] = None):
         self.config = get_config()
-        self.provider = os.getenv("HYT_LLM_PROVIDER", self.config.llm.provider).lower()
-        self.model_name = os.getenv("HYT_LLM_MODEL", self.config.llm.model)
+        self.provider = (provider or os.getenv("HYT_LLM_PROVIDER", self.config.llm.provider)).lower()
+        self.model_name = model or os.getenv("HYT_LLM_MODEL", self.config.llm.model)
         self.temperature = self.config.llm.temperature
         self.max_tokens = self.config.llm.max_tokens
         self.max_retries = self.config.llm.max_retries
         self.retry_backoff = self.config.llm.retry_backoff_seconds
+        self.timeout_seconds = getattr(self.config.llm, "timeout_seconds", 120)
+        self.ollama_base_url = os.getenv(
+            "OLLAMA_BASE_URL", getattr(self.config.llm, "ollama_base_url", "http://localhost:11434")
+        ).rstrip("/")
 
-        # Initialize API keys
-        self.openai_key = os.getenv("OPENAI_API_KEY")
+        # Credentials
         self.gemini_key = os.getenv("GEMINI_API_KEY")
+        self.groq_key = os.getenv("GROQ_API_KEY")
+        self.openai_key = os.getenv("OPENAI_API_KEY")
+        self.anthropic_key = os.getenv("ANTHROPIC_API_KEY")
 
-        # Auto-select provider if default is not available
-        if self.provider == "gemini" and not self.gemini_key and self.openai_key:
-            self.provider = "openai"
-        elif self.provider == "openai" and not self.openai_key and self.gemini_key:
-            self.provider = "gemini"
+        # Track active resolved model
+        self.active_resolved_model = self.model_name
 
+        # Calibrate default model
+        self.set_active_model(self.provider, self.model_name)
+
+    def set_active_model(self, provider: str, model: Optional[str] = None):
+        """Dynamically updates the active provider and calibrates the model name."""
+        self.provider = provider.lower()
+        if model:
+            self.model_name = model
+
+        if self.provider == "gemini":
+            self.model_name = self._resolve_gemini_model(self.model_name)
+        elif self.provider == "groq":
+            self.model_name = self._resolve_groq_model(self.model_name)
+        elif self.provider == "ollama":
+            self.model_name = self._resolve_ollama_model(self.model_name)
+        elif self.provider == "openai":
+            self.model_name = self._resolve_openai_model(self.model_name)
+        elif self.provider == "anthropic":
+            if not self.model_name or "claude" not in self.model_name:
+                self.model_name = "claude-3-5-haiku-20241022"
+
+    # --------------------------------------------------------------------------
+    # Model Resolution Helpers
+    # --------------------------------------------------------------------------
+    def _resolve_gemini_model(self, requested: Optional[str]) -> str:
+        req = (requested or "").lower()
+        if "pro" in req:
+            return "models/gemini-2.5-pro"
+        elif "flash" in req or "gemini" in req:
+            if not requested.startswith("models/"):
+                return f"models/{requested}"
+            return requested
+        return "models/gemini-2.5-flash"
+
+    def _resolve_groq_model(self, requested: Optional[str]) -> str:
+        req = (requested or "").lower()
+        if "gemma" in req:
+            return "gemma2-9b-it"
+        elif "mixtral" in req:
+            return "mixtral-8x7b-32768"
+        elif "8b" in req or "instant" in req:
+            return "llama-3.1-8b-instant"
+        elif "llama" in req or "70b" in req:
+            return "llama-3.3-70b-versatile"
+        elif requested and not requested.startswith("models/") and "gpt" not in requested:
+            return requested
+        return "llama-3.3-70b-versatile"
+
+    def _resolve_ollama_model(self, requested: Optional[str]) -> str:
+        """Dynamically resolves Ollama models, supporting Gemma 4 (swift-12b) and Qwen."""
+        installed = self.get_ollama_models()
+        model_names = [m.get("name", "") for m in installed]
+
+        req_lower = (requested or "").lower().strip()
+
+        # 1. Exact match with installed tags
+        if requested and requested in model_names:
+            return requested
+        for name in model_names:
+            if requested and requested in name:
+                return name
+
+        # 2. Gemma 4 alias matching (e.g. "gemma4", "gemma 4", "swift", "swift-12b")
+        if any(k in req_lower for k in ["gemma4", "gemma 4", "gemma-4", "swift"]):
+            for m in installed:
+                name = m.get("name", "")
+                details = m.get("details", {})
+                parent = details.get("parent_model", "").lower()
+                family = details.get("family", "").lower()
+                if "swift" in name or "gemma4" in parent or "gemma4" in family:
+                    return name
+            return "swift-12b:latest"
+
+        # 3. General Gemma matching
+        if "gemma" in req_lower:
+            for name in model_names:
+                if "gemma" in name:
+                    return name
+            # Check if swift-12b is installed as gemma4 family
+            for m in installed:
+                if "gemma" in m.get("details", {}).get("family", ""):
+                    return m.get("name", "")
+            return "gemma2:9b"
+
+        # 4. Qwen matching
+        if "qwen" in req_lower:
+            for name in model_names:
+                if "qwen" in name:
+                    return name
+            return "qwen2.5-coder:1.5b"
+
+        # 5. Fallback: If user specified a non-empty name, use it
+        if requested and not requested.startswith("models/") and "gpt" not in requested:
+            return requested
+
+        # 6. Default to first available installed model
+        if model_names:
+            # Prefer swift-12b (gemma4) or qwen if present
+            for name in model_names:
+                if "swift" in name or "gemma" in name:
+                    return name
+            return model_names[0]
+
+        return "swift-12b:latest"
+
+    def _resolve_openai_model(self, requested: Optional[str]) -> str:
+        req = (requested or "").lower()
+        if "4o-mini" in req:
+            return "gpt-4o-mini"
+        elif "4o" in req:
+            return "gpt-4o"
+        elif "turbo" in req:
+            return "gpt-4-turbo"
+        elif requested and "gpt" in requested:
+            return requested
+        return "gpt-4o-mini"
+
+    # --------------------------------------------------------------------------
+    # Ollama Model Inspection
+    # --------------------------------------------------------------------------
+    def get_ollama_models(self) -> List[Dict[str, Any]]:
+        """Queries local Ollama endpoint for installed models and their details."""
+        try:
+            resp = requests.get(f"{self.ollama_base_url}/api/tags", timeout=3)
+            if resp.status_code == 200:
+                return resp.json().get("models", [])
+        except Exception:
+            pass
+        return []
+
+    def get_provider_status(self) -> Dict[str, Dict[str, Any]]:
+        """Inspects and returns connectivity and credential status of all 4 clients."""
+        ollama_models = self.get_ollama_models()
+        return {
+            "gemini": {
+                "configured": bool(self.gemini_key),
+                "key_preview": f"{self.gemini_key[:8]}..." if self.gemini_key else "None",
+                "default_model": "models/gemini-2.5-flash",
+                "supported_models": ["models/gemini-2.5-flash", "models/gemini-2.5-pro"],
+            },
+            "groq": {
+                "configured": bool(self.groq_key),
+                "key_preview": f"{self.groq_key[:8]}..." if self.groq_key else "None",
+                "default_model": "llama-3.3-70b-versatile",
+                "supported_models": [
+                    "llama-3.3-70b-versatile",
+                    "llama-3.1-8b-instant",
+                    "gemma2-9b-it",
+                    "mixtral-8x7b-32768",
+                ],
+            },
+            "ollama": {
+                "configured": len(ollama_models) > 0,
+                "endpoint": self.ollama_base_url,
+                "installed_models": [
+                    {
+                        "name": m.get("name"),
+                        "family": m.get("details", {}).get("family"),
+                        "parent": m.get("details", {}).get("parent_model"),
+                        "size_gb": round(m.get("size", 0) / (1024**3), 2),
+                    }
+                    for m in ollama_models
+                ],
+                "recommended_models": ["swift-12b:latest (Gemma 4)", "qwen2.5-coder:1.5b"],
+            },
+            "openai": {
+                "configured": bool(self.openai_key),
+                "key_preview": f"{self.openai_key[:8]}..." if self.openai_key else "None",
+                "default_model": "gpt-4o-mini",
+                "supported_models": ["gpt-4o-mini", "gpt-4o", "gpt-4-turbo"],
+            },
+            "anthropic": {
+                "configured": bool(self.anthropic_key),
+                "key_preview": f"{self.anthropic_key[:8]}..." if self.anthropic_key else "None",
+                "default_model": "claude-3-5-haiku-20241022",
+                "supported_models": ["claude-3-5-haiku-20241022", "claude-3-5-sonnet-20241022"],
+            },
+        }
+
+    # --------------------------------------------------------------------------
+    # Main Completion Entry Point
+    # --------------------------------------------------------------------------
     def complete(
         self,
         system_prompt: str,
         user_prompt: str,
         json_mode: bool = True,
+        override_provider: Optional[str] = None,
+        override_model: Optional[str] = None,
     ) -> str:
         """
-        Executes LLM completion with exponential backoff retries.
-        
-        Args:
-            system_prompt: Guiding system instructions (treats input as trusted recruiter or schema extractor).
-            user_prompt: Input document payload.
-            json_mode: If true, enforces JSON formatting.
-            
-        Returns:
-            Raw response text from LLM.
+        Executes LLM completion with automatic multi-provider failover.
         """
+        active_provider = (override_provider or self.provider).lower()
+        active_model = override_model or self.model_name
+
+        providers_to_try = [active_provider]
+        fallbacks = ["gemini", "ollama", "groq", "openai", "anthropic"]
+        for fb in fallbacks:
+            if fb not in providers_to_try:
+                providers_to_try.append(fb)
+
         last_error = None
 
-        for attempt in range(1, self.max_retries + 1):
-            try:
-                if self.provider == "gemini":
-                    return self._complete_gemini(system_prompt, user_prompt, json_mode)
-                else:
-                    return self._complete_openai(system_prompt, user_prompt, json_mode)
-            except Exception as e:
-                last_error = e
-                logger.warning(
-                    f"LLM API attempt {attempt}/{self.max_retries} failed with {self.provider}: {e}",
-                    gate="LLM_CLIENT",
-                )
-                # Try fallback provider on error
-                if self.provider == "openai" and self.gemini_key:
-                    logger.info("Attempting failover to Gemini provider...", gate="LLM_CLIENT")
-                    try:
-                        return self._complete_gemini(system_prompt, user_prompt, json_mode)
-                    except Exception as ge:
-                        last_error = ge
-                elif self.provider == "gemini" and self.openai_key:
-                    logger.info("Attempting failover to OpenAI provider...", gate="LLM_CLIENT")
-                    try:
-                        return self._complete_openai(system_prompt, user_prompt, json_mode)
-                    except Exception as oe:
-                        last_error = oe
+        for p in providers_to_try:
+            for attempt in range(1, self.max_retries + 1):
+                try:
+                    if p == "gemini" and self.gemini_key:
+                        m_name = self._resolve_gemini_model(active_model)
+                        self.active_resolved_model = m_name
+                        return self._complete_gemini(system_prompt, user_prompt, json_mode, m_name)
+                    elif p == "groq" and self.groq_key:
+                        m_name = self._resolve_groq_model(active_model)
+                        self.active_resolved_model = m_name
+                        return self._complete_groq(system_prompt, user_prompt, json_mode, m_name)
+                    elif p == "ollama":
+                        m_name = self._resolve_ollama_model(active_model)
+                        self.active_resolved_model = m_name
+                        return self._complete_ollama(system_prompt, user_prompt, json_mode, m_name)
+                    elif p == "openai" and self.openai_key:
+                        m_name = self._resolve_openai_model(active_model)
+                        self.active_resolved_model = m_name
+                        return self._complete_openai(system_prompt, user_prompt, json_mode, m_name)
+                    elif p == "anthropic" and self.anthropic_key:
+                        m_name = active_model if "claude" in active_model else "claude-3-5-haiku-20241022"
+                        self.active_resolved_model = m_name
+                        return self._complete_anthropic(system_prompt, user_prompt, json_mode, m_name)
+                    else:
+                        break  # Skip provider if credentials missing
+                except Exception as e:
+                    last_error = e
+                    err_str = str(e).lower()
 
-                if attempt < self.max_retries:
-                    time.sleep(self.retry_backoff * (2 ** (attempt - 1)))
+                    # Fast failover on invalid API key / authentication errors (do not waste retry backoffs)
+                    if any(auth_err in err_str for auth_err in ["401", "invalid_api_key", "invalid api key", "authentication", "unauthorized"]):
+                        logger.warning(
+                            f"LLM authentication failed for provider '{p}': {e}. Failing over immediately...",
+                            gate="LLM_CLIENT",
+                        )
+                        break
 
-        raise RuntimeError(f"All LLM completion retries failed. Last error: {last_error}")
+                    logger.warning(
+                        f"LLM attempt {attempt}/{self.max_retries} with '{p}' failed: {e}",
+                        gate="LLM_CLIENT",
+                    )
+                    if attempt < self.max_retries:
+                        time.sleep(self.retry_backoff * (2 ** (attempt - 1)))
+                    else:
+                        logger.info(f"Failing over from '{p}' to next available provider...", gate="LLM_CLIENT")
+
+        raise RuntimeError(f"All LLM completion providers failed. Last error: {last_error}")
 
     def complete_structured(
         self,
         system_prompt: str,
         user_prompt: str,
         schema_cls: Type[BaseModel],
+        override_provider: Optional[str] = None,
+        override_model: Optional[str] = None,
     ) -> BaseModel:
         """
         Executes completion and validates output against a Pydantic schema.
         Automatically retries with a corrective prompt on parse error.
         """
-        raw_resp = self.complete(system_prompt, user_prompt, json_mode=True)
+        raw_resp = self.complete(
+            system_prompt,
+            user_prompt,
+            json_mode=True,
+            override_provider=override_provider,
+            override_model=override_model,
+        )
         cleaned_json = self._clean_json_markdown(raw_resp)
 
         try:
@@ -116,28 +343,29 @@ class LLMClient:
                 f"Initial structured parsing failed: {parse_err}. Triggering corrective retry...",
                 gate="LLM_CLIENT",
             )
-            # Corrective prompt
             correction_prompt = (
-                f"Your previous output failed validation with error: {parse_err}\n"
+                f"Your previous output failed schema validation with error: {parse_err}\n"
                 f"Previous output was:\n{raw_resp}\n\n"
                 f"Please correct the JSON output so it strictly adheres to the requested schema. "
                 f"Return ONLY valid JSON."
             )
-            retry_resp = self.complete(system_prompt, correction_prompt, json_mode=True)
+            retry_resp = self.complete(
+                system_prompt,
+                correction_prompt,
+                json_mode=True,
+                override_provider=override_provider,
+                override_model=override_model,
+            )
             cleaned_retry = self._clean_json_markdown(retry_resp)
             parsed_retry = json.loads(cleaned_retry)
             return schema_cls.model_validate(parsed_retry)
 
-    def _complete_gemini(self, system_prompt: str, user_prompt: str, json_mode: bool) -> str:
+    # --------------------------------------------------------------------------
+    # 1. Google Gemini Provider
+    # --------------------------------------------------------------------------
+    def _complete_gemini(self, system_prompt: str, user_prompt: str, json_mode: bool, model_name: str) -> str:
         import google.generativeai as genai
         genai.configure(api_key=self.gemini_key)
-        
-        # Use gemini-2.5-flash or gemini-1.5-flash
-        model_name = self.model_name
-        if "gemini" not in model_name:
-            model_name = "models/gemini-2.5-flash"
-        elif not model_name.startswith("models/"):
-            model_name = f"models/{model_name}"
 
         generation_config = {
             "temperature": self.temperature,
@@ -154,13 +382,73 @@ class LLMClient:
         response = model.generate_content(user_prompt)
         return response.text
 
-    def _complete_openai(self, system_prompt: str, user_prompt: str, json_mode: bool) -> str:
+    # --------------------------------------------------------------------------
+    # 2. Groq Cloud Provider (Ultra-Fast Inference)
+    # --------------------------------------------------------------------------
+    def _complete_groq(self, system_prompt: str, user_prompt: str, json_mode: bool, model_name: str) -> str:
+        from groq import Groq
+        client = Groq(api_key=self.groq_key)
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ]
+        kwargs = {
+            "model": model_name,
+            "messages": messages,
+            "temperature": self.temperature,
+            "max_tokens": self.max_tokens,
+        }
+        if json_mode:
+            kwargs["response_format"] = {"type": "json_object"}
+
+        response = client.chat.completions.create(**kwargs)
+        return response.choices[0].message.content or ""
+
+    # --------------------------------------------------------------------------
+    # 3. Local Ollama Provider (Supports Gemma 4 / swift-12b & Qwen)
+    # --------------------------------------------------------------------------
+    def _complete_ollama(self, system_prompt: str, user_prompt: str, json_mode: bool, model_name: str) -> str:
+        url = f"{self.ollama_base_url}/api/chat"
+
+        payload = {
+            "model": model_name,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            "stream": False,
+            "options": {
+                "temperature": self.temperature,
+                "num_predict": max(self.max_tokens, 2048),
+            },
+        }
+        if json_mode:
+            payload["format"] = "json"
+
+        resp = requests.post(url, json=payload, timeout=self.timeout_seconds)
+        resp.raise_for_status()
+        data = resp.json()
+        msg = data.get("message", {})
+        content = msg.get("content", "")
+
+        # Handle reasoning / thinking models (e.g. swift-12b Gemma 4)
+        if not content.strip() and msg.get("thinking"):
+            thinking_text = msg.get("thinking", "")
+            json_match = re.search(r'(\{[\s\S]*\}|\[[\s\S]*\])', thinking_text)
+            if json_match:
+                content = json_match.group(0)
+            else:
+                content = thinking_text
+
+        return content
+
+    # --------------------------------------------------------------------------
+    # 4. OpenAI Provider
+    # --------------------------------------------------------------------------
+    def _complete_openai(self, system_prompt: str, user_prompt: str, json_mode: bool, model_name: str) -> str:
         import openai
         client = openai.OpenAI(api_key=self.openai_key)
-        
-        model_name = self.model_name
-        if "gpt" not in model_name:
-            model_name = "gpt-4o-mini"
 
         kwargs = {
             "model": model_name,
@@ -177,6 +465,25 @@ class LLMClient:
         response = client.chat.completions.create(**kwargs)
         return response.choices[0].message.content or ""
 
+    # --------------------------------------------------------------------------
+    # 5. Anthropic Provider
+    # --------------------------------------------------------------------------
+    def _complete_anthropic(self, system_prompt: str, user_prompt: str, json_mode: bool, model_name: str) -> str:
+        import anthropic
+        client = anthropic.Anthropic(api_key=self.anthropic_key)
+
+        response = client.messages.create(
+            model=model_name,
+            max_tokens=self.max_tokens,
+            temperature=self.temperature,
+            system=system_prompt,
+            messages=[{"role": "user", "content": user_prompt}],
+        )
+        return response.content[0].text if response.content else ""
+
+    # --------------------------------------------------------------------------
+    # JSON Utility
+    # --------------------------------------------------------------------------
     @staticmethod
     def _clean_json_markdown(text: str) -> str:
         """Strips markdown code blocks like ```json ... ``` from LLM text."""
@@ -194,9 +501,14 @@ class LLMClient:
 _LLM_CLIENT_INSTANCE: Optional[LLMClient] = None
 
 
-def get_llm_client() -> LLMClient:
-    """Returns singleton LLMClient."""
+def get_llm_client(provider: Optional[str] = None, model: Optional[str] = None) -> LLMClient:
+    """Returns singleton LLMClient, optionally switching provider or model."""
     global _LLM_CLIENT_INSTANCE
     if _LLM_CLIENT_INSTANCE is None:
-        _LLM_CLIENT_INSTANCE = LLMClient()
+        _LLM_CLIENT_INSTANCE = LLMClient(provider=provider, model=model)
+    else:
+        if provider:
+            _LLM_CLIENT_INSTANCE.set_active_model(provider, model)
+        elif model:
+            _LLM_CLIENT_INSTANCE.set_active_model(_LLM_CLIENT_INSTANCE.provider, model)
     return _LLM_CLIENT_INSTANCE

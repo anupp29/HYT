@@ -50,6 +50,8 @@ def extract_job_description(
     raw_jd: JobDescriptionRaw,
     use_cache: bool = True,
     force_refresh: bool = False,
+    provider: Optional[str] = None,
+    model: Optional[str] = None,
 ) -> JobDescription:
     """
     Extracts structured JobDescription from raw input with atomic disk caching.
@@ -58,6 +60,8 @@ def extract_job_description(
         raw_jd: JobDescriptionRaw containing raw text and content_hash.
         use_cache: If True, checks cache before calling LLM.
         force_refresh: If True, bypasses cache and re-extracts.
+        provider: Optional provider override ("gemini", "groq", "ollama", "openai", "anthropic").
+        model: Optional model override (e.g. "llama-3.3-70b-versatile", "gemma4", "swift-12b").
         
     Returns:
         Validated JobDescription model.
@@ -91,13 +95,15 @@ RAW JOB DESCRIPTION TEXT:
 
 Please extract the structured job requirements JSON."""
 
-    llm = get_llm_client()
+    llm = get_llm_client(provider=provider, model=model)
 
     try:
         raw_json_str = llm.complete(
             system_prompt=JD_EXTRACTION_SYSTEM_PROMPT,
             user_prompt=user_prompt,
             json_mode=True,
+            override_provider=provider,
+            override_model=model,
         )
         cleaned_json = llm._clean_json_markdown(raw_json_str)
         parsed_dict = json.loads(cleaned_json)

@@ -29,13 +29,14 @@ class PathsConfig(BaseModel):
 
 
 class LLMConfig(BaseModel):
-    provider: str = "openai"
-    model: str = "gpt-4o-mini"
+    provider: str = "gemini" # "gemini", "groq", "ollama", "openai", "anthropic"
+    model: str = "models/gemini-2.5-flash"
     temperature: float = Field(default=0.0, ge=0.0, le=1.0)
     max_tokens: int = Field(default=2048, ge=256, le=8192)
     max_retries: int = Field(default=3, ge=0, le=10)
     retry_backoff_seconds: int = Field(default=2, ge=1, le=30)
-    timeout_seconds: int = Field(default=45, ge=5, le=180)
+    timeout_seconds: int = Field(default=120, ge=5, le=300)
+    ollama_base_url: str = Field(default="http://localhost:11434")
 
 
 class EmbeddingsConfig(BaseModel):
