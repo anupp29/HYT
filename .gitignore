@@ -1,0 +1,36 @@
+﻿# Raw and processed data - never commit PII
+data/raw/
+data/sample/
+data/adversarial/
+
+# LLM cache - regenerable, not source code
+cache/
+
+# Logs
+logs/
+
+# Python environment
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Golden set - commit only golden_labels.csv and golden_summary.json (no PDFs)
+# data/golden/ IS committed - it contains labels only (no raw resumes)

@@ -1,0 +1,22 @@
+{
+  "updated_at": "2026-10-14T01:19:32.667928",
+  "total_pairs": 200,
+  "unique_candidates": 106,
+  "num_jds": 6,
+  "score_distribution": {
+    "1": 5,
+    "2": 81,
+    "3": 82,
+    "4": 25,
+    "5": 7
+  },
+  "decision_distribution": {
+    "advance": 32,
+    "escalate": 104,
+    "reject": 64
+  },
+  "career_switchers_count": 24,
+  "overqualified_count": 45,
+  "has_github_count": 17,
+  "status": "complete_human_labelled"
+}
