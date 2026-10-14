@@ -1,0 +1,173 @@
+# ==============================================================================
+# HYT ATS - Master Pipeline Configuration
+# ==============================================================================
+# All parameters, thresholds, and weights are defined here.
+# NO values are hardcoded in the source code.
+# Environment variables prefixed with HYT_ can dynamically override any value.
+# ==============================================================================
+
+pipeline:
+  name: "HYT-ATS-Screening-Engine"
+  version: "1.0.0"
+  target_domain: "Software Engineering & IT"
+
+paths:
+  cache_dir: "./cache"
+  log_dir: "./logs"
+  data_raw_dir: "./data/raw"
+  data_sample_dir: "./data/sample"
+  data_golden_dir: "./data/golden"
+  data_jds_dir: "./data/jds"
+
+# ------------------------------------------------------------------------------
+# LLM Settings (Deterministic Extraction & Explanations)
+# Max 2 LLM calls per candidate (Gate 3 extraction + Gate 8 explanation)
+# ------------------------------------------------------------------------------
+llm:
+  provider: "openai" # "openai", "anthropic", or "gemini"
+  model: "gpt-4o-mini" # or claude-3-5-haiku / gemini-1.5-flash
+  temperature: 0.0 # Strict determinism (Principle 1)
+  max_tokens: 2048
+  max_retries: 3
+  retry_backoff_seconds: 2
+  timeout_seconds: 45
+
+# ------------------------------------------------------------------------------
+# Embeddings Settings (Local Sentence-Transformer)
+# ------------------------------------------------------------------------------
+embeddings:
+  model_name: "sentence-transformers/all-MiniLM-L6-v2"
+  device: "cpu" # "cpu" or "cuda"
+  batch_size: 32
+  normalize_embeddings: true
+
+# ------------------------------------------------------------------------------
+# Gate 0: Integrity Shield (Adversarial Attack & Anomaly Detection)
+# ------------------------------------------------------------------------------
+gate0:
+  # Hidden Text Detection (WCAG 2.1 contrast ratio standard)
+  min_contrast_ratio: 4.5 # Standard contrast ratio threshold
+  min_font_size_pt: 3.0 # Text rendered below 3pt flagged as microscopic text stuffing
+  
+  # Metadata & Text Injections
+  metadata_skill_density_threshold: 0.25 # Ratio of skill tokens in PDF metadata
+  jd_copy_similarity_threshold: 0.82 # TF-IDF cosine similarity indicating verbatim JD plagiarism
+  
+  # Structural Anomalies
+  max_pages_warning: 5
+  suspicious_char_ratio_threshold: 0.15 # Ratio of invisible / non-printable unicode chars
+  
+  # Quarantine Threshold: number of integrity flags triggering QUARANTINE status
+  quarantine_flag_count: 2
+
+# ------------------------------------------------------------------------------
+# Gate 1: Security Shield (Prompt Injection Detection)
+# ------------------------------------------------------------------------------
+gate1:
+  enabled: true
+  heuristic_injection_patterns:
+    - "ignore previous instructions"
+    - "system prompt"
+    - "new role:"
+    - "assistant instructions:"
+    - "override score"
+    - "rate candidate 5/5"
+    - "bypass screening"
+    - "do not evaluate"
+  quarantine_on_injection: true
+
+# ------------------------------------------------------------------------------
+# Gate 2: Privacy Shield (PII Redaction)
+# ------------------------------------------------------------------------------
+gate2:
+  redact_email: true
+  redact_phone: true
+  redact_names: true
+  redact_addresses: true
+  replacement_token: "[REDACTED]"
+
+# ------------------------------------------------------------------------------
+# Gate 3: Structural Extraction Settings
+# ------------------------------------------------------------------------------
+gate3:
+  strict_schema_validation: true
+  fallback_on_parse_error: true
+  max_extraction_retries: 2
+
+# ------------------------------------------------------------------------------
+# Gate 4: Verification Engine (GitHub Cross-Reference & Profile Depth)
+# ------------------------------------------------------------------------------
+gate4:
+  enabled: true
+  github_api_timeout_seconds: 5
+  shallow_profile_unverified_threshold: 0.60 # >60% unverified skills triggers SHALLOW_PROFILE
+  github_language_mismatch_threshold: 0.50 # Claimed core languages absent from top repos
+  github_activity_lookback_days: 730 # 2 years of public commit/PR activity
+  max_repos_to_inspect: 15
+
+# ------------------------------------------------------------------------------
+# Gate 5: Fast Filter (Bi-Encoder Pre-Filter)
+# Calibrated conservatively to guarantee 0 False Negatives on Golden Set
+# ------------------------------------------------------------------------------
+gate5:
+  enabled: true
+  prefilter_similarity_threshold: 0.30 # Resumes below this cosine sim are flagged for human confirmation
+  action_on_below_threshold: "ESCALATE" # Never auto-reject on embedding alone
+
+# ------------------------------------------------------------------------------
+# Gate 6: Deep Fit Engine (Deterministic 4-Dimensional Scoring)
+# ------------------------------------------------------------------------------
+gate6:
+  # Dimension Weights (MUST SUM TO EXACTLY 1.0)
+  weights:
+    technical: 0.40
+    experience: 0.30
+    seniority: 0.20
+    education: 0.05
+    location: 0.05
+
+  # Technical Alignment Parameters
+  hard_gate_similarity_threshold: 0.68 # Minimum cosine similarity for verified must-have match
+  unverified_skill_weight: 0.45 # Partial credit multiplier for unverified/listed-only skills
+  nicetohave_skill_weight: 0.30 # Partial credit multiplier for verified nice-to-haves
+  
+  # Seniority Calibration Mapping
+  seniority_scores:
+    exact_match: 1.0
+    one_level_below: 0.70
+    two_levels_below: 0.40
+    overqualified: 0.65 # Overqualification partial score
+    overqualified_flag_threshold: 12.0 # YoE exceeding JD requirement by 12+ years triggers flag
+  
+  # Education & Location Policy (Never 0.0 - Education or Location alone never kills candidacy)
+  education_partial_score: 0.60 # Candidate without exact degree requirement
+  location_partial_score: 0.50 # Candidate in different timezone/location when remote is flexible
+
+# ------------------------------------------------------------------------------
+# Gate 7: Decision Engine (Structural Recall Bias)
+# ------------------------------------------------------------------------------
+gate7:
+  high_threshold: 75.0 # Score >= 75 with no anomalies -> AUTO_ADVANCE
+  low_threshold: 40.0  # Score < 40 with multiple failures -> candidate for AUTO_REJECT
+  
+  # Auto-Reject Constraint: Near-impossible by design (Structural Recall Bias)
+  # Requires score < low_threshold AND hard_failures >= proportion AND 0 verified matches
+  auto_reject_hard_failure_proportion: 0.60
+
+# ------------------------------------------------------------------------------
+# Gate 8: Explanation Generator (LLM Call 2)
+# ------------------------------------------------------------------------------
+gate8:
+  generate_for_auto_advance: true
+  generate_for_escalate: true
+  generate_for_auto_reject: false # Never spend tokens explaining auto-rejects (Rule 8)
+  max_explanation_sentences: 3
+
+# ------------------------------------------------------------------------------
+# Evaluation Harness Settings
+# ------------------------------------------------------------------------------
+eval:
+  ndcg_k_values: [5, 10]
+  min_labelled_resumes_per_job: 10
+  judge_sample_size: 40 # Number of explanations for human vs LLM-as-judge Cohen's Kappa
+  fairness_sample_size: 30 # Number of counterfactual candidate variants

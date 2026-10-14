@@ -1,0 +1,2042 @@
+{
+  "created_at": "2026-10-13T19:38:23.445357Z",
+  "domain": "Software Engineering & Information Technology",
+  "resume_count": 220,
+  "jd_count": 6,
+  "resume_sources": {
+    "INFORMATION-TECHNOLOGY": 120,
+    "ENGINEERING_SW_ADJACENT": 100
+  },
+  "resumes": [
+    {
+      "candidate_id": "10089434",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/10089434.pdf",
+      "clean_txt_path": "sample/10089434_clean.txt",
+      "github_url": null,
+      "text_length": 8254,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "10247517",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/10247517.pdf",
+      "clean_txt_path": "sample/10247517_clean.txt",
+      "github_url": null,
+      "text_length": 7039,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "10265057",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/10265057.pdf",
+      "clean_txt_path": "sample/10265057_clean.txt",
+      "github_url": null,
+      "text_length": 5133,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "10553553",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/10553553.pdf",
+      "clean_txt_path": "sample/10553553_clean.txt",
+      "github_url": null,
+      "text_length": 4969,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "10641230",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/10641230.pdf",
+      "clean_txt_path": "sample/10641230_clean.txt",
+      "github_url": null,
+      "text_length": 5224,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "10839851",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/10839851.pdf",
+      "clean_txt_path": "sample/10839851_clean.txt",
+      "github_url": null,
+      "text_length": 4267,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "10840430",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/10840430.pdf",
+      "clean_txt_path": "sample/10840430_clean.txt",
+      "github_url": null,
+      "text_length": 7353,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "11580408",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/11580408.pdf",
+      "clean_txt_path": "sample/11580408_clean.txt",
+      "github_url": null,
+      "text_length": 5694,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "11584809",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/11584809.pdf",
+      "clean_txt_path": "sample/11584809_clean.txt",
+      "github_url": null,
+      "text_length": 5077,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "11957080",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/11957080.pdf",
+      "clean_txt_path": "sample/11957080_clean.txt",
+      "github_url": null,
+      "text_length": 9127,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "12045067",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/12045067.pdf",
+      "clean_txt_path": "sample/12045067_clean.txt",
+      "github_url": null,
+      "text_length": 8857,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "12334140",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/12334140.pdf",
+      "clean_txt_path": "sample/12334140_clean.txt",
+      "github_url": null,
+      "text_length": 13053,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "12635195",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/12635195.pdf",
+      "clean_txt_path": "sample/12635195_clean.txt",
+      "github_url": null,
+      "text_length": 2812,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "12763627",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/12763627.pdf",
+      "clean_txt_path": "sample/12763627_clean.txt",
+      "github_url": null,
+      "text_length": 6087,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "13385306",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/13385306.pdf",
+      "clean_txt_path": "sample/13385306_clean.txt",
+      "github_url": null,
+      "text_length": 4928,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "13405733",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/13405733.pdf",
+      "clean_txt_path": "sample/13405733_clean.txt",
+      "github_url": null,
+      "text_length": 6217,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "13477922",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/13477922.pdf",
+      "clean_txt_path": "sample/13477922_clean.txt",
+      "github_url": null,
+      "text_length": 5160,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "13836471",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/13836471.pdf",
+      "clean_txt_path": "sample/13836471_clean.txt",
+      "github_url": null,
+      "text_length": 4728,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "14789139",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/14789139.pdf",
+      "clean_txt_path": "sample/14789139_clean.txt",
+      "github_url": null,
+      "text_length": 8555,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "15118506",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/15118506.pdf",
+      "clean_txt_path": "sample/15118506_clean.txt",
+      "github_url": null,
+      "text_length": 5210,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "15297298",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/15297298.pdf",
+      "clean_txt_path": "sample/15297298_clean.txt",
+      "github_url": null,
+      "text_length": 5958,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "15651486",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/15651486.pdf",
+      "clean_txt_path": "sample/15651486_clean.txt",
+      "github_url": null,
+      "text_length": 6602,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "15791766",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/15791766.pdf",
+      "clean_txt_path": "sample/15791766_clean.txt",
+      "github_url": null,
+      "text_length": 4763,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "15802627",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/15802627.pdf",
+      "clean_txt_path": "sample/15802627_clean.txt",
+      "github_url": null,
+      "text_length": 8070,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "16186411",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/16186411.pdf",
+      "clean_txt_path": "sample/16186411_clean.txt",
+      "github_url": null,
+      "text_length": 8972,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "16533554",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/16533554.pdf",
+      "clean_txt_path": "sample/16533554_clean.txt",
+      "github_url": null,
+      "text_length": 5338,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "16899268",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/16899268.pdf",
+      "clean_txt_path": "sample/16899268_clean.txt",
+      "github_url": null,
+      "text_length": 3965,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "17111768",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/17111768.pdf",
+      "clean_txt_path": "sample/17111768_clean.txt",
+      "github_url": null,
+      "text_length": 10622,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "17641670",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/17641670.pdf",
+      "clean_txt_path": "sample/17641670_clean.txt",
+      "github_url": null,
+      "text_length": 13993,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "17681064",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/17681064.pdf",
+      "clean_txt_path": "sample/17681064_clean.txt",
+      "github_url": null,
+      "text_length": 5143,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "17688766",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/17688766.pdf",
+      "clean_txt_path": "sample/17688766_clean.txt",
+      "github_url": null,
+      "text_length": 4306,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "17987433",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/17987433.pdf",
+      "clean_txt_path": "sample/17987433_clean.txt",
+      "github_url": null,
+      "text_length": 5814,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "18067556",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/18067556.pdf",
+      "clean_txt_path": "sample/18067556_clean.txt",
+      "github_url": null,
+      "text_length": 20033,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "18159866",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/18159866.pdf",
+      "clean_txt_path": "sample/18159866_clean.txt",
+      "github_url": null,
+      "text_length": 10301,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "18176523",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/18176523.pdf",
+      "clean_txt_path": "sample/18176523_clean.txt",
+      "github_url": null,
+      "text_length": 4686,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "18187364",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/18187364.pdf",
+      "clean_txt_path": "sample/18187364_clean.txt",
+      "github_url": null,
+      "text_length": 9240,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "18301617",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/18301617.pdf",
+      "clean_txt_path": "sample/18301617_clean.txt",
+      "github_url": null,
+      "text_length": 5537,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "18752129",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/18752129.pdf",
+      "clean_txt_path": "sample/18752129_clean.txt",
+      "github_url": null,
+      "text_length": 8604,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "19201175",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/19201175.pdf",
+      "clean_txt_path": "sample/19201175_clean.txt",
+      "github_url": null,
+      "text_length": 5492,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "19796840",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/19796840.pdf",
+      "clean_txt_path": "sample/19796840_clean.txt",
+      "github_url": null,
+      "text_length": 15633,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "19850482",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/19850482.pdf",
+      "clean_txt_path": "sample/19850482_clean.txt",
+      "github_url": null,
+      "text_length": 7088,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "20001721",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/20001721.pdf",
+      "clean_txt_path": "sample/20001721_clean.txt",
+      "github_url": null,
+      "text_length": 3677,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "20024870",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/20024870.pdf",
+      "clean_txt_path": "sample/20024870_clean.txt",
+      "github_url": null,
+      "text_length": 2747,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "20237244",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/20237244.pdf",
+      "clean_txt_path": "sample/20237244_clean.txt",
+      "github_url": null,
+      "text_length": 3052,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "20408458",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/20408458.pdf",
+      "clean_txt_path": "sample/20408458_clean.txt",
+      "github_url": null,
+      "text_length": 8379,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "20674668",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/20674668.pdf",
+      "clean_txt_path": "sample/20674668_clean.txt",
+      "github_url": null,
+      "text_length": 5786,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "20824105",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/20824105.pdf",
+      "clean_txt_path": "sample/20824105_clean.txt",
+      "github_url": null,
+      "text_length": 6938,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "20879311",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/20879311.pdf",
+      "clean_txt_path": "sample/20879311_clean.txt",
+      "github_url": null,
+      "text_length": 8136,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "21283365",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/21283365.pdf",
+      "clean_txt_path": "sample/21283365_clean.txt",
+      "github_url": null,
+      "text_length": 5943,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "21780877",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/21780877.pdf",
+      "clean_txt_path": "sample/21780877_clean.txt",
+      "github_url": null,
+      "text_length": 6229,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "22450718",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/22450718.pdf",
+      "clean_txt_path": "sample/22450718_clean.txt",
+      "github_url": null,
+      "text_length": 7727,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "22776912",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/22776912.pdf",
+      "clean_txt_path": "sample/22776912_clean.txt",
+      "github_url": null,
+      "text_length": 9297,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "23527321",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/23527321.pdf",
+      "clean_txt_path": "sample/23527321_clean.txt",
+      "github_url": null,
+      "text_length": 5690,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "23666211",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/23666211.pdf",
+      "clean_txt_path": "sample/23666211_clean.txt",
+      "github_url": null,
+      "text_length": 5920,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "23864648",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/23864648.pdf",
+      "clean_txt_path": "sample/23864648_clean.txt",
+      "github_url": null,
+      "text_length": 5928,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "24020470",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/24020470.pdf",
+      "clean_txt_path": "sample/24020470_clean.txt",
+      "github_url": null,
+      "text_length": 7784,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "24038620",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/24038620.pdf",
+      "clean_txt_path": "sample/24038620_clean.txt",
+      "github_url": null,
+      "text_length": 6194,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "24083609",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/24083609.pdf",
+      "clean_txt_path": "sample/24083609_clean.txt",
+      "github_url": null,
+      "text_length": 1860,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "24230851",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/24230851.pdf",
+      "clean_txt_path": "sample/24230851_clean.txt",
+      "github_url": null,
+      "text_length": 4795,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "24889109",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/24889109.pdf",
+      "clean_txt_path": "sample/24889109_clean.txt",
+      "github_url": null,
+      "text_length": 4694,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "24913648",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/24913648.pdf",
+      "clean_txt_path": "sample/24913648_clean.txt",
+      "github_url": null,
+      "text_length": 6989,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "25207620",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/25207620.pdf",
+      "clean_txt_path": "sample/25207620_clean.txt",
+      "github_url": null,
+      "text_length": 6260,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "25857360",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/25857360.pdf",
+      "clean_txt_path": "sample/25857360_clean.txt",
+      "github_url": null,
+      "text_length": 6400,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "25905275",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/25905275.pdf",
+      "clean_txt_path": "sample/25905275_clean.txt",
+      "github_url": null,
+      "text_length": 7315,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "25959103",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/25959103.pdf",
+      "clean_txt_path": "sample/25959103_clean.txt",
+      "github_url": null,
+      "text_length": 5325,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "25990239",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/25990239.pdf",
+      "clean_txt_path": "sample/25990239_clean.txt",
+      "github_url": null,
+      "text_length": 5827,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "26480367",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/26480367.pdf",
+      "clean_txt_path": "sample/26480367_clean.txt",
+      "github_url": null,
+      "text_length": 5001,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "26746496",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/26746496.pdf",
+      "clean_txt_path": "sample/26746496_clean.txt",
+      "github_url": null,
+      "text_length": 8255,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "26768723",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/26768723.pdf",
+      "clean_txt_path": "sample/26768723_clean.txt",
+      "github_url": null,
+      "text_length": 5001,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "26801767",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/26801767.pdf",
+      "clean_txt_path": "sample/26801767_clean.txt",
+      "github_url": null,
+      "text_length": 9445,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "27058381",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/27058381.pdf",
+      "clean_txt_path": "sample/27058381_clean.txt",
+      "github_url": null,
+      "text_length": 11443,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "27295996",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/27295996.pdf",
+      "clean_txt_path": "sample/27295996_clean.txt",
+      "github_url": null,
+      "text_length": 7123,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "27372171",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/27372171.pdf",
+      "clean_txt_path": "sample/27372171_clean.txt",
+      "github_url": null,
+      "text_length": 11884,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "27485716",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/27485716.pdf",
+      "clean_txt_path": "sample/27485716_clean.txt",
+      "github_url": null,
+      "text_length": 5949,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "27536013",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/27536013.pdf",
+      "clean_txt_path": "sample/27536013_clean.txt",
+      "github_url": null,
+      "text_length": 5822,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "27770859",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/27770859.pdf",
+      "clean_txt_path": "sample/27770859_clean.txt",
+      "github_url": null,
+      "text_length": 5395,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "28035460",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/28035460.pdf",
+      "clean_txt_path": "sample/28035460_clean.txt",
+      "github_url": null,
+      "text_length": 6257,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "28126340",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/28126340.pdf",
+      "clean_txt_path": "sample/28126340_clean.txt",
+      "github_url": null,
+      "text_length": 8668,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "28672970",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/28672970.pdf",
+      "clean_txt_path": "sample/28672970_clean.txt",
+      "github_url": null,
+      "text_length": 6561,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "28697203",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/28697203.pdf",
+      "clean_txt_path": "sample/28697203_clean.txt",
+      "github_url": null,
+      "text_length": 5246,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "28897981",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/28897981.pdf",
+      "clean_txt_path": "sample/28897981_clean.txt",
+      "github_url": null,
+      "text_length": 6448,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "29051656",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/29051656.pdf",
+      "clean_txt_path": "sample/29051656_clean.txt",
+      "github_url": null,
+      "text_length": 6892,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "29075857",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/29075857.pdf",
+      "clean_txt_path": "sample/29075857_clean.txt",
+      "github_url": null,
+      "text_length": 9253,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "29975124",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/29975124.pdf",
+      "clean_txt_path": "sample/29975124_clean.txt",
+      "github_url": null,
+      "text_length": 6038,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "30223363",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/30223363.pdf",
+      "clean_txt_path": "sample/30223363_clean.txt",
+      "github_url": null,
+      "text_length": 10834,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "31111279",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/31111279.pdf",
+      "clean_txt_path": "sample/31111279_clean.txt",
+      "github_url": null,
+      "text_length": 8017,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "31243710",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/31243710.pdf",
+      "clean_txt_path": "sample/31243710_clean.txt",
+      "github_url": null,
+      "text_length": 7709,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "32959732",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/32959732.pdf",
+      "clean_txt_path": "sample/32959732_clean.txt",
+      "github_url": null,
+      "text_length": 11635,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "33241454",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/33241454.pdf",
+      "clean_txt_path": "sample/33241454_clean.txt",
+      "github_url": null,
+      "text_length": 4028,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "33381211",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/33381211.pdf",
+      "clean_txt_path": "sample/33381211_clean.txt",
+      "github_url": null,
+      "text_length": 10837,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "35325329",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/35325329.pdf",
+      "clean_txt_path": "sample/35325329_clean.txt",
+      "github_url": null,
+      "text_length": 6599,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "36434348",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/36434348.pdf",
+      "clean_txt_path": "sample/36434348_clean.txt",
+      "github_url": null,
+      "text_length": 5557,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "36856210",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/36856210.pdf",
+      "clean_txt_path": "sample/36856210_clean.txt",
+      "github_url": null,
+      "text_length": 4633,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "37242217",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/37242217.pdf",
+      "clean_txt_path": "sample/37242217_clean.txt",
+      "github_url": null,
+      "text_length": 7219,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "37764298",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/37764298.pdf",
+      "clean_txt_path": "sample/37764298_clean.txt",
+      "github_url": null,
+      "text_length": 6642,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "38753827",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/38753827.pdf",
+      "clean_txt_path": "sample/38753827_clean.txt",
+      "github_url": null,
+      "text_length": 9751,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "39413067",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/39413067.pdf",
+      "clean_txt_path": "sample/39413067_clean.txt",
+      "github_url": null,
+      "text_length": 5373,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "39718499",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/39718499.pdf",
+      "clean_txt_path": "sample/39718499_clean.txt",
+      "github_url": null,
+      "text_length": 2320,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "40018190",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/40018190.pdf",
+      "clean_txt_path": "sample/40018190_clean.txt",
+      "github_url": null,
+      "text_length": 2964,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "41344156",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/41344156.pdf",
+      "clean_txt_path": "sample/41344156_clean.txt",
+      "github_url": null,
+      "text_length": 6484,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "46260230",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/46260230.pdf",
+      "clean_txt_path": "sample/46260230_clean.txt",
+      "github_url": null,
+      "text_length": 10196,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "48037995",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/48037995.pdf",
+      "clean_txt_path": "sample/48037995_clean.txt",
+      "github_url": null,
+      "text_length": 5732,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "51363762",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/51363762.pdf",
+      "clean_txt_path": "sample/51363762_clean.txt",
+      "github_url": null,
+      "text_length": 8152,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "51639418",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/51639418.pdf",
+      "clean_txt_path": "sample/51639418_clean.txt",
+      "github_url": null,
+      "text_length": 4943,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "52246737",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/52246737.pdf",
+      "clean_txt_path": "sample/52246737_clean.txt",
+      "github_url": null,
+      "text_length": 7645,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "52618188",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/52618188.pdf",
+      "clean_txt_path": "sample/52618188_clean.txt",
+      "github_url": null,
+      "text_length": 7541,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "57002858",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/57002858.pdf",
+      "clean_txt_path": "sample/57002858_clean.txt",
+      "github_url": null,
+      "text_length": 5119,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "64017585",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/64017585.pdf",
+      "clean_txt_path": "sample/64017585_clean.txt",
+      "github_url": null,
+      "text_length": 3106,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "66832845",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/66832845.pdf",
+      "clean_txt_path": "sample/66832845_clean.txt",
+      "github_url": null,
+      "text_length": 5052,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "68460556",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/68460556.pdf",
+      "clean_txt_path": "sample/68460556_clean.txt",
+      "github_url": null,
+      "text_length": 2394,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "70089206",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/70089206.pdf",
+      "clean_txt_path": "sample/70089206_clean.txt",
+      "github_url": null,
+      "text_length": 6653,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "79541391",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/79541391.pdf",
+      "clean_txt_path": "sample/79541391_clean.txt",
+      "github_url": null,
+      "text_length": 12869,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "81761658",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/81761658.pdf",
+      "clean_txt_path": "sample/81761658_clean.txt",
+      "github_url": null,
+      "text_length": 6587,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "83816738",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/83816738.pdf",
+      "clean_txt_path": "sample/83816738_clean.txt",
+      "github_url": null,
+      "text_length": 9127,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "89413122",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/89413122.pdf",
+      "clean_txt_path": "sample/89413122_clean.txt",
+      "github_url": null,
+      "text_length": 4712,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "90867631",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/90867631.pdf",
+      "clean_txt_path": "sample/90867631_clean.txt",
+      "github_url": null,
+      "text_length": 12272,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "91121135",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/91121135.pdf",
+      "clean_txt_path": "sample/91121135_clean.txt",
+      "github_url": null,
+      "text_length": 6615,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "91635250",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/91635250.pdf",
+      "clean_txt_path": "sample/91635250_clean.txt",
+      "github_url": null,
+      "text_length": 7371,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "91697974",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/91697974.pdf",
+      "clean_txt_path": "sample/91697974_clean.txt",
+      "github_url": null,
+      "text_length": 5747,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "92069209",
+      "source_category": "INFORMATION-TECHNOLOGY",
+      "pdf_path": "sample/92069209.pdf",
+      "clean_txt_path": "sample/92069209_clean.txt",
+      "github_url": null,
+      "text_length": 5476,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "10219099",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/10219099.pdf",
+      "clean_txt_path": "sample/10219099_clean.txt",
+      "github_url": null,
+      "text_length": 7734,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "10624813",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/10624813.pdf",
+      "clean_txt_path": "sample/10624813_clean.txt",
+      "github_url": null,
+      "text_length": 6633,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "10712803",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/10712803.pdf",
+      "clean_txt_path": "sample/10712803_clean.txt",
+      "github_url": null,
+      "text_length": 9278,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "10985403",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/10985403.pdf",
+      "clean_txt_path": "sample/10985403_clean.txt",
+      "github_url": null,
+      "text_length": 4671,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "11890896",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/11890896.pdf",
+      "clean_txt_path": "sample/11890896_clean.txt",
+      "github_url": null,
+      "text_length": 5588,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "11981094",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/11981094.pdf",
+      "clean_txt_path": "sample/11981094_clean.txt",
+      "github_url": null,
+      "text_length": 5743,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "12011623",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/12011623.pdf",
+      "clean_txt_path": "sample/12011623_clean.txt",
+      "github_url": null,
+      "text_length": 6695,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "12022566",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/12022566.pdf",
+      "clean_txt_path": "sample/12022566_clean.txt",
+      "github_url": null,
+      "text_length": 5437,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "12472574",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/12472574.pdf",
+      "clean_txt_path": "sample/12472574_clean.txt",
+      "github_url": null,
+      "text_length": 17700,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "12488356",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/12488356.pdf",
+      "clean_txt_path": "sample/12488356_clean.txt",
+      "github_url": null,
+      "text_length": 6900,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "12748557",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/12748557.pdf",
+      "clean_txt_path": "sample/12748557_clean.txt",
+      "github_url": null,
+      "text_length": 5513,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "13149176",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/13149176.pdf",
+      "clean_txt_path": "sample/13149176_clean.txt",
+      "github_url": null,
+      "text_length": 6633,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "13264796",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/13264796.pdf",
+      "clean_txt_path": "sample/13264796_clean.txt",
+      "github_url": null,
+      "text_length": 18587,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "14049846",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/14049846.pdf",
+      "clean_txt_path": "sample/14049846_clean.txt",
+      "github_url": null,
+      "text_length": 5686,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "14206561",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/14206561.pdf",
+      "clean_txt_path": "sample/14206561_clean.txt",
+      "github_url": null,
+      "text_length": 3401,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "14554542",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/14554542.pdf",
+      "clean_txt_path": "sample/14554542_clean.txt",
+      "github_url": null,
+      "text_length": 11527,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "15858254",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/15858254.pdf",
+      "clean_txt_path": "sample/15858254_clean.txt",
+      "github_url": null,
+      "text_length": 4957,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "16803215",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/16803215.pdf",
+      "clean_txt_path": "sample/16803215_clean.txt",
+      "github_url": null,
+      "text_length": 4852,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "16911115",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/16911115.pdf",
+      "clean_txt_path": "sample/16911115_clean.txt",
+      "github_url": null,
+      "text_length": 4910,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "17043822",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/17043822.pdf",
+      "clean_txt_path": "sample/17043822_clean.txt",
+      "github_url": null,
+      "text_length": 6544,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "17103000",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/17103000.pdf",
+      "clean_txt_path": "sample/17103000_clean.txt",
+      "github_url": null,
+      "text_length": 5383,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "17108676",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/17108676.pdf",
+      "clean_txt_path": "sample/17108676_clean.txt",
+      "github_url": null,
+      "text_length": 5390,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "17926546",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/17926546.pdf",
+      "clean_txt_path": "sample/17926546_clean.txt",
+      "github_url": null,
+      "text_length": 6074,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "19124258",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/19124258.pdf",
+      "clean_txt_path": "sample/19124258_clean.txt",
+      "github_url": null,
+      "text_length": 4995,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "19396040",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/19396040.pdf",
+      "clean_txt_path": "sample/19396040_clean.txt",
+      "github_url": null,
+      "text_length": 5023,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "19397727",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/19397727.pdf",
+      "clean_txt_path": "sample/19397727_clean.txt",
+      "github_url": null,
+      "text_length": 4859,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "19553067",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/19553067.pdf",
+      "clean_txt_path": "sample/19553067_clean.txt",
+      "github_url": null,
+      "text_length": 4787,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "20566550",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/20566550.pdf",
+      "clean_txt_path": "sample/20566550_clean.txt",
+      "github_url": null,
+      "text_length": 7022,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "20882041",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/20882041.pdf",
+      "clean_txt_path": "sample/20882041_clean.txt",
+      "github_url": null,
+      "text_length": 5933,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "21038022",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/21038022.pdf",
+      "clean_txt_path": "sample/21038022_clean.txt",
+      "github_url": null,
+      "text_length": 8237,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "21629057",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/21629057.pdf",
+      "clean_txt_path": "sample/21629057_clean.txt",
+      "github_url": null,
+      "text_length": 7411,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "21807224",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/21807224.pdf",
+      "clean_txt_path": "sample/21807224_clean.txt",
+      "github_url": null,
+      "text_length": 2744,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "21847415",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/21847415.pdf",
+      "clean_txt_path": "sample/21847415_clean.txt",
+      "github_url": null,
+      "text_length": 6072,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "22605864",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/22605864.pdf",
+      "clean_txt_path": "sample/22605864_clean.txt",
+      "github_url": null,
+      "text_length": 7125,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "22890839",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/22890839.pdf",
+      "clean_txt_path": "sample/22890839_clean.txt",
+      "github_url": null,
+      "text_length": 5863,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "23234047",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/23234047.pdf",
+      "clean_txt_path": "sample/23234047_clean.txt",
+      "github_url": null,
+      "text_length": 5619,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "23438227",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/23438227.pdf",
+      "clean_txt_path": "sample/23438227_clean.txt",
+      "github_url": null,
+      "text_length": 5786,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "23497307",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/23497307.pdf",
+      "clean_txt_path": "sample/23497307_clean.txt",
+      "github_url": null,
+      "text_length": 6634,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "24322804",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/24322804.pdf",
+      "clean_txt_path": "sample/24322804_clean.txt",
+      "github_url": null,
+      "text_length": 5187,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "24647794",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/24647794.pdf",
+      "clean_txt_path": "sample/24647794_clean.txt",
+      "github_url": null,
+      "text_length": 4899,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "25608963",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/25608963.pdf",
+      "clean_txt_path": "sample/25608963_clean.txt",
+      "github_url": null,
+      "text_length": 6134,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "25797445",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/25797445.pdf",
+      "clean_txt_path": "sample/25797445_clean.txt",
+      "github_url": null,
+      "text_length": 4827,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "26456899",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/26456899.pdf",
+      "clean_txt_path": "sample/26456899_clean.txt",
+      "github_url": null,
+      "text_length": 4610,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "26834746",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/26834746.pdf",
+      "clean_txt_path": "sample/26834746_clean.txt",
+      "github_url": null,
+      "text_length": 7311,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "27040860",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/27040860.pdf",
+      "clean_txt_path": "sample/27040860_clean.txt",
+      "github_url": null,
+      "text_length": 3093,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "27152464",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/27152464.pdf",
+      "clean_txt_path": "sample/27152464_clean.txt",
+      "github_url": null,
+      "text_length": 5888,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "28005884",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/28005884.pdf",
+      "clean_txt_path": "sample/28005884_clean.txt",
+      "github_url": null,
+      "text_length": 4605,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "28078163",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/28078163.pdf",
+      "clean_txt_path": "sample/28078163_clean.txt",
+      "github_url": null,
+      "text_length": 6100,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "28320387",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/28320387.pdf",
+      "clean_txt_path": "sample/28320387_clean.txt",
+      "github_url": null,
+      "text_length": 4970,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "28505854",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/28505854.pdf",
+      "clean_txt_path": "sample/28505854_clean.txt",
+      "github_url": null,
+      "text_length": 7922,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "28628090",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/28628090.pdf",
+      "clean_txt_path": "sample/28628090_clean.txt",
+      "github_url": null,
+      "text_length": 11417,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "28630325",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/28630325.pdf",
+      "clean_txt_path": "sample/28630325_clean.txt",
+      "github_url": null,
+      "text_length": 2678,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "28762662",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/28762662.pdf",
+      "clean_txt_path": "sample/28762662_clean.txt",
+      "github_url": null,
+      "text_length": 6833,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "28831378",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/28831378.pdf",
+      "clean_txt_path": "sample/28831378_clean.txt",
+      "github_url": null,
+      "text_length": 5365,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "28923650",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/28923650.pdf",
+      "clean_txt_path": "sample/28923650_clean.txt",
+      "github_url": null,
+      "text_length": 5489,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "30097175",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/30097175.pdf",
+      "clean_txt_path": "sample/30097175_clean.txt",
+      "github_url": null,
+      "text_length": 4859,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "30288581",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/30288581.pdf",
+      "clean_txt_path": "sample/30288581_clean.txt",
+      "github_url": null,
+      "text_length": 3422,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "30542184",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/30542184.pdf",
+      "clean_txt_path": "sample/30542184_clean.txt",
+      "github_url": null,
+      "text_length": 8836,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "31677347",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/31677347.pdf",
+      "clean_txt_path": "sample/31677347_clean.txt",
+      "github_url": null,
+      "text_length": 6346,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "31684925",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/31684925.pdf",
+      "clean_txt_path": "sample/31684925_clean.txt",
+      "github_url": null,
+      "text_length": 5980,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "31694970",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/31694970.pdf",
+      "clean_txt_path": "sample/31694970_clean.txt",
+      "github_url": null,
+      "text_length": 8039,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "32081266",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/32081266.pdf",
+      "clean_txt_path": "sample/32081266_clean.txt",
+      "github_url": null,
+      "text_length": 10381,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "32802563",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/32802563.pdf",
+      "clean_txt_path": "sample/32802563_clean.txt",
+      "github_url": null,
+      "text_length": 5780,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "32985311",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/32985311.pdf",
+      "clean_txt_path": "sample/32985311_clean.txt",
+      "github_url": null,
+      "text_length": 2968,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "33685075",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/33685075.pdf",
+      "clean_txt_path": "sample/33685075_clean.txt",
+      "github_url": null,
+      "text_length": 6800,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "35389360",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/35389360.pdf",
+      "clean_txt_path": "sample/35389360_clean.txt",
+      "github_url": null,
+      "text_length": 10060,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "35651876",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/35651876.pdf",
+      "clean_txt_path": "sample/35651876_clean.txt",
+      "github_url": null,
+      "text_length": 15149,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "35737840",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/35737840.pdf",
+      "clean_txt_path": "sample/35737840_clean.txt",
+      "github_url": null,
+      "text_length": 5408,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "36149549",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/36149549.pdf",
+      "clean_txt_path": "sample/36149549_clean.txt",
+      "github_url": null,
+      "text_length": 4680,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "36517781",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/36517781.pdf",
+      "clean_txt_path": "sample/36517781_clean.txt",
+      "github_url": null,
+      "text_length": 6257,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "37335325",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/37335325.pdf",
+      "clean_txt_path": "sample/37335325_clean.txt",
+      "github_url": null,
+      "text_length": 8883,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "38220146",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/38220146.pdf",
+      "clean_txt_path": "sample/38220146_clean.txt",
+      "github_url": null,
+      "text_length": 4911,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "38314236",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/38314236.pdf",
+      "clean_txt_path": "sample/38314236_clean.txt",
+      "github_url": null,
+      "text_length": 3320,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "38535335",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/38535335.pdf",
+      "clean_txt_path": "sample/38535335_clean.txt",
+      "github_url": null,
+      "text_length": 1403,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "39835894",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/39835894.pdf",
+      "clean_txt_path": "sample/39835894_clean.txt",
+      "github_url": null,
+      "text_length": 5614,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "39855211",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/39855211.pdf",
+      "clean_txt_path": "sample/39855211_clean.txt",
+      "github_url": null,
+      "text_length": 7274,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "43752620",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/43752620.pdf",
+      "clean_txt_path": "sample/43752620_clean.txt",
+      "github_url": null,
+      "text_length": 6915,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "44624796",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/44624796.pdf",
+      "clean_txt_path": "sample/44624796_clean.txt",
+      "github_url": null,
+      "text_length": 3469,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "47549345",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/47549345.pdf",
+      "clean_txt_path": "sample/47549345_clean.txt",
+      "github_url": null,
+      "text_length": 3901,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "47919212",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/47919212.pdf",
+      "clean_txt_path": "sample/47919212_clean.txt",
+      "github_url": null,
+      "text_length": 5480,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "49127329",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/49127329.pdf",
+      "clean_txt_path": "sample/49127329_clean.txt",
+      "github_url": null,
+      "text_length": 8461,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "50328713",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/50328713.pdf",
+      "clean_txt_path": "sample/50328713_clean.txt",
+      "github_url": null,
+      "text_length": 8733,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "51588273",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/51588273.pdf",
+      "clean_txt_path": "sample/51588273_clean.txt",
+      "github_url": null,
+      "text_length": 2823,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "54227873",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/54227873.pdf",
+      "clean_txt_path": "sample/54227873_clean.txt",
+      "github_url": null,
+      "text_length": 5980,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "55595908",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/55595908.pdf",
+      "clean_txt_path": "sample/55595908_clean.txt",
+      "github_url": null,
+      "text_length": 6443,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "55953734",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/55953734.pdf",
+      "clean_txt_path": "sample/55953734_clean.txt",
+      "github_url": null,
+      "text_length": 5043,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "56691064",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/56691064.pdf",
+      "clean_txt_path": "sample/56691064_clean.txt",
+      "github_url": null,
+      "text_length": 5835,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "60004873",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/60004873.pdf",
+      "clean_txt_path": "sample/60004873_clean.txt",
+      "github_url": null,
+      "text_length": 2900,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "61579998",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/61579998.pdf",
+      "clean_txt_path": "sample/61579998_clean.txt",
+      "github_url": null,
+      "text_length": 5235,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "64468610",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/64468610.pdf",
+      "clean_txt_path": "sample/64468610_clean.txt",
+      "github_url": null,
+      "text_length": 6051,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "64755882",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/64755882.pdf",
+      "clean_txt_path": "sample/64755882_clean.txt",
+      "github_url": null,
+      "text_length": 4560,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "74236636",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/74236636.pdf",
+      "clean_txt_path": "sample/74236636_clean.txt",
+      "github_url": null,
+      "text_length": 5457,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "77828437",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/77828437.pdf",
+      "clean_txt_path": "sample/77828437_clean.txt",
+      "github_url": null,
+      "text_length": 5951,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "81125166",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/81125166.pdf",
+      "clean_txt_path": "sample/81125166_clean.txt",
+      "github_url": null,
+      "text_length": 9216,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "82125182",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/82125182.pdf",
+      "clean_txt_path": "sample/82125182_clean.txt",
+      "github_url": null,
+      "text_length": 4134,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "82246962",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/82246962.pdf",
+      "clean_txt_path": "sample/82246962_clean.txt",
+      "github_url": null,
+      "text_length": 7484,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "86209934",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/86209934.pdf",
+      "clean_txt_path": "sample/86209934_clean.txt",
+      "github_url": null,
+      "text_length": 6920,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "86828820",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/86828820.pdf",
+      "clean_txt_path": "sample/86828820_clean.txt",
+      "github_url": null,
+      "text_length": 5125,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "90280583",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/90280583.pdf",
+      "clean_txt_path": "sample/90280583_clean.txt",
+      "github_url": null,
+      "text_length": 6505,
+      "sw_adjacent": true
+    },
+    {
+      "candidate_id": "96029688",
+      "source_category": "ENGINEERING",
+      "pdf_path": "sample/96029688.pdf",
+      "clean_txt_path": "sample/96029688_clean.txt",
+      "github_url": null,
+      "text_length": 7767,
+      "sw_adjacent": true
+    }
+  ],
+  "jds": [
+    {
+      "job_id": "2234533717",
+      "title": "Full Stack Engineer",
+      "company": "Ideando Inc",
+      "seniority_level": "mid",
+      "min_years_experience": 3,
+      "path": "data/jds/jd_2234533717.json"
+    },
+    {
+      "job_id": "3586167732",
+      "title": "Senior Software Engineer",
+      "company": "StyleAI",
+      "seniority_level": "senior",
+      "min_years_experience": 5,
+      "path": "data/jds/jd_3586167732.json"
+    },
+    {
+      "job_id": "3886458575",
+      "title": "Staff Software Engineer",
+      "company": "Function Health",
+      "seniority_level": "lead",
+      "min_years_experience": 8,
+      "path": "data/jds/jd_3886458575.json"
+    },
+    {
+      "job_id": "3887497535",
+      "title": "Associate Software Engineer / Software Engineer",
+      "company": "University of Illinois Urbana-Champaign",
+      "seniority_level": "junior",
+      "min_years_experience": 0,
+      "path": "data/jds/jd_3887497535.json"
+    },
+    {
+      "job_id": "3891267064",
+      "title": "Lead AWS Platform Engineer",
+      "company": "Perficient",
+      "seniority_level": "lead",
+      "min_years_experience": 7,
+      "path": "data/jds/jd_3891267064.json"
+    },
+    {
+      "job_id": "3900940733",
+      "title": "Staff Software Engineer (Backend Systems)",
+      "company": "DAT Freight & Analytics",
+      "seniority_level": "lead",
+      "min_years_experience": 8,
+      "path": "data/jds/jd_3900940733.json"
+    }
+  ]
+}
