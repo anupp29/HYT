@@ -246,7 +246,16 @@ Please audit this resume and extract the structured JSON according to the instru
             candidate_id=candidate_id,
         )
 
-    total_years = float(parsed_dict.get("estimated_years_experience", sum(e.years for e in exp_list) or 1.0))
+    if extraction_escalated:
+        date_flags.append(VerificationFlag.EXTRACTION_FAILED.value)
+        date_flags.append(VerificationFlag.PARSING_ERROR.value)
+        logger.warning(
+            f"Candidate {candidate_id} flagged for human escalation due to extraction parse failure.",
+            gate="GATE_3",
+            candidate_id=candidate_id,
+        )
+
+    total_years = float(parsed_dict.get("estimated_years_experience", sum(e.years for e in exp_list) or 0.0))
 
     structured_resume = ResumeStructured(
         candidate_id=candidate_id,
@@ -352,31 +361,106 @@ def _extract_year(date_str: Optional[str]) -> Optional[float]:
 
 
 def _deterministic_resume_fallback(text: str, candidate_id: str) -> Dict[str, Any]:
-    """Regex fallback if LLM service is completely unreachable."""
+    """
+    Algorithmic regex extractor used strictly when LLM parsing fails after retries.
+    Extracts real data grounded in actual resume text without fabricating fake companies or degrees (Principle 5).
+    Flags the profile for human recruiter escalation (Principle 6).
+    """
     text_lower = text.lower()
-    
-    # Common skills
-    known_skills = [
-        "python", "java", "c++", "c#", "golang", "rust", "react", "node.js", "typescript",
-        "javascript", "sql", "postgresql", "docker", "kubernetes", "aws", "git", "linux",
+
+    # 1. Real Skills Grounding from Lexicon
+    lexicon = [
+        "python", "java", "c++", "c", "c#", "golang", "go", "rust", "react", "angular",
+        "vue", "node.js", "nodejs", "typescript", "javascript", "sql", "postgresql",
+        "mysql", "sqlite", "mongodb", "redis", "docker", "kubernetes", "aws", "gcp",
+        "azure", "git", "linux", "bash", "shell", "html", "css", "django", "flask",
+        "fastapi", "spring", "terraform", "ci/cd", "rest", "graphql",
     ]
-    found_skills = [s.capitalize() for s in known_skills if re.search(r'\b' + re.escape(s) + r'\b', text_lower)]
+    found_skills = []
+    for s in lexicon:
+        pattern = r'\b' + re.escape(s) + r'\b'
+        match = re.search(pattern, text_lower)
+        if match:
+            # Check for actual contextual sentence around the skill
+            sentence_match = re.search(r'([^.\n]*\b' + re.escape(s) + r'\b[^.\n]*)', text, re.IGNORECASE)
+            ctx = sentence_match.group(1).strip() if sentence_match else None
+            is_ver = bool(ctx and len(ctx) >= 20)
+            found_skills.append({
+                "name": s.capitalize() if len(s) > 2 else s.upper(),
+                "context": ctx[:150] if ctx else None,
+                "is_verified": is_ver,
+                "years_experience": None,
+            })
+
+    # 2. Real Chronological Date Extraction
+    current_year = datetime.now().year
+    raw_years = re.findall(r'\b(19\d\d|20\d\d)\b', text)
+    valid_years = sorted([int(y) for y in raw_years if 1970 <= int(y) <= current_year + 1])
+
+    if len(valid_years) >= 2:
+        estimated_years = float(max(valid_years) - min(valid_years))
+    elif len(valid_years) == 1:
+        estimated_years = float(max(current_year - valid_years[0], 0))
+    else:
+        estimated_years = 0.0
+
+    # 3. Grounded Seniority Estimation
+    if any(k in text_lower for k in ["principal", "staff", "director", "architect"]):
+        seniority = "principal"
+    elif any(k in text_lower for k in ["lead", "manager"]):
+        seniority = "lead"
+    elif any(k in text_lower for k in ["senior", "sr.", "sr "]) or estimated_years >= 5:
+        seniority = "senior"
+    elif estimated_years >= 2:
+        seniority = "mid"
+    elif any(k in text_lower for k in ["intern", "trainee", "junior", "jr."]) or estimated_years < 2:
+        seniority = "junior"
+    else:
+        seniority = "mid"
+
+    # 4. Extract Real Experience Mentions (No fabricated company names)
+    experiences = []
+    role_pattern = re.compile(
+        r'(?i)^[•\-\*\s]*((?:Senior\s+|Junior\s+|Lead\s+|Associate\s+|Principal\s+|Full\s+Stack\s+|Backend\s+|Frontend\s+|DevOps\s+|Software\s+)?'
+        r'(?:Engineer|Developer|Architect|Consultant|Analyst|Intern|Scientist|Specialist|Administrator))'
+        r'(?:\s+(?:at|–|-|@|,)\s+([A-Za-z0-9\s,\.&]{2,40}))?',
+        re.MULTILINE
+    )
+    for m in role_pattern.finditer(text):
+        title = m.group(1).strip()
+        comp = m.group(2).strip() if m.group(2) else "Not Specified"
+        if len(experiences) < 5:
+            experiences.append({
+                "title": title,
+                "company": comp,
+                "start_date": None,
+                "end_date": None,
+                "years": round(estimated_years / max(len(experiences) + 1, 1), 1),
+                "bullets": [],
+                "skills_demonstrated": [s["name"] for s in found_skills[:3]],
+            })
+
+    # 5. Extract Real Education Mentions (No fabricated universities)
+    education = []
+    degree_pattern = re.compile(
+        r'(?i)(Bachelor[^\n\.,]+|Master[^\n\.,]+|B\.S\.[^\n\.,]+|M\.S\.[^\n\.,]+|B\.Tech[^\n\.,]+|M\.Tech[^\n\.,]+|Ph\.D\.[^\n\.,]+)',
+        re.MULTILINE
+    )
+    for m in degree_pattern.finditer(text):
+        deg_str = m.group(1).strip()
+        if len(education) < 2:
+            education.append({
+                "institution": "Not Specified",
+                "degree": deg_str[:60],
+                "field_of_study": "Engineering / Science",
+                "graduation_year": valid_years[-1] if valid_years else None,
+            })
 
     return {
-        "estimated_years_experience": 3.0,
-        "seniority_level": "mid",
-        "skills": [{"name": s, "context": None, "is_verified": False} for s in found_skills],
-        "experience": [
-            {
-                "title": "Software Engineer",
-                "company": "Tech Company",
-                "start_date": "2021",
-                "end_date": "Present",
-                "years": 3.0,
-                "bullets": ["Developed backend systems and web applications."],
-                "skills_demonstrated": found_skills[:3],
-            }
-        ],
-        "education": [{"institution": "University", "degree": "B.S. Computer Science", "field_of_study": "Computer Science"}],
-        "current_location": "Remote",
+        "estimated_years_experience": estimated_years,
+        "seniority_level": seniority,
+        "skills": found_skills,
+        "experience": experiences,
+        "education": education,
+        "current_location": None,
     }

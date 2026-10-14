@@ -195,3 +195,25 @@ def test_gate3_disk_caching():
         assert mock_call.call_count == 1  # Still 1, zero additional calls!
         assert res1.content_hash == res2.content_hash
         assert res1.estimated_years_experience == res2.estimated_years_experience
+
+
+def test_gate3_extraction_failure_escalation():
+    """Verify that unrecoverable LLM failures trigger truthful grounded fallback and escalation flags."""
+    raw_text = """
+    Software Engineer with experience in Python and PostgreSQL.
+    Worked from 2019 to 2023 developing backend data pipelines.
+    Bachelor of Science in Computer Science.
+    """
+    with patch("src.utils.llm_client.LLMClient.complete", side_effect=ValueError("Corrupted JSON output")):
+        res = extract_structured_resume(raw_text, candidate_id="cand_fail_escalate", use_cache=False)
+        assert isinstance(res, ResumeStructured)
+        # Must flag extraction failure for recruiter review
+        assert VerificationFlag.EXTRACTION_FAILED.value in res.verification_flags
+        assert VerificationFlag.PARSING_ERROR.value in res.verification_flags
+        # Grounded experience: 2023 - 2019 = 4.0 years
+        assert res.estimated_years_experience == 4.0
+        # Truthful skill extraction without fake companies
+        skill_names = [s.name.lower() for s in res.skills]
+        assert "python" in skill_names
+        assert "postgresql" in skill_names
+

@@ -61,6 +61,8 @@ class VerificationFlag(str, Enum):
     GITHUB_NOT_FOUND = "GITHUB_NOT_FOUND"
     GITHUB_API_ERROR = "GITHUB_API_ERROR"
     DATE_SUSPICIOUS = "DATE_SUSPICIOUS"
+    EXTRACTION_FAILED = "EXTRACTION_FAILED"
+    PARSING_ERROR = "PARSING_ERROR"
 
 
 # ------------------------------------------------------------------------------
