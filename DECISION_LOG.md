@@ -96,4 +96,19 @@
   3. **Tier 3 (Dense Neural MiniLM)**: Evaluates semantic adjacent equivalents only if Tier 1 and 2 miss, gated strictly at $\ge 0.68$.
 * **Why Non-Obvious:** Achieves microsecond lookup speeds, 100% determinism on acronyms, and permanently immunizes the ATS against classic false-positive substring and semantic bleed blunders.
 
+---
+
+### Decision 14: Structural Recall Bias in Decision Policy (Gate 7)
+* **Context:** Typical algorithmic filters reject candidates mechanically whenever their total score drops below an arbitrary cutoff.
+* **Decision:** Gate 7 enforces an 8-condition priority ladder where `AUTO_REJECT` requires three concurrent conditions: `score < 40`, `hard_failures >= 60%`, AND `verified_must_haves == 0`. A single verified must-have match saves any low-scoring candidate and routes them to `ESCALATE` (Condition 7).
+* **Why Non-Obvious:** False Negatives (rejecting a qualified software developer) are exponentially more expensive to an enterprise than False Positives. Structural recall bias ensures promising candidates with specialized or non-traditional profiles are never discarded automatically.
+
+---
+
+### Decision 15: Grounded Explanation Isolation Boundary (Gate 8)
+* **Context:** ATS explanation generators frequently hallucinate skills, metrics, or technologies when given raw resume text.
+* **Decision:** Gate 8 restricts LLM input exclusively to the structured `ScoringLedger` JSON. Raw and clean resume texts are strictly withheld from the prompt.
+* **Why Non-Obvious:** An LLM cannot hallucinate evidence it was never provided. Every strength and gap cited in the 3-sentence recruiter assessment maps 1:1 to an auditable ledger entry. Furthermore, per Rule 8, zero LLM tokens are wasted explaining `AUTO_REJECT` decisions.
+
+
 

@@ -26,6 +26,8 @@ from src.gates.gate3 import extract_structured_resume
 from src.gates.gate4 import evaluate_gate4
 from src.gates.gate5 import evaluate_gate5
 from src.gates.gate6 import evaluate_gate6
+from src.gates.gate7 import evaluate_gate7
+from src.gates.gate8 import evaluate_gate8
 from src.utils.logger import init_logger, get_logger
 from src.utils.config import get_config
 from src.utils.llm_client import get_llm_client
@@ -550,6 +552,31 @@ def score_candidate_command(args):
     print(f"[->] Running Gate 6 Deterministic Scoring Engine & Evidence Ledger...")
     ledger = evaluate_gate6(structured, structured_jd, jd_embeddings=jd_embeddings)
 
+    # Gate 7: Decision Policy Engine
+    print(f"[->] Running Gate 7 Decision Policy Engine...")
+    decision_result = evaluate_gate7(
+        ledger=ledger,
+        gate0_report=gate0_report,
+        gate4_report=gate4_report,
+        prefilter_result=prefilter,
+        candidate_id=candidate_id,
+        job_id=args.job_id,
+    )
+
+    # Gate 8: Grounded Recruiter Explanation (LLM Call 2)
+    print(f"[->] Running Gate 8 Grounded Recruiter Explanation Generator...")
+    explanation = evaluate_gate8(
+        ledger=ledger,
+        decision_result=decision_result,
+        gate0_report=gate0_report,
+        gate4_report=gate4_report,
+        jd=structured_jd,
+        use_cache=not args.refresh,
+        force_refresh=args.refresh,
+        provider=args.provider,
+        model=args.model,
+    )
+
     b = ledger.breakdown
     cfg = get_config()
     w = cfg.gate6.weights
@@ -558,6 +585,10 @@ def score_candidate_command(args):
     print(f"RECRUITER FIT EVALUATION CARD — CANDIDATE {candidate_id.upper()}")
     print("=" * 75)
     print(f"Target Job:            {structured_jd.title} ({structured_jd.company})")
+    print(f"Final Decision:        [{decision_result.decision.value}] (Condition {decision_result.matched_condition})")
+    print(f"Decision Reason:       {decision_result.reason}")
+    if decision_result.escalation_reason:
+        print(f"Escalation Note:       {decision_result.escalation_reason}")
     print(f"Integrity Status:      [{gate0_status}] ({len(gate0_report.flags)} security flags)")
     print(f"Verification Status:   [{'CLEAN' if gate4_report.is_verified else 'FLAGGED'}] ({len(gate4_report.flags)} verification flags)")
     print(f"Pre-Filter Fit:        PASSED ({prefilter.similarity:.2f} similarity vs {prefilter.threshold:.2f} threshold)")
@@ -567,6 +598,14 @@ def score_candidate_command(args):
         print(f"Hard Gate:             100% MUST-HAVES SATISFIED ({ledger.verified_must_haves_count}/{ledger.total_must_haves_count})")
     if ledger.is_overqualified:
         print("Overqualification:     [FLAGGED: OVERQUALIFIED] Candidate significantly exceeds target seniority")
+
+    if explanation:
+        print("-" * 75)
+        print("GROUNDED RECRUITER ASSESSMENT (3-Sentence Audit):")
+        print(f"  [1. STRENGTHS] {explanation.strengths_sentence}")
+        print(f"  [2. GAPS]      {explanation.gaps_sentence}")
+        print(f"  [3. INTERVIEW] {explanation.interview_focus_sentence}")
+
     print("-" * 75)
     print("5-DIMENSIONAL DETERMINISTIC SCORECARD:")
     print(f"  1. Technical Alignment (weight: {w.technical:.0%}):    {b.technical_score:6.2f} / 100  (contrib: {b.technical_score * w.technical:.2f})")

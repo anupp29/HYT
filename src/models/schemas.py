@@ -267,12 +267,24 @@ class ScoringLedger(BaseModel):
 # 4. Final Output & Recruiter Explanations
 # ------------------------------------------------------------------------------
 
+class Gate7DecisionResult(BaseModel):
+    """Output of Gate 7 Decision Policy Engine."""
+    candidate_id: str
+    job_id: str
+    decision: DecisionType
+    reason: str
+    matched_condition: int
+    escalation_reason: Optional[str] = None
+
+
 class RecruiterExplanation(BaseModel):
     """3-sentence structured recruiter explanation (Gate 8)."""
     strengths_sentence: str
     gaps_sentence: str
     interview_focus_sentence: str
     full_explanation: str
+    integrity_flags: List[str] = Field(default_factory=list)
+    verification_flags: List[str] = Field(default_factory=list)
 
 
 class CandidateRecord(BaseModel):
