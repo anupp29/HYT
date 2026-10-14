@@ -199,6 +199,18 @@ class Gate0IntegrityReport(BaseModel):
     clean_text_length: int = 0
 
 
+class PreFilterResult(BaseModel):
+    """Output of Gate 5 Fast Filter Funnel."""
+    candidate_id: str
+    job_id: str
+    passed: bool
+    similarity: float
+    threshold: float
+    decision: Optional[DecisionType] = None
+    reason: Optional[str] = None
+    skip_scoring: bool = False
+
+
 class Gate4VerificationReport(BaseModel):
     """Output of Gate 4 Verification Engine."""
     candidate_id: str
@@ -244,6 +256,7 @@ class ScoringLedger(BaseModel):
     job_id: str
     entries: List[LedgerEntry] = Field(default_factory=list)
     breakdown: ScoringBreakdown
+    hard_failures: List[str] = Field(default_factory=list)
     hard_failures_count: int = 0
     verified_must_haves_count: int = 0
     total_must_haves_count: int = 0

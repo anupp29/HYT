@@ -71,3 +71,18 @@
 * **Context:** Many ATS systems calculate flat cosine similarity between resume and the full JD text.
 * **Decision:** JDs are parsed into hard must-haves and soft nice-to-haves. Must-haves form a hard gate; unverified must-haves receive reduced credit, preventing keyword stuffing.
 * **Why Non-Obvious:** Candidates who stuff 50 keywords without contextual work evidence fail the hard gate verification.
+
+---
+
+### Decision 11: Candidate Skill String Isolation in Embedding Space (Gate 5)
+* **Context:** Initial prototypes considered prepending JD domain context (e.g. `f"{jd.title} technical skills: ..."`) to candidate skill embeddings to bridge terminology gaps.
+* **Decision:** In Gate 5, candidate skills are encoded purely as a comma-separated list of their actual extracted skills (`", ".join(candidate_skills)`).
+* **Why Non-Obvious:** Prepending JD context causes unrelated resumes (e.g., healthcare/nursing) to falsely inherit high-dimensional software engineer embeddings, inflating similarity from 0.035 to 0.367 and evading the domain pre-filter. Pure skill isolation guarantees conservative, unpolluted domain separation.
+
+---
+
+### Decision 12: Non-Fatal Baseline Policy for Education and Location (Gate 6)
+* **Context:** Rigid ATS scoring algorithms frequently assign a 0.0 score or hard-reject candidates whose degree title or physical city does not match the JD exactly.
+* **Decision:** Education and Location alone NEVER produce a 0.0 score or kill a candidacy (assigned configurable baseline floors of 60.0% and 50.0% respectively).
+* **Why Non-Obvious:** Elite software engineers are frequently self-taught, bootcamp graduates, or willing to relocate/work remotely. A zero-score penalty in education or location disproportionately kills top talent while violating Principle 1 and Principle 6 (Structural Recall Bias).
+

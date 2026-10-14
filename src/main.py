@@ -24,6 +24,8 @@ from src.gates.gate1 import extract_clean_text
 from src.gates.gate2 import mask_pii
 from src.gates.gate3 import extract_structured_resume
 from src.gates.gate4 import evaluate_gate4
+from src.gates.gate5 import evaluate_gate5
+from src.gates.gate6 import evaluate_gate6
 from src.utils.logger import init_logger, get_logger
 from src.utils.config import get_config
 from src.utils.llm_client import get_llm_client
@@ -74,12 +76,20 @@ def main():
     gate0_parser.add_argument("--job-id", "-j", type=str, default=None, help="Optional job ID to test for JD copying")
 
     # Command: inspect-extraction
-    extract_parser = subparsers.add_parser("inspect-extraction", help="Run Gates 0-3 to extract structured profile from resume")
+    extract_parser = subparsers.add_parser("inspect-extraction", help="Run Gates 0-4 to extract structured profile from resume")
     extract_parser.add_argument("--pdf", type=str, default=None, help="Path to resume PDF file")
     extract_parser.add_argument("--candidate-id", "-c", type=str, default=None, help="Candidate ID from data/sample")
     extract_parser.add_argument("--refresh", action="store_true", help="Bypass cache and force re-extraction")
     extract_parser.add_argument("--provider", "-p", type=str, default=None, help="LLM provider for this extraction")
     extract_parser.add_argument("--model", "-m", type=str, default=None, help="AI model name for this extraction")
+
+    # Command: score-candidate
+    score_parser = subparsers.add_parser("score-candidate", help="Run Gates 0-6 end-to-end to score candidate against a JD")
+    score_parser.add_argument("--candidate-id", "-c", type=str, required=True, help="Candidate ID from data/sample")
+    score_parser.add_argument("--job-id", "-j", type=str, required=True, help="Job ID from data/jds")
+    score_parser.add_argument("--refresh", action="store_true", help="Bypass cache and force re-evaluation")
+    score_parser.add_argument("--provider", "-p", type=str, default=None, help="LLM provider for extraction")
+    score_parser.add_argument("--model", "-m", type=str, default=None, help="AI model name")
 
     args = parser.parse_args()
 
@@ -98,6 +108,8 @@ def main():
         check_integrity_command(args)
     elif args.command == "inspect-extraction":
         inspect_extraction_command(args)
+    elif args.command == "score-candidate":
+        score_candidate_command(args)
     else:
         parser.print_help()
 
@@ -457,6 +469,124 @@ def inspect_extraction_command(args):
             print(f"  - {edu.degree} in {edu.field_of_study} from {edu.institution}{grad}")
 
     print("=" * 70 + "\n")
+
+
+def score_candidate_command(args):
+    """Executes Gates 0 through 6 end-to-end to score a candidate against a target JD."""
+    pdf_path = PROJECT_ROOT / "data" / "sample" / f"{args.candidate_id}.pdf"
+    if not pdf_path.exists():
+        print(f"Error: Could not find candidate resume for ID '{args.candidate_id}' at {pdf_path}")
+        sys.exit(1)
+
+    jd_path = PROJECT_ROOT / "data" / "jds" / f"jd_{args.job_id}.json"
+    if not jd_path.exists():
+        alt_path = PROJECT_ROOT / "data" / "jds" / f"{args.job_id}.json"
+        if alt_path.exists():
+            jd_path = alt_path
+        else:
+            print(f"Error: Could not find JD file for job_id '{args.job_id}' at {jd_path}")
+            sys.exit(1)
+
+    candidate_id = args.candidate_id
+    print(f"\n[HYT ATS] Scoring Candidate {candidate_id} against Job {args.job_id} ...")
+
+    # Ingest JD
+    print(f"[1/7] Ingesting Job Description...")
+    raw_jd = process_jd_input(jd_path)
+    structured_jd = extract_job_description(raw_jd, use_cache=not args.refresh)
+    jd_embeddings = embed_job_requirements(structured_jd, use_cache=not args.refresh)
+
+    # Gate 0: Integrity Shield
+    print(f"[2/7] Running Gate 0 Integrity Shield...")
+    gate0_report = evaluate_gate0(str(pdf_path), target_jd_text=raw_jd.raw_text)
+    gate0_status = "QUARANTINED" if gate0_report.is_quarantined else ("FLAGGED" if gate0_report.flags else "CLEAN")
+
+    # Gate 1: Layout-Aware Extraction
+    print(f"[3/7] Running Gate 1 Layout-Aware Text Extraction...")
+    clean_text = extract_clean_text(str(pdf_path))
+
+    # Gate 2: Privacy Shield
+    print(f"[4/7] Running Gate 2 Privacy Shield (PII Redaction)...")
+    pii_res = mask_pii(clean_text, candidate_id=candidate_id)
+
+    # Gate 3: Structured Extraction
+    print(f"[5/7] Running Gate 3 Structured Extraction (LLM Call)...")
+    structured = extract_structured_resume(
+        pii_res.masked_clean_text,
+        candidate_id=candidate_id,
+        github_handle=pii_res.github_handle,
+        use_cache=not args.refresh,
+        force_refresh=args.refresh,
+        provider=args.provider,
+        model=args.model,
+    )
+
+    # Gate 4: Verification Layer
+    print(f"[6/7] Running Gate 4 Verification Layer (Skill Depth & GitHub Audit)...")
+    gate4_report = evaluate_gate4(
+        structured,
+        github_url=pii_res.github_url,
+        github_handle=pii_res.github_handle,
+        candidate_id=candidate_id,
+        use_cache=not args.refresh,
+    )
+
+    # Gate 5: Pre-Filter Funnel
+    print(f"[7/7] Running Gate 5 Domain Pre-Filter...")
+    prefilter = evaluate_gate5(structured, structured_jd, jd_embeddings=jd_embeddings)
+
+    if not prefilter.passed:
+        print("\n" + "=" * 75)
+        print(f"SCREENING OUTCOME — CANDIDATE {candidate_id.upper()} (ESCALATED AT PRE-FILTER)")
+        print("=" * 75)
+        print(f"Target Role:           {structured_jd.title} ({structured_jd.company})")
+        print(f"Domain Similarity:     {prefilter.similarity:.2f} (threshold: {prefilter.threshold:.2f})")
+        print(f"Pre-Filter Decision:   [ESCALATE] - HUMAN CONFIRMATION MANDATORY")
+        print(f"Reason:                {prefilter.reason}")
+        print("=" * 75 + "\n")
+        return
+
+    # Gate 6: Deterministic Scoring Engine
+    print(f"[->] Running Gate 6 Deterministic Scoring Engine & Evidence Ledger...")
+    ledger = evaluate_gate6(structured, structured_jd, jd_embeddings=jd_embeddings)
+
+    b = ledger.breakdown
+    cfg = get_config()
+    w = cfg.gate6.weights
+
+    print("\n" + "=" * 75)
+    print(f"RECRUITER FIT EVALUATION CARD — CANDIDATE {candidate_id.upper()}")
+    print("=" * 75)
+    print(f"Target Job:            {structured_jd.title} ({structured_jd.company})")
+    print(f"Integrity Status:      [{gate0_status}] ({len(gate0_report.flags)} security flags)")
+    print(f"Verification Status:   [{'CLEAN' if gate4_report.is_verified else 'FLAGGED'}] ({len(gate4_report.flags)} verification flags)")
+    print(f"Pre-Filter Fit:        PASSED ({prefilter.similarity:.2f} similarity vs {prefilter.threshold:.2f} threshold)")
+    if ledger.hard_failures:
+        print(f"Hard Failures:         {len(ledger.hard_failures)} MISSING MUST-HAVES: {', '.join(ledger.hard_failures)}")
+    else:
+        print(f"Hard Gate:             100% MUST-HAVES SATISFIED ({ledger.verified_must_haves_count}/{ledger.total_must_haves_count})")
+    if ledger.is_overqualified:
+        print("Overqualification:     [FLAGGED: OVERQUALIFIED] Candidate significantly exceeds target seniority")
+    print("-" * 75)
+    print("5-DIMENSIONAL DETERMINISTIC SCORECARD:")
+    print(f"  1. Technical Alignment (weight: {w.technical:.0%}):    {b.technical_score:6.2f} / 100  (contrib: {b.technical_score * w.technical:.2f})")
+    print(f"  2. Experience Depth    (weight: {w.experience:.0%}):    {b.experience_score:6.2f} / 100  (contrib: {b.experience_score * w.experience:.2f})")
+    print(f"  3. Seniority Fit       (weight: {w.seniority:.0%}):    {b.seniority_score:6.2f} / 100  (contrib: {b.seniority_score * w.seniority:.2f})")
+    print(f"  4. Education Baseline  (weight: {w.education:.0%}):    {b.education_score:6.2f} / 100  (contrib: {b.education_score * w.education:.2f})")
+    print(f"  5. Location & Remote   (weight: {w.location:.0%}):    {b.location_score:6.2f} / 100  (contrib: {b.location_score * w.location:.2f})")
+    print(f"  -------------------------------------------------------------------------")
+    print(f"  FINAL WEIGHTED SCORE:                                 {b.weighted_total:6.2f} / 100")
+    print("-" * 75)
+    print("MANDATORY EVIDENCE LEDGER (Immutable Citation Trail):")
+    for idx, e in enumerate(ledger.entries, 1):
+        status_tag = "[VERIFIED]" if e.is_verified else "[UNVERIFIED / GAP]"
+        print(f"  {idx:2d}. {status_tag} {e.requirement}")
+        if e.evidence:
+            print(f"      Evidence: \"{e.evidence[:85]}{'...' if len(e.evidence) > 85 else ''}\"")
+        if e.gap:
+            print(f"      Gap:      {e.gap}")
+        print(f"      Score Contribution: {e.score_contribution:.1f} pts")
+    print("=" * 75 + "\n")
 
 
 if __name__ == "__main__":
