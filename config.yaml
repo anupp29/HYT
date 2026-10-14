@@ -24,8 +24,8 @@ paths:
 # Max 2 LLM calls per candidate (Gate 3 extraction + Gate 8 explanation)
 # ------------------------------------------------------------------------------
 llm:
-  provider: "openai" # "openai", "anthropic", or "gemini"
-  model: "gpt-4o-mini" # or claude-3-5-haiku / gemini-1.5-flash
+  provider: "gemini" # "gemini", "openai", or "anthropic"
+  model: "models/gemini-2.5-flash" # Gemini 2.5 Flash
   temperature: 0.0 # Strict determinism (Principle 1)
   max_tokens: 2048
   max_retries: 3
