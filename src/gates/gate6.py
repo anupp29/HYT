@@ -12,6 +12,7 @@ Guarantees:
 """
 
 import math
+import re
 from typing import Dict, Any, List, Optional, Tuple
 import numpy as np
 
@@ -28,6 +29,7 @@ from src.models.schemas import (
 from src.gates.jd_embedding import get_embedding_model, embed_job_requirements
 from src.utils.config import get_config
 from src.utils.logger import get_logger
+from src.utils.taxonomy import canonicalize_skill, are_skills_equivalent, are_skills_related
 
 logger = get_logger("GATE_6_SCORING_ENGINE")
 
@@ -59,20 +61,26 @@ def _find_best_skill_match(
     skills: List[Skill],
     req_vec: Optional[List[float]],
     model: Any,
+    precomputed_vecs: Optional[np.ndarray] = None,
 ) -> Tuple[float, Optional[Skill]]:
-    """Finds best matching candidate skill for a requirement via cosine similarity."""
+    """Finds best matching candidate skill for a requirement via taxonomy + cosine similarity."""
     if not skills:
         return 0.0, None
 
-    # Exact name match shortcut
     req_clean = requirement.lower().strip()
+
+    # 1. Exact or Canonical Taxonomy Match Shortcut (O(1) resolution)
     for s in skills:
         s_clean = s.name.lower().strip()
-        if req_clean == s_clean or (len(req_clean) >= 4 and req_clean in s_clean):
+        if req_clean == s_clean or are_skills_equivalent(req_clean, s_clean):
+            return 1.0, s
+        # Word boundary match (e.g. "PostgreSQL" in "PostgreSQL 14" or "Core Java")
+        # Prevents false positive substring matches like "Java" inside "JavaScript"
+        if len(req_clean) >= 3 and re.search(rf"\b{re.escape(req_clean)}\b", s_clean):
             return 1.0, s
 
+    # 2. Lexical word overlap fallback
     if model == "FALLBACK" or req_vec is None:
-        # Lexical word overlap fallback
         req_words = set(re.findall(r'\w+', req_clean))
         best_sim = 0.0
         best_skill = None
@@ -85,9 +93,12 @@ def _find_best_skill_match(
                 best_skill = s
         return best_sim, best_skill
 
-    # Neural Embedding Cosine Similarity
-    skill_names = [s.name for s in skills]
-    skill_vecs = model.encode(skill_names, normalize_embeddings=True)
+    # 3. Neural Embedding Cosine Similarity
+    if precomputed_vecs is not None and len(precomputed_vecs) == len(skills):
+        skill_vecs = precomputed_vecs
+    else:
+        skill_names = [s.name for s in skills]
+        skill_vecs = model.encode(skill_names, normalize_embeddings=True)
 
     best_sim = -1.0
     best_idx = -1
@@ -135,6 +146,15 @@ def evaluate_gate6(
     verified_skills = [s for s in resume.skills if s.is_verified]
     unverified_skills = [s for s in resume.skills if not s.is_verified]
 
+    # Precompute skill embedding vectors once across all requirements for maximum throughput
+    verified_vecs = None
+    unverified_vecs = None
+    if model != "FALLBACK":
+        if verified_skills:
+            verified_vecs = model.encode([s.name for s in verified_skills], normalize_embeddings=True)
+        if unverified_skills:
+            unverified_vecs = model.encode([s.name for s in unverified_skills], normalize_embeddings=True)
+
     ledger_entries: List[LedgerEntry] = []
     hard_gate_threshold = cfg.gate6.hard_gate_similarity_threshold
 
@@ -151,7 +171,9 @@ def evaluate_gate6(
         req_vec = must_have_vecs.get(must_have)
 
         # 1. Hard Gate Check: Best match among VERIFIED skills only
-        v_sim, v_skill = _find_best_skill_match(must_have, verified_skills, req_vec, model)
+        v_sim, v_skill = _find_best_skill_match(
+            must_have, verified_skills, req_vec, model, precomputed_vecs=verified_vecs
+        )
 
         if v_sim < hard_gate_threshold:
             hard_failures.append(must_have)
@@ -173,7 +195,9 @@ def evaluate_gate6(
             )
         else:
             # Check for Unverified / Listed-Only Skill (Partial Credit)
-            u_sim, u_skill = _find_best_skill_match(must_have, unverified_skills, req_vec, model)
+            u_sim, u_skill = _find_best_skill_match(
+                must_have, unverified_skills, req_vec, model, precomputed_vecs=unverified_vecs
+            )
             if u_sim >= hard_gate_threshold and u_skill:
                 partial_weight = cfg.gate6.unverified_skill_weight
                 must_have_contributions.append(partial_weight)
@@ -212,7 +236,9 @@ def evaluate_gate6(
     # Nice-To-Haves Evaluation (Bonus / Secondary Credit)
     for nice_to_have in jd.nice_to_have_skills:
         req_vec = nice_to_have_vecs.get(nice_to_have)
-        nv_sim, nv_skill = _find_best_skill_match(nice_to_have, verified_skills, req_vec, model)
+        nv_sim, nv_skill = _find_best_skill_match(
+            nice_to_have, verified_skills, req_vec, model, precomputed_vecs=verified_vecs
+        )
 
         if nv_sim >= hard_gate_threshold and nv_skill:
             nth_weight = cfg.gate6.nicetohave_skill_weight
@@ -311,18 +337,22 @@ def evaluate_gate6(
     # --------------------------------------------------------------------------
     has_education = len(resume.education) > 0
     edu_requirement = jd.education_requirement or "Bachelor's degree or equivalent"
+    edu_req_lower = edu_requirement.lower()
 
-    # Check for relevant degree match
+    # Check for relevant degree match or flexible baseline
     meets_education = False
-    for edu in resume.education:
-        deg = (edu.degree or "").lower()
-        field = (edu.field_of_study or "").lower()
-        if any(term in deg for term in ["bachelor", "master", "phd", "b.s", "m.s", "b.tech", "m.tech", "b.e."]):
-            meets_education = True
-            break
-        if any(term in field for term in ["computer", "engineering", "information", "software", "science"]):
-            meets_education = True
-            break
+    if not jd.education_requirement or any(k in edu_req_lower for k in ["none", "any", "not specified"]):
+        meets_education = True
+    else:
+        for edu in resume.education:
+            deg = (edu.degree or "").lower()
+            field = (edu.field_of_study or "").lower()
+            if any(term in deg for term in ["bachelor", "master", "phd", "b.s", "m.s", "b.tech", "m.tech", "b.e."]):
+                meets_education = True
+                break
+            if any(term in field for term in ["computer", "engineering", "information", "software", "science"]):
+                meets_education = True
+                break
 
     if meets_education:
         education_score = 100.0
@@ -355,7 +385,16 @@ def evaluate_gate6(
     jd_loc = (jd.location or "").lower()
     remote_policy = (jd.remote_policy or "").lower()
 
-    if remote_policy in ("remote", "flexible") or "remote" in cand_loc or (jd_loc in cand_loc and jd_loc):
+    # Robust bidirectional city & state token match
+    loc_matched = (
+        remote_policy in ("remote", "flexible")
+        or "remote" in cand_loc
+        or (jd_loc in cand_loc and jd_loc)
+        or (cand_loc in jd_loc and cand_loc)
+        or any(len(part.strip()) >= 3 and part.strip() in cand_loc for part in jd_loc.split(","))
+    )
+
+    if loc_matched:
         location_score = 100.0
         loc_gap = None
     else:

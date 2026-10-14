@@ -1,0 +1,409 @@
+{
+  "version": "1.0.0",
+  "domain": "software_engineering_and_it",
+  "description": "Comprehensive production-grade Software Engineering, Cloud, DevOps, Database, and Systems Skills Taxonomy with canonical names, bidirectional aliases, acronyms, and semantic clusters.",
+  "skills": {
+    "python": {
+      "canonical_name": "python",
+      "category": "languages",
+      "aliases": ["py", "python3", "python 3", "python2", "python 2", "cpython", "py3"],
+      "related": ["django", "fastapi", "flask", "pandas", "numpy", "pytest", "asyncio"]
+    },
+    "javascript": {
+      "canonical_name": "javascript",
+      "category": "languages",
+      "aliases": ["js", "es6", "es6+", "ecmascript", "es2015", "es2020", "vanilla js", "modern javascript"],
+      "related": ["typescript", "node.js", "react", "vue", "html", "css", "npm"]
+    },
+    "typescript": {
+      "canonical_name": "typescript",
+      "category": "languages",
+      "aliases": ["ts", "type-script"],
+      "related": ["javascript", "react", "node.js", "angular", "nest.js"]
+    },
+    "java": {
+      "canonical_name": "java",
+      "category": "languages",
+      "aliases": ["core java", "java 8", "java 11", "java 17", "java 21", "j2se", "j2ee", "jakarta ee", "open jdk", "openjdk"],
+      "related": ["spring", "spring boot", "junit", "maven", "gradle", "hibernate", "kotlin"]
+    },
+    "c++": {
+      "canonical_name": "c++",
+      "category": "languages",
+      "aliases": ["cpp", "cplusplus", "c plus plus", "c++11", "c++14", "c++17", "c++20", "modern c++"],
+      "related": ["c", "stl", "boost", "cmake", "embedded systems", "linux", "cuda"]
+    },
+    "c#": {
+      "canonical_name": "c#",
+      "category": "languages",
+      "aliases": ["csharp", "c sharp", "c-sharp"],
+      "related": [".net", "asp.net core", ".net core", "entity framework", "visual studio", "azure"]
+    },
+    "go": {
+      "canonical_name": "go",
+      "category": "languages",
+      "aliases": ["golang", "go-lang", "go language"],
+      "related": ["gin", "goroutines", "grpc", "docker", "kubernetes", "microservices"]
+    },
+    "rust": {
+      "canonical_name": "rust",
+      "category": "languages",
+      "aliases": ["rust-lang", "rustlang"],
+      "related": ["cargo", "actix-web", "tokio", "systems programming", "webassembly"]
+    },
+    "ruby": {
+      "canonical_name": "ruby",
+      "category": "languages",
+      "aliases": ["ruby-lang"],
+      "related": ["ruby on rails", "rails", "rspec", "bundler", "sinatra"]
+    },
+    "php": {
+      "canonical_name": "php",
+      "category": "languages",
+      "aliases": ["php7", "php8", "modern php"],
+      "related": ["laravel", "symfony", "composer", "wordpress", "mysql"]
+    },
+    "sql": {
+      "canonical_name": "sql",
+      "category": "languages",
+      "aliases": ["structured query language", "ansi sql", "t-sql", "tsql", "pl/sql", "plsql"],
+      "related": ["postgresql", "mysql", "relational database", "rdbms", "database indexing"]
+    },
+    "html": {
+      "canonical_name": "html",
+      "category": "languages",
+      "aliases": ["html5", "html 5", "hypertext markup language"],
+      "related": ["css", "javascript", "dom", "web standards", "semantic html"]
+    },
+    "css": {
+      "canonical_name": "css",
+      "category": "languages",
+      "aliases": ["css3", "css 3", "cascading style sheets"],
+      "related": ["html", "sass", "scss", "tailwind css", "responsive design", "flexbox", "grid"]
+    },
+    "bash": {
+      "canonical_name": "bash",
+      "category": "languages",
+      "aliases": ["shell script", "shell scripting", "sh", "zsh", "bash script", "unix shell"],
+      "related": ["linux", "unix", "devops", "automation"]
+    },
+    "react": {
+      "canonical_name": "react",
+      "category": "frontend",
+      "aliases": ["react.js", "reactjs", "react js", "react 18", "react hooks"],
+      "related": ["next.js", "redux", "javascript", "typescript", "frontend", "zustand", "html", "css"]
+    },
+    "next.js": {
+      "canonical_name": "next.js",
+      "category": "frontend",
+      "aliases": ["nextjs", "next js", "next", "ssr"],
+      "related": ["react", "typescript", "server side rendering", "vercel"]
+    },
+    "vue": {
+      "canonical_name": "vue",
+      "category": "frontend",
+      "aliases": ["vue.js", "vuejs", "vue 3", "vue2"],
+      "related": ["nuxt.js", "pinia", "vuex", "javascript", "typescript"]
+    },
+    "angular": {
+      "canonical_name": "angular",
+      "category": "frontend",
+      "aliases": ["angular.js", "angularjs", "angular 2+", "angular 14", "angular 16"],
+      "related": ["typescript", "rxjs", "ngrx", "frontend"]
+    },
+    "tailwind css": {
+      "canonical_name": "tailwind css",
+      "category": "frontend",
+      "aliases": ["tailwind", "tailwindcss", "tailwind-css"],
+      "related": ["css", "html", "react", "responsive design"]
+    },
+    "redux": {
+      "canonical_name": "redux",
+      "category": "frontend",
+      "aliases": ["redux toolkit", "rtk", "redux-thunk", "redux-saga"],
+      "related": ["react", "state management", "javascript", "typescript"]
+    },
+    "responsive design": {
+      "canonical_name": "responsive design",
+      "category": "frontend",
+      "aliases": ["mobile-first", "mobile first", "responsive web design", "rwd", "cross-browser compatibility"],
+      "related": ["css", "html", "frontend", "tailwind css"]
+    },
+    "node.js": {
+      "canonical_name": "node.js",
+      "category": "backend_frameworks",
+      "aliases": ["nodejs", "node js", "node", "server-side javascript"],
+      "related": ["express.js", "nest.js", "javascript", "typescript", "npm", "backend"]
+    },
+    "express.js": {
+      "canonical_name": "express.js",
+      "category": "backend_frameworks",
+      "aliases": ["express", "expressjs", "express js"],
+      "related": ["node.js", "rest api", "backend", "javascript"]
+    },
+    "nest.js": {
+      "canonical_name": "nest.js",
+      "category": "backend_frameworks",
+      "aliases": ["nestjs", "nest js", "nest"],
+      "related": ["node.js", "typescript", "microservices", "backend"]
+    },
+    "fastapi": {
+      "canonical_name": "fastapi",
+      "category": "backend_frameworks",
+      "aliases": ["fast-api", "fast api"],
+      "related": ["python", "pydantic", "starlette", "rest api", "asyncio", "swagger"]
+    },
+    "django": {
+      "canonical_name": "django",
+      "category": "backend_frameworks",
+      "aliases": ["django framework", "drf", "django rest framework"],
+      "related": ["python", "postgresql", "orm", "backend"]
+    },
+    "flask": {
+      "canonical_name": "flask",
+      "category": "backend_frameworks",
+      "aliases": ["flask framework"],
+      "related": ["python", "rest api", "jinja2", "backend"]
+    },
+    "spring boot": {
+      "canonical_name": "spring boot",
+      "category": "backend_frameworks",
+      "aliases": ["springboot", "spring-boot", "spring framework", "spring"],
+      "related": ["java", "hibernate", "microservices", "jpa", "maven"]
+    },
+    ".net": {
+      "canonical_name": ".net",
+      "category": "backend_frameworks",
+      "aliases": ["dotnet", ".net core", "asp.net", "asp.net core", "aspnetcore", "dot-net"],
+      "related": ["c#", "entity framework", "csharp", "azure", "backend"]
+    },
+    "ruby on rails": {
+      "canonical_name": "ruby on rails",
+      "category": "backend_frameworks",
+      "aliases": ["rails", "ror"],
+      "related": ["ruby", "activerecord", "backend"]
+    },
+    "postgresql": {
+      "canonical_name": "postgresql",
+      "category": "databases_storage",
+      "aliases": ["postgres", "pgsql", "psql", "postgre", "postgres db"],
+      "related": ["sql", "relational database", "rdbms", "database indexing", "acid"]
+    },
+    "mysql": {
+      "canonical_name": "mysql",
+      "category": "databases_storage",
+      "aliases": ["my-sql", "mariadb", "innodb"],
+      "related": ["sql", "relational database", "rdbms"]
+    },
+    "mongodb": {
+      "canonical_name": "mongodb",
+      "category": "databases_storage",
+      "aliases": ["mongo", "mongo db", "nosql document db"],
+      "related": ["nosql", "document database", "mongoose", "json"]
+    },
+    "redis": {
+      "canonical_name": "redis",
+      "category": "databases_storage",
+      "aliases": ["redis cache", "in-memory cache", "key-value store"],
+      "related": ["caching", "pub/sub", "nosql", "in-memory database"]
+    },
+    "dynamodb": {
+      "canonical_name": "dynamodb",
+      "category": "databases_storage",
+      "aliases": ["dynamo db", "aws dynamodb", "amazon dynamodb"],
+      "related": ["nosql", "aws", "key-value store", "serverless"]
+    },
+    "elasticsearch": {
+      "canonical_name": "elasticsearch",
+      "category": "databases_storage",
+      "aliases": ["elastic search", "opensearch", "elk", "elastic"],
+      "related": ["search engine", "lucene", "kibana", "logstash", "nosql"]
+    },
+    "cassandra": {
+      "canonical_name": "cassandra",
+      "category": "databases_storage",
+      "aliases": ["apache cassandra", "cql"],
+      "related": ["nosql", "wide-column store", "distributed database"]
+    },
+    "snowflake": {
+      "canonical_name": "snowflake",
+      "category": "databases_storage",
+      "aliases": ["snowflake data warehouse", "snowflake dwh"],
+      "related": ["data warehouse", "sql", "olap", "analytics"]
+    },
+    "amazon web services": {
+      "canonical_name": "amazon web services",
+      "category": "cloud_infrastructure",
+      "aliases": ["aws", "amazon cloud", "aws cloud"],
+      "related": ["s3", "ec2", "rds", "lambda", "cloudwatch", "iam", "cloud"]
+    },
+    "google cloud platform": {
+      "canonical_name": "google cloud platform",
+      "category": "cloud_infrastructure",
+      "aliases": ["gcp", "google cloud"],
+      "related": ["bigquery", "gke", "cloud storage", "cloud run", "cloud"]
+    },
+    "microsoft azure": {
+      "canonical_name": "microsoft azure",
+      "category": "cloud_infrastructure",
+      "aliases": ["azure", "azure cloud", "ms azure"],
+      "related": ["azure devops", "azure functions", "blob storage", "cloud"]
+    },
+    "terraform": {
+      "canonical_name": "terraform",
+      "category": "cloud_infrastructure",
+      "aliases": ["tf", "hashicorp terraform", "iac", "infrastructure as code"],
+      "related": ["cloudformation", "ansible", "devops", "cloud", "aws"]
+    },
+    "docker": {
+      "canonical_name": "docker",
+      "category": "devops_containers",
+      "aliases": ["docker container", "docker-compose", "containerization", "dockerfile", "containers"],
+      "related": ["kubernetes", "containerization", "devops", "microservices"]
+    },
+    "kubernetes": {
+      "canonical_name": "kubernetes",
+      "category": "devops_containers",
+      "aliases": ["k8s", "kube", "k8", "k-8-s", "container orchestration"],
+      "related": ["docker", "helm", "argocd", "eks", "gke", "devops", "microservices"]
+    },
+    "helm": {
+      "canonical_name": "helm",
+      "category": "devops_containers",
+      "aliases": ["helm charts", "helm3"],
+      "related": ["kubernetes", "k8s", "devops"]
+    },
+    "ci/cd": {
+      "canonical_name": "ci/cd",
+      "category": "devops_containers",
+      "aliases": ["continuous integration", "continuous deployment", "continuous delivery", "ci cd", "cicd", "ci/cd pipeline"],
+      "related": ["github actions", "gitlab ci", "jenkins", "devops", "automation"]
+    },
+    "github actions": {
+      "canonical_name": "github actions",
+      "category": "devops_containers",
+      "aliases": ["gh actions", "gha"],
+      "related": ["ci/cd", "git", "github", "devops"]
+    },
+    "jenkins": {
+      "canonical_name": "jenkins",
+      "category": "devops_containers",
+      "aliases": ["jenkins ci", "jenkins pipeline"],
+      "related": ["ci/cd", "devops", "automation"]
+    },
+    "gitlab ci": {
+      "canonical_name": "gitlab ci",
+      "category": "devops_containers",
+      "aliases": ["gitlab ci/cd", "gitlab-ci"],
+      "related": ["ci/cd", "git", "gitlab", "devops"]
+    },
+    "apache kafka": {
+      "canonical_name": "apache kafka",
+      "category": "messaging_streaming",
+      "aliases": ["kafka", "confluent kafka"],
+      "related": ["event-driven", "messaging queue", "pub/sub", "streaming", "rabbitmq", "microservices"]
+    },
+    "rabbitmq": {
+      "canonical_name": "rabbitmq",
+      "category": "messaging_streaming",
+      "aliases": ["rabbit mq", "rmq", "amqp"],
+      "related": ["messaging queue", "message broker", "event-driven", "microservices"]
+    },
+    "rest api": {
+      "canonical_name": "rest api",
+      "category": "networking_protocols",
+      "aliases": ["rest", "restful", "restful api", "rest apis", "restful web services", "rest endpoints"],
+      "related": ["http", "json", "fastapi", "express.js", "backend", "api"]
+    },
+    "graphql": {
+      "canonical_name": "graphql",
+      "category": "networking_protocols",
+      "aliases": ["gql", "apollo graphql"],
+      "related": ["api", "rest api", "node.js", "backend", "frontend"]
+    },
+    "grpc": {
+      "canonical_name": "grpc",
+      "category": "networking_protocols",
+      "aliases": ["g-rpc", "protobuf", "protocol buffers"],
+      "related": ["microservices", "rpc", "http/2", "backend", "go"]
+    },
+    "microservices": {
+      "canonical_name": "microservices",
+      "category": "architecture_practices",
+      "aliases": ["microservice", "micro-service", "microservices architecture", "soa", "distributed microservices"],
+      "related": ["distributed systems", "docker", "kubernetes", "rest api", "grpc", "event-driven"]
+    },
+    "distributed systems": {
+      "canonical_name": "distributed systems",
+      "category": "architecture_practices",
+      "aliases": ["distributed computing", "high-availability systems", "fault-tolerant systems", "distributed backend"],
+      "related": ["microservices", "concurrency", "scalability", "load balancing", "kafka"]
+    },
+    "agile": {
+      "canonical_name": "agile",
+      "category": "architecture_practices",
+      "aliases": ["scrum", "kanban", "sprint planning", "agile methodology", "sdlc"],
+      "related": ["jira", "software development lifecycle"]
+    },
+    "test-driven development": {
+      "canonical_name": "test-driven development",
+      "category": "architecture_practices",
+      "aliases": ["tdd", "unit testing", "automated testing", "test automation"],
+      "related": ["pytest", "jest", "junit", "testing"]
+    },
+    "pytest": {
+      "canonical_name": "pytest",
+      "category": "testing_qa",
+      "aliases": ["py-test", "python testing"],
+      "related": ["python", "unit testing", "mock", "tdd"]
+    },
+    "jest": {
+      "canonical_name": "jest",
+      "category": "testing_qa",
+      "aliases": ["jestjs", "jest testing"],
+      "related": ["react", "javascript", "typescript", "unit testing"]
+    },
+    "cypress": {
+      "canonical_name": "cypress",
+      "category": "testing_qa",
+      "aliases": ["cypress.io", "cypress e2e"],
+      "related": ["e2e testing", "testing", "javascript", "frontend"]
+    },
+    "playwright": {
+      "canonical_name": "playwright",
+      "category": "testing_qa",
+      "aliases": ["playwright testing"],
+      "related": ["e2e testing", "automation", "typescript", "python"]
+    },
+    "git": {
+      "canonical_name": "git",
+      "category": "tools_vcs",
+      "aliases": ["version control", "vcs", "source control", "github", "gitlab", "bitbucket", "git flow"],
+      "related": ["github", "gitlab", "devops"]
+    },
+    "linux": {
+      "canonical_name": "linux",
+      "category": "tools_vcs",
+      "aliases": ["unix", "ubuntu", "debian", "centos", "redhat", "rhel", "alpine linux", "posix"],
+      "related": ["bash", "devops", "systems", "sysadmin"]
+    },
+    "pandas": {
+      "canonical_name": "pandas",
+      "category": "data_engineering_ai",
+      "aliases": ["python pandas"],
+      "related": ["python", "numpy", "data analysis", "data science"]
+    },
+    "pytorch": {
+      "canonical_name": "pytorch",
+      "category": "data_engineering_ai",
+      "aliases": ["torch"],
+      "related": ["python", "deep learning", "machine learning", "tensorflow"]
+    },
+    "machine learning": {
+      "canonical_name": "machine learning",
+      "category": "data_engineering_ai",
+      "aliases": ["ml", "ai", "artificial intelligence", "deep learning", "data science"],
+      "related": ["python", "pytorch", "tensorflow", "scikit-learn"]
+    }
+  }
+}

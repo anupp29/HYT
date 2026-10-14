@@ -86,3 +86,14 @@
 * **Decision:** Education and Location alone NEVER produce a 0.0 score or kill a candidacy (assigned configurable baseline floors of 60.0% and 50.0% respectively).
 * **Why Non-Obvious:** Elite software engineers are frequently self-taught, bootcamp graduates, or willing to relocate/work remotely. A zero-score penalty in education or location disproportionately kills top talent while violating Principle 1 and Principle 6 (Structural Recall Bias).
 
+---
+
+### Decision 13: Three-Tier Skills Taxonomy Cascade (Taxonomy Map → Word-Boundary Regex → Dense Embeddings)
+* **Context:** Pure keyword matching fails on standard tech acronyms (`k8s` vs `kubernetes`, `psql` vs `postgresql`), while pure dense neural embeddings suffer from conceptual bleed (matching `Java` to `JavaScript` at ~0.60 similarity or `React` to `Angular` at ~0.76).
+* **Decision:** Implemented an external, comprehensive SWE taxonomy (`data/taxonomy/skills_taxonomy.json`) backed by `src/utils/taxonomy.py`. Scoring executes a strict 3-tier cascade:
+  1. **Tier 1 (O(1) Canonical Taxonomy)**: Instant bidirectional alias resolution (`k8s` ↔ `kubernetes`, `aws` ↔ `amazon web services`).
+  2. **Tier 2 (Word-Boundary Regex `\b` Token Guard)**: Prevents substring bleed (blocks `Java` from matching inside `JavaScript`) while matching compound phrases (`Core Java`, `PostgreSQL 14`).
+  3. **Tier 3 (Dense Neural MiniLM)**: Evaluates semantic adjacent equivalents only if Tier 1 and 2 miss, gated strictly at $\ge 0.68$.
+* **Why Non-Obvious:** Achieves microsecond lookup speeds, 100% determinism on acronyms, and permanently immunizes the ATS against classic false-positive substring and semantic bleed blunders.
+
+

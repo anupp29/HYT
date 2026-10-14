@@ -49,7 +49,8 @@ CRITICAL INSTRUCTIONS:
    - For every verified skill, provide the exact verbatim sentence from the experience bullet in the "context" field.
 3. EXPERIENCE:
    - Extract each job title, company name, start date, end date, estimated duration in years, bullets, and skills demonstrated.
-   - Keep bullets concise (1 to 2 key bullets per role).
+   - Keep bullets concise (maximum 2 to 3 impactful bullets per role, maximum 25 words per bullet). Focus on technical responsibilities and demonstrated tools.
+   - Do not repeat full resume text verbatim.
 4. SENIORITY & YEARS:
    - Extract numeric "estimated_years_experience" (total professional years).
    - "seniority_level": strictly one of: "entry", "junior", "mid", "senior", "lead", "staff", "principal", "executive".
@@ -309,9 +310,13 @@ def _has_suspicious_date_overlap(experiences: List[ExperienceEntry]) -> bool:
     current_year = float(datetime.now().year)
 
     for exp in experiences:
-        # Skip internships or part-time roles
-        title_lower = exp.title.lower()
-        if "intern" in title_lower or "part-time" in title_lower or "freelance" in title_lower or "contract" in title_lower:
+        # Skip internships, part-time, freelance, consulting, advisory, or side projects
+        role_text = f"{exp.title} {exp.company or ''} {' '.join(exp.bullets or [])}".lower()
+        if any(term in role_text for term in [
+            "intern", "part-time", "part time", "freelance", "contract",
+            "consultant", "consulting", "side project", "founder", "advisor",
+            "volunteer", "open source", "self-employed"
+        ]):
             continue
 
         start_val = _extract_year(exp.start_date)
