@@ -20,6 +20,10 @@ from src.gates.jd_input import process_jd_input
 from src.gates.jd_extraction import extract_job_description
 from src.gates.jd_embedding import embed_job_requirements
 from src.gates.gate0 import evaluate_gate0
+from src.gates.gate1 import extract_clean_text
+from src.gates.gate2 import mask_pii
+from src.gates.gate3 import extract_structured_resume
+from src.gates.gate4 import evaluate_gate4
 from src.utils.logger import init_logger, get_logger
 from src.utils.config import get_config
 from src.utils.llm_client import get_llm_client
@@ -69,6 +73,14 @@ def main():
     gate0_parser.add_argument("--pdf", type=str, required=True, help="Path to resume PDF file")
     gate0_parser.add_argument("--job-id", "-j", type=str, default=None, help="Optional job ID to test for JD copying")
 
+    # Command: inspect-extraction
+    extract_parser = subparsers.add_parser("inspect-extraction", help="Run Gates 0-3 to extract structured profile from resume")
+    extract_parser.add_argument("--pdf", type=str, default=None, help="Path to resume PDF file")
+    extract_parser.add_argument("--candidate-id", "-c", type=str, default=None, help="Candidate ID from data/sample")
+    extract_parser.add_argument("--refresh", action="store_true", help="Bypass cache and force re-extraction")
+    extract_parser.add_argument("--provider", "-p", type=str, default=None, help="LLM provider for this extraction")
+    extract_parser.add_argument("--model", "-m", type=str, default=None, help="AI model name for this extraction")
+
     args = parser.parse_args()
 
     # Initialize structured logger
@@ -84,6 +96,8 @@ def main():
         verify_jd_command(args)
     elif args.command == "check-integrity":
         check_integrity_command(args)
+    elif args.command == "inspect-extraction":
+        inspect_extraction_command(args)
     else:
         parser.print_help()
 
@@ -317,6 +331,131 @@ def check_integrity_command(args):
             print(f"     Reason: {reason}")
     else:
         print("No adversarial attacks, hidden text, or keyword stuffing detected.")
+    print("=" * 70 + "\n")
+
+
+def inspect_extraction_command(args):
+    """Executes Gates 0 through 3 on a candidate resume PDF and displays structured inspection card."""
+    pdf_path = None
+    if args.candidate_id:
+        pdf_path = PROJECT_ROOT / "data" / "sample" / f"{args.candidate_id}.pdf"
+        if not pdf_path.exists():
+            print(f"Error: Could not find candidate resume for ID '{args.candidate_id}' at {pdf_path}")
+            sys.exit(1)
+    elif args.pdf:
+        pdf_path = Path(args.pdf)
+        if not pdf_path.exists():
+            print(f"Error: Resume PDF not found at: {pdf_path}")
+            sys.exit(1)
+    else:
+        print("Error: You must provide either --pdf <file> or --candidate-id <id>")
+        sys.exit(1)
+
+    candidate_id = pdf_path.stem
+    print(f"\n[HYT ATS] Inspecting Candidate: {candidate_id} ({pdf_path.name}) ...")
+
+    # Gate 0: Integrity Shield
+    print(f"[1/4] Running Gate 0 Integrity Shield...")
+    gate0_report = evaluate_gate0(str(pdf_path))
+    gate0_status = "QUARANTINED" if gate0_report.is_quarantined else ("FLAGGED" if gate0_report.flags else "CLEAN")
+
+    # Gate 1: Layout-Aware Extraction
+    print(f"[2/4] Running Gate 1 Layout-Aware Text Extraction...")
+    clean_text = extract_clean_text(str(pdf_path))
+
+    # Gate 2: Privacy Shield
+    print(f"[3/4] Running Gate 2 Privacy Shield (PII Redaction)...")
+    pii_res = mask_pii(clean_text, candidate_id=candidate_id)
+
+    # Gate 3: Structured Extraction
+    print(f"[4/5] Running Gate 3 Structured Extraction (LLM Call)...")
+    structured = extract_structured_resume(
+        pii_res.masked_clean_text,
+        candidate_id=candidate_id,
+        github_handle=pii_res.github_handle,
+        use_cache=not args.refresh,
+        force_refresh=args.refresh,
+        provider=args.provider,
+        model=args.model,
+    )
+
+    # Gate 4: Verification Layer
+    print(f"[5/5] Running Gate 4 Verification Layer (Skill Depth & GitHub Audit)...")
+    gate4_report = evaluate_gate4(
+        structured,
+        github_url=pii_res.github_url,
+        github_handle=pii_res.github_handle,
+        candidate_id=candidate_id,
+        use_cache=not args.refresh,
+    )
+
+    verified_skills = [s for s in structured.skills if s.is_verified]
+    unverified_skills = [s for s in structured.skills if not s.is_verified]
+
+    gate4_status = "VERIFIED CLEAN" if gate4_report.is_verified else "VERIFICATION FLAGS RAISED"
+
+    print("\n" + "=" * 70)
+    print(f"CANDIDATE EXTRACTION PROFILE — {candidate_id.upper()}")
+    print("=" * 70)
+    print(f"Integrity Status:      [{gate0_status}] ({len(gate0_report.flags)} security flags)")
+    print(f"Verification Status:   [{gate4_status}] ({len(gate4_report.flags)} verification flags)")
+    print(f"Estimated Experience:  {structured.estimated_years_experience:.1f} years")
+    print(f"Seniority Level:       {structured.seniority_level.value.upper()}")
+    print(f"Location:              {structured.current_location or 'Not specified'}")
+    print(f"GitHub:                {pii_res.github_url or 'None provided'} (handle: {pii_res.github_handle or 'None'})")
+    if gate4_report.github_top_languages:
+        langs_str = ", ".join([f"{k} ({v:.1f}%)" for k, v in list(gate4_report.github_language_breakdown.items())[:4]])
+        print(f"GitHub Codebase:       {langs_str} (~{gate4_report.recent_public_commits} commits)")
+    print(f"PII Redactions:        Emails: {pii_res.redacted_email_count} | Phones: {pii_res.redacted_phone_count} | Name Masked: {pii_res.name_masked}")
+
+    all_flags = [f.value for f in structured.verification_flags] + [f.value for f in gate4_report.flags]
+    if all_flags:
+        print(f"Active Flags:          {', '.join(set(all_flags))}")
+
+    print("-" * 70)
+    print(f"VERIFIED SKILLS ({len(verified_skills)} of {len(structured.skills)} total):")
+    if verified_skills:
+        for idx, skill in enumerate(verified_skills, 1):
+            context_snippet = (skill.context[:70] + "...") if skill.context and len(skill.context) > 70 else (skill.context or "")
+            print(f"  {idx:2d}. {skill.name} [VERIFIED]")
+            if context_snippet:
+                print(f"      Evidence: \"{context_snippet}\"")
+    else:
+        print("  (None verified with direct project/experience evidence)")
+
+    print("-" * 70)
+    print(f"UNVERIFIED / CLAIMED-ONLY SKILLS ({len(unverified_skills)}):")
+    if unverified_skills:
+        unv_names = [s.name for s in unverified_skills]
+        line = "  "
+        for name in unv_names:
+            if len(line) + len(name) + 2 > 68:
+                print(line)
+                line = "  " + name + ", "
+            else:
+                line += name + ", "
+        if line.strip():
+            print(line.rstrip(", "))
+    else:
+        print("  (All claimed skills were verified with evidence)")
+
+    print("-" * 70)
+    print("VERIFICATION EVIDENCE LEDGER:")
+    for note in gate4_report.ledger_notes:
+        print(f"  * {note}")
+
+    print("-" * 70)
+    print(f"EXPERIENCE TIMELINE ({len(structured.experience)} positions):")
+    for exp in structured.experience:
+        print(f"  - {exp.title} at {exp.company} ({exp.start_date} - {exp.end_date}, ~{exp.years:.1f} yrs)")
+
+    if structured.education:
+        print("-" * 70)
+        print("EDUCATION:")
+        for edu in structured.education:
+            grad = f" (Grad: {edu.graduation_year})" if edu.graduation_year else ""
+            print(f"  - {edu.degree} in {edu.field_of_study} from {edu.institution}{grad}")
+
     print("=" * 70 + "\n")
 
 

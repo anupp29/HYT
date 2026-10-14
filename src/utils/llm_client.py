@@ -31,8 +31,8 @@ from dotenv import load_dotenv
 from src.utils.config import get_config
 from src.utils.logger import get_logger
 
-# Load environment variables
-load_dotenv()
+# Load environment variables with override
+load_dotenv(override=True)
 
 logger = get_logger("LLM_CLIENT")
 
@@ -420,7 +420,8 @@ class LLMClient:
             "stream": False,
             "options": {
                 "temperature": self.temperature,
-                "num_predict": max(self.max_tokens, 2048),
+                "num_predict": max(self.max_tokens, 4096),
+                "num_ctx": 16384,
             },
         }
         if json_mode:

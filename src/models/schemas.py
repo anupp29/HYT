@@ -56,9 +56,11 @@ class IntegrityFlag(str, Enum):
 class VerificationFlag(str, Enum):
     SHALLOW_PROFILE = "SHALLOW_PROFILE"
     GITHUB_LANGUAGE_MISMATCH = "GITHUB_LANGUAGE_MISMATCH"
+    GITHUB_MISMATCH = "GITHUB_MISMATCH"
     GITHUB_INACTIVE = "GITHUB_INACTIVE"
     GITHUB_NOT_FOUND = "GITHUB_NOT_FOUND"
     GITHUB_API_ERROR = "GITHUB_API_ERROR"
+    DATE_SUSPICIOUS = "DATE_SUSPICIOUS"
 
 
 # ------------------------------------------------------------------------------
@@ -164,6 +166,7 @@ class ResumeStructured(BaseModel):
     education: List[EducationEntry] = Field(default_factory=list)
     github_handle: Optional[str] = None
     current_location: Optional[str] = None
+    verification_flags: List[str] = Field(default_factory=list, description="Flags like DATE_SUSPICIOUS detected during extraction")
     content_hash: str = Field(description="SHA-256 hash of PII-stripped resume text")
 
     @property
@@ -198,10 +201,18 @@ class Gate4VerificationReport(BaseModel):
     """Output of Gate 4 Verification Engine."""
     candidate_id: str
     github_handle: Optional[str] = None
+    github_url: Optional[str] = None
     flags: List[VerificationFlag] = Field(default_factory=list)
+    total_skills_count: int = 0
+    verified_skills_count: int = 0
+    unverified_skills_count: int = 0
     unverified_skill_ratio: float = 0.0
     github_top_languages: List[str] = Field(default_factory=list)
+    github_language_breakdown: Dict[str, float] = Field(default_factory=dict)
+    github_active_in_lookback: bool = True
     recent_public_commits: int = 0
+    inactive_skills: List[str] = Field(default_factory=list)
+    ledger_notes: List[str] = Field(default_factory=list)
     is_verified: bool = True
 
 

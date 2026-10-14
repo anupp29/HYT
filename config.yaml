@@ -25,8 +25,8 @@ paths:
 # Max 2 LLM calls per candidate (Gate 3 extraction + Gate 8 explanation)
 # ------------------------------------------------------------------------------
 llm:
-  provider: "gemini" # Active provider: "gemini", "groq", "ollama", "openai", "anthropic"
-  model: "models/gemini-2.5-flash" # Options:
+  provider: "ollama" # Active provider: "ollama", "gemini", "groq", "openai", "anthropic"
+  model: "qwen2.5-coder:1.5b" # Options:
                                    # 1. Gemini: "models/gemini-2.5-flash", "models/gemini-2.5-pro"
                                    # 2. Groq: "llama-3.3-70b-versatile", "llama-3.1-8b-instant", "gemma2-9b-it", "mixtral-8x7b-32768"
                                    # 3. Ollama: "swift-12b" (Gemma 4), "qwen2.5-coder:1.5b", "gemma2:9b", "gemma:7b"

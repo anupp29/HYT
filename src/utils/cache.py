@@ -37,7 +37,9 @@ class CacheManager:
 
     def _get_path(self, namespace: str, key: str, ext: str = "json") -> str:
         safe_key = "".join(c for c in key if c.isalnum() or c in ("-", "_", "."))
-        return os.path.join(self.cache_dir, namespace, f"{safe_key}.{ext}")
+        ns_dir = os.path.join(self.cache_dir, namespace)
+        os.makedirs(ns_dir, exist_ok=True)
+        return os.path.join(ns_dir, f"{safe_key}.{ext}")
 
     def get(self, namespace: str, key: str) -> Optional[Dict[str, Any]]:
         """

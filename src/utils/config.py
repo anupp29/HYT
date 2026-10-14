@@ -29,8 +29,8 @@ class PathsConfig(BaseModel):
 
 
 class LLMConfig(BaseModel):
-    provider: str = "gemini" # "gemini", "groq", "ollama", "openai", "anthropic"
-    model: str = "models/gemini-2.5-flash"
+    provider: str = "ollama" # "ollama", "gemini", "groq", "openai", "anthropic"
+    model: str = "qwen2.5-coder:1.5b"
     temperature: float = Field(default=0.0, ge=0.0, le=1.0)
     max_tokens: int = Field(default=2048, ge=256, le=8192)
     max_retries: int = Field(default=3, ge=0, le=10)
