@@ -28,6 +28,11 @@ from src.gates.gate5 import evaluate_gate5
 from src.gates.gate6 import evaluate_gate6
 from src.gates.gate7 import evaluate_gate7
 from src.gates.gate8 import evaluate_gate8
+from src.gates.gate10 import rank_candidates, format_ranking_table
+from src.pipeline import process_candidate, process_batch
+from src.utils.output import format_candidate_record
+from src.utils.override import log_decision_override
+from src.models.schemas import DecisionType
 from src.utils.logger import init_logger, get_logger
 from src.utils.config import get_config
 from src.utils.llm_client import get_llm_client
@@ -85,8 +90,38 @@ def main():
     extract_parser.add_argument("--provider", "-p", type=str, default=None, help="LLM provider for this extraction")
     extract_parser.add_argument("--model", "-m", type=str, default=None, help="AI model name for this extraction")
 
+    # Command: run-candidate (Phase 7 Orchestrator)
+    run_cand_parser = subparsers.add_parser("run-candidate", help="Run full 10-gate pipeline for a single resume")
+    run_cand_parser.add_argument("--resume", "-r", type=str, required=True, help="Path to resume PDF file")
+    run_cand_parser.add_argument("--jd", "-j", type=str, required=True, help="Job ID or path to JD file")
+    run_cand_parser.add_argument("--refresh", action="store_true", help="Bypass cache and force re-evaluation")
+    run_cand_parser.add_argument("--provider", "-p", type=str, default=None, help="LLM provider")
+    run_cand_parser.add_argument("--model", "-m", type=str, default=None, help="AI model name")
+
+    # Command: run-batch (Phase 7 Batch Orchestrator)
+    batch_parser = subparsers.add_parser("run-batch", help="Run full pipeline on all resumes in a directory")
+    batch_parser.add_argument("--resume-dir", "-d", type=str, default="data/sample", help="Directory of resume PDFs")
+    batch_parser.add_argument("--jd", "-j", type=str, required=True, help="Job ID or path to JD file")
+    batch_parser.add_argument("--limit", "-l", type=int, default=None, help="Limit number of resumes to process")
+    batch_parser.add_argument("--refresh", action="store_true", help="Bypass cache and force re-evaluation")
+    batch_parser.add_argument("--provider", "-p", type=str, default=None, help="LLM provider")
+    batch_parser.add_argument("--model", "-m", type=str, default=None, help="AI model name")
+
+    # Command: rank (Phase 7 Leaderboard)
+    rank_parser = subparsers.add_parser("rank", help="Rank and display candidate leaderboard for a target job")
+    rank_parser.add_argument("--jd", "-j", type=str, required=True, help="Job ID or path to JD file")
+    rank_parser.add_argument("--resume-dir", "-d", type=str, default="data/sample", help="Directory of resume PDFs")
+    rank_parser.add_argument("--limit", "-l", type=int, default=20, help="Max candidates to rank")
+
+    # Command: override (Phase 7 Decision Override Audit)
+    override_parser = subparsers.add_parser("override", help="Log a human recruiter decision override")
+    override_parser.add_argument("--candidate-id", "-c", type=str, required=True, help="Candidate identifier")
+    override_parser.add_argument("--decision", "-d", type=str, required=True, choices=["AUTO_ADVANCE", "ESCALATE", "AUTO_REJECT"])
+    override_parser.add_argument("--reason", "-r", type=str, required=True, help="Recruiter justification")
+    override_parser.add_argument("--recruiter", type=str, default="human_recruiter", help="Recruiter name or ID")
+
     # Command: score-candidate
-    score_parser = subparsers.add_parser("score-candidate", help="Run Gates 0-6 end-to-end to score candidate against a JD")
+    score_parser = subparsers.add_parser("score-candidate", help="Run Gates 0-8 end-to-end to score candidate against a JD")
     score_parser.add_argument("--candidate-id", "-c", type=str, required=True, help="Candidate ID from data/sample")
     score_parser.add_argument("--job-id", "-j", type=str, required=True, help="Job ID from data/jds")
     score_parser.add_argument("--refresh", action="store_true", help="Bypass cache and force re-evaluation")
@@ -112,6 +147,14 @@ def main():
         inspect_extraction_command(args)
     elif args.command == "score-candidate":
         score_candidate_command(args)
+    elif args.command == "run-candidate":
+        run_candidate_command(args)
+    elif args.command == "run-batch":
+        run_batch_command(args)
+    elif args.command == "rank":
+        rank_command(args)
+    elif args.command == "override":
+        override_command(args)
     else:
         parser.print_help()
 
@@ -628,5 +671,139 @@ def score_candidate_command(args):
     print("=" * 75 + "\n")
 
 
+def resolve_jd_path(jd_arg: str) -> Path:
+    """Resolves JD path from file path, job ID, or relative location."""
+    p = Path(jd_arg)
+    if p.exists():
+        return p
+    jds_dir = PROJECT_ROOT / "data" / "jds"
+    candidates = [
+        jds_dir / jd_arg,
+        jds_dir / f"{jd_arg}.json",
+        jds_dir / f"jd_{jd_arg}.json",
+        jds_dir / f"jd_{jd_arg}",
+    ]
+    for c in candidates:
+        if c.exists():
+            return c
+    raise FileNotFoundError(f"Job Description not found for '{jd_arg}'. Looked in {jds_dir}")
+
+
+def run_candidate_command(args):
+    """Executes full 10-gate ATS pipeline for a single resume PDF."""
+    resume_path = Path(args.resume)
+    if not resume_path.exists():
+        print(f"Error: Resume file not found at {resume_path}")
+        sys.exit(1)
+
+    try:
+        jd_path = resolve_jd_path(args.jd)
+    except FileNotFoundError as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
+    record = process_candidate(
+        resume_path=resume_path,
+        jd=jd_path,
+        use_cache=not args.refresh,
+        force_refresh=args.refresh,
+        provider=args.provider,
+        model=args.model,
+    )
+    output_str = format_candidate_record(record, include_full_ledger=True)
+    print(output_str)
+
+
+def run_batch_command(args):
+    """Executes full 10-gate ATS pipeline across a directory of resume PDFs."""
+    resume_dir = Path(args.resume_dir)
+    if not resume_dir.exists():
+        print(f"Error: Resume directory not found at {resume_dir}")
+        sys.exit(1)
+
+    try:
+        jd_path = resolve_jd_path(args.jd)
+    except FileNotFoundError as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
+    pdf_files = sorted(resume_dir.glob("*.pdf"))
+    if not pdf_files:
+        print(f"Warning: No PDF resumes found in {resume_dir}")
+        return
+
+    if args.limit:
+        pdf_files = pdf_files[: args.limit]
+
+    print(f"\n[HYT ATS] Processing batch of {len(pdf_files)} resumes against {jd_path.stem}...")
+    records = process_batch(
+        resume_paths=pdf_files,
+        jd=jd_path,
+        use_cache=not args.refresh,
+        force_refresh=args.refresh,
+        provider=args.provider,
+        model=args.model,
+    )
+    ranked = rank_candidates(records)
+    print(format_ranking_table(ranked))
+
+
+def rank_command(args):
+    """Ranks and formats a candidate leaderboard for a target job."""
+    resume_dir = Path(args.resume_dir)
+    if not resume_dir.exists():
+        print(f"Error: Resume directory not found at {resume_dir}")
+        sys.exit(1)
+
+    try:
+        jd_path = resolve_jd_path(args.jd)
+    except FileNotFoundError as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
+    pdf_files = sorted(resume_dir.glob("*.pdf"))
+    if not pdf_files:
+        print(f"Warning: No PDF resumes found in {resume_dir}")
+        return
+
+    if args.limit:
+        pdf_files = pdf_files[: args.limit]
+
+    records = process_batch(
+        resume_paths=pdf_files,
+        jd=jd_path,
+        use_cache=True,
+    )
+    ranked = rank_candidates(records)
+    print(format_ranking_table(ranked))
+
+
+def override_command(args):
+    """Logs a human recruiter decision override to the audit trail."""
+    try:
+        new_dec = DecisionType(args.decision)
+    except ValueError:
+        print(f"Error: Invalid decision '{args.decision}'. Choose from: AUTO_ADVANCE, ESCALATE, AUTO_REJECT")
+        sys.exit(1)
+
+    entry = log_decision_override(
+        candidate_id=args.candidate_id,
+        new_decision=new_dec,
+        reason=args.reason,
+        recruiter_id=args.recruiter,
+    )
+    print("\n" + "=" * 70)
+    print(f"RECRUITER DECISION OVERRIDE LOGGED SUCCESSFULLY")
+    print("=" * 70)
+    print(f"Candidate ID:     {entry['candidate_id']}")
+    print(f"New Decision:     [{entry['new_decision']}]")
+    print(f"Recruiter:        {entry['recruiter_id']}")
+    print(f"Justification:    {entry['reason']}")
+    print(f"Timestamp:        {entry['timestamp']}")
+    print(f"Audit Trail File: logs/overrides.jsonl")
+    print("=" * 70 + "\n")
+
+
 if __name__ == "__main__":
     main()
+

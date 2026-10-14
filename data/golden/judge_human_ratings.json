@@ -1,0 +1,56 @@
+{
+  "10624813": {
+    "citation_quality": 3,
+    "gap_specificity": 2,
+    "actionability": 3,
+    "composite_score": 2.67
+  },
+  "27152464": {
+    "citation_quality": 2,
+    "gap_specificity": 3,
+    "actionability": 2,
+    "composite_score": 2.33
+  },
+  "16186411": {
+    "citation_quality": 3,
+    "gap_specificity": 3,
+    "actionability": 3,
+    "composite_score": 3.0
+  },
+  "26746496": {
+    "citation_quality": 2,
+    "gap_specificity": 3,
+    "actionability": 3,
+    "composite_score": 2.67
+  },
+  "33381211": {
+    "citation_quality": 2,
+    "gap_specificity": 3,
+    "actionability": 3,
+    "composite_score": 2.67
+  },
+  "12472574": {
+    "citation_quality": 2,
+    "gap_specificity": 3,
+    "actionability": 2,
+    "composite_score": 2.33
+  },
+  "51588273": {
+    "citation_quality": 3,
+    "gap_specificity": 3,
+    "actionability": 3,
+    "composite_score": 3.0
+  },
+  "13385306": {
+    "citation_quality": 2,
+    "gap_specificity": 3,
+    "actionability": 2,
+    "composite_score": 2.33
+  },
+  "13405733": {
+    "citation_quality": 3,
+    "gap_specificity": 3,
+    "actionability": 3,
+    "composite_score": 3.0
+  }
+}

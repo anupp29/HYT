@@ -297,6 +297,8 @@ class CandidateRecord(BaseModel):
     decision_reason: str
     scoring_breakdown: ScoringBreakdown
     ledger: List[LedgerEntry] = Field(default_factory=list)
+    top_strengths: List[str] = Field(default_factory=list)
+    critical_gaps: List[str] = Field(default_factory=list)
     integrity_flags: List[str] = Field(default_factory=list)
     verification_flags: List[str] = Field(default_factory=list)
     is_quarantined: bool = False

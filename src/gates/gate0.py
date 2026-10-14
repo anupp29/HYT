@@ -57,7 +57,8 @@ SWE_SKILL_LEXICON = {
 INJECTION_REGEX_PATTERNS = [
     re.compile(r"(?i)\b(ignore|disregard|forget|override|bypass)\b.{0,60}\b(previous|prior|above|all)\b.{0,40}\b(instructions|prompts|rules|commands|context)\b"),
     re.compile(r"(?i)\b(system\s*prompt|you\s+are\s+now|new\s+role|jailbreak|developer\s*mode)\b"),
-    re.compile(r"(?i)\b(output|return|print|set|give)\b.{0,40}\b(score|decision|status)\b.{0,40}\b(100|advance|auto_advance|hire|perfect)\b"),
+    re.compile(r"(?i)\b(output|return|print|set|give|assign|always\s+return)\b.{0,40}\b(score|decision|status)?\b.{0,40}\b(100|advance|auto_advance|hire|perfect)\b"),
+    re.compile(r"(?i)\b(always\s+return|assign\s+100|give\s+100|auto_advance\s+this\s+candidate|grant\s+bypass)\b"),
     re.compile(r"(<\|im_start\|>|<\|im_end\|>|\[system\]|\[system\s+instruction\]|assistant:|human:)", re.IGNORECASE),
     re.compile(r"(?i)\b(end of resume|ignore resume|resume ends here)\b"),
 ]
