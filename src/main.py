@@ -60,13 +60,21 @@ def main():
 
     subparsers = parser.add_subparsers(dest="command", help="Available subcommands")
 
-    # Command: verify-jd
+    # Command: verify-jd / run-job
     jd_parser = subparsers.add_parser("verify-jd", help="Extract and inspect structured requirements from a JD")
-    jd_parser.add_argument("--input", "-i", type=str, help="Path to raw JD file (JSON or TXT)")
-    jd_parser.add_argument("--job-id", "-j", type=str, help="Select one of the 6 standard JDs by ID (e.g. 2234533717)")
+    jd_parser.add_argument("--input", "-i", "--jd", dest="input", type=str, help="Path to raw JD file (JSON or TXT)")
+    jd_parser.add_argument("--job-id", "-j", "--job_id", dest="job_id", type=str, help="Select one of the 6 standard JDs by ID (e.g. 2234533717)")
     jd_parser.add_argument("--refresh", action="store_true", help="Bypass cache and force re-extraction")
     jd_parser.add_argument("--provider", "-p", type=str, help="LLM provider for this extraction")
     jd_parser.add_argument("--model", "-m", type=str, help="AI model name for this extraction")
+
+    # Command: run-job (Plan 7.4 alias for verify-jd)
+    run_job_parser = subparsers.add_parser("run-job", help="Extract and inspect structured requirements from a JD (alias for verify-jd)")
+    run_job_parser.add_argument("--jd", "--input", "-i", dest="input", type=str, help="Path to raw JD file (JSON or TXT)")
+    run_job_parser.add_argument("--job-id", "-j", "--job_id", dest="job_id", type=str, help="Select one of the 6 standard JDs by ID")
+    run_job_parser.add_argument("--refresh", action="store_true", help="Bypass cache and force re-extraction")
+    run_job_parser.add_argument("--provider", "-p", type=str, help="LLM provider for this extraction")
+    run_job_parser.add_argument("--model", "-m", type=str, help="AI model name for this extraction")
 
     # Command: list-jds
     subparsers.add_parser("list-jds", help="List all available pre-configured JDs in data/jds")
@@ -77,15 +85,16 @@ def main():
     # Command: test-llm
     test_parser = subparsers.add_parser("test-llm", help="Send a diagnostic probe to test LLM provider and model connectivity")
     test_parser.add_argument("--provider", "-p", type=str, default=None, help="Provider to test ('gemini', 'groq', 'ollama', 'openai', 'anthropic')")
+
     # Command: check-integrity
     gate0_parser = subparsers.add_parser("check-integrity", help="Run Gate 0 Integrity Shield on a resume PDF")
     gate0_parser.add_argument("--pdf", type=str, required=True, help="Path to resume PDF file")
-    gate0_parser.add_argument("--job-id", "-j", type=str, default=None, help="Optional job ID to test for JD copying")
+    gate0_parser.add_argument("--job-id", "-j", "--job_id", dest="job_id", type=str, default=None, help="Optional job ID to test for JD copying")
 
     # Command: inspect-extraction
     extract_parser = subparsers.add_parser("inspect-extraction", help="Run Gates 0-4 to extract structured profile from resume")
     extract_parser.add_argument("--pdf", type=str, default=None, help="Path to resume PDF file")
-    extract_parser.add_argument("--candidate-id", "-c", type=str, default=None, help="Candidate ID from data/sample")
+    extract_parser.add_argument("--candidate-id", "--candidate_id", "-c", dest="candidate_id", type=str, default=None, help="Candidate ID from data/sample")
     extract_parser.add_argument("--refresh", action="store_true", help="Bypass cache and force re-extraction")
     extract_parser.add_argument("--provider", "-p", type=str, default=None, help="LLM provider for this extraction")
     extract_parser.add_argument("--model", "-m", type=str, default=None, help="AI model name for this extraction")
@@ -93,15 +102,15 @@ def main():
     # Command: run-candidate (Phase 7 Orchestrator)
     run_cand_parser = subparsers.add_parser("run-candidate", help="Run full 10-gate pipeline for a single resume")
     run_cand_parser.add_argument("--resume", "-r", type=str, required=True, help="Path to resume PDF file")
-    run_cand_parser.add_argument("--jd", "-j", type=str, required=True, help="Job ID or path to JD file")
+    run_cand_parser.add_argument("--jd", "-j", "--jd_hash", "--jd-hash", dest="jd", type=str, required=True, help="Job ID, hash, or path to JD file")
     run_cand_parser.add_argument("--refresh", action="store_true", help="Bypass cache and force re-evaluation")
     run_cand_parser.add_argument("--provider", "-p", type=str, default=None, help="LLM provider")
     run_cand_parser.add_argument("--model", "-m", type=str, default=None, help="AI model name")
 
     # Command: run-batch (Phase 7 Batch Orchestrator)
     batch_parser = subparsers.add_parser("run-batch", help="Run full pipeline on all resumes in a directory")
-    batch_parser.add_argument("--resume-dir", "-d", type=str, default="data/sample", help="Directory of resume PDFs")
-    batch_parser.add_argument("--jd", "-j", type=str, required=True, help="Job ID or path to JD file")
+    batch_parser.add_argument("--resume-dir", "--resume_dir", "-d", dest="resume_dir", type=str, default="data/sample", help="Directory of resume PDFs")
+    batch_parser.add_argument("--jd", "-j", "--jd_hash", "--jd-hash", dest="jd", type=str, required=True, help="Job ID, hash, or path to JD file")
     batch_parser.add_argument("--limit", "-l", type=int, default=None, help="Limit number of resumes to process")
     batch_parser.add_argument("--refresh", action="store_true", help="Bypass cache and force re-evaluation")
     batch_parser.add_argument("--provider", "-p", type=str, default=None, help="LLM provider")
@@ -109,21 +118,21 @@ def main():
 
     # Command: rank (Phase 7 Leaderboard)
     rank_parser = subparsers.add_parser("rank", help="Rank and display candidate leaderboard for a target job")
-    rank_parser.add_argument("--jd", "-j", type=str, required=True, help="Job ID or path to JD file")
-    rank_parser.add_argument("--resume-dir", "-d", type=str, default="data/sample", help="Directory of resume PDFs")
+    rank_parser.add_argument("--jd", "-j", "--jd_hash", "--jd-hash", dest="jd", type=str, required=True, help="Job ID, hash, or path to JD file")
+    rank_parser.add_argument("--resume-dir", "--resume_dir", "-d", dest="resume_dir", type=str, default="data/sample", help="Directory of resume PDFs")
     rank_parser.add_argument("--limit", "-l", type=int, default=20, help="Max candidates to rank")
 
     # Command: override (Phase 7 Decision Override Audit)
     override_parser = subparsers.add_parser("override", help="Log a human recruiter decision override")
-    override_parser.add_argument("--candidate-id", "-c", type=str, required=True, help="Candidate identifier")
+    override_parser.add_argument("--candidate-id", "--candidate_id", "-c", dest="candidate_id", type=str, required=True, help="Candidate identifier")
     override_parser.add_argument("--decision", "-d", type=str, required=True, choices=["AUTO_ADVANCE", "ESCALATE", "AUTO_REJECT"])
     override_parser.add_argument("--reason", "-r", type=str, required=True, help="Recruiter justification")
     override_parser.add_argument("--recruiter", type=str, default="human_recruiter", help="Recruiter name or ID")
 
     # Command: score-candidate
     score_parser = subparsers.add_parser("score-candidate", help="Run Gates 0-8 end-to-end to score candidate against a JD")
-    score_parser.add_argument("--candidate-id", "-c", type=str, required=True, help="Candidate ID from data/sample")
-    score_parser.add_argument("--job-id", "-j", type=str, required=True, help="Job ID from data/jds")
+    score_parser.add_argument("--candidate-id", "--candidate_id", "-c", dest="candidate_id", type=str, required=True, help="Candidate ID from data/sample")
+    score_parser.add_argument("--job-id", "-j", "--job_id", dest="job_id", type=str, required=True, help="Job ID from data/jds")
     score_parser.add_argument("--refresh", action="store_true", help="Bypass cache and force re-evaluation")
     score_parser.add_argument("--provider", "-p", type=str, default=None, help="LLM provider for extraction")
     score_parser.add_argument("--model", "-m", type=str, default=None, help="AI model name")
@@ -133,14 +142,14 @@ def main():
     # Initialize structured logger
     init_logger(console_output=True)
 
-    if args.command == "list-jds":
+    if args.command in ("verify-jd", "run-job"):
+        verify_jd_command(args)
+    elif args.command == "list-jds":
         list_jds()
     elif args.command == "list-models":
         list_models_command()
     elif args.command == "test-llm":
         test_llm_command(args)
-    elif args.command == "verify-jd":
-        verify_jd_command(args)
     elif args.command == "check-integrity":
         check_integrity_command(args)
     elif args.command == "inspect-extraction":
@@ -672,7 +681,7 @@ def score_candidate_command(args):
 
 
 def resolve_jd_path(jd_arg: str) -> Path:
-    """Resolves JD path from file path, job ID, or relative location."""
+    """Resolves JD path from file path, job ID, content hash, or relative location."""
     p = Path(jd_arg)
     if p.exists():
         return p
@@ -686,6 +695,16 @@ def resolve_jd_path(jd_arg: str) -> Path:
     for c in candidates:
         if c.exists():
             return c
+    # Check if jd_arg matches content_hash or job_id inside any stored JD JSON
+    if jds_dir.exists():
+        for f in jds_dir.glob("*.json"):
+            try:
+                with open(f, "r", encoding="utf-8") as jf:
+                    data = json.load(jf)
+                if data.get("job_id") == jd_arg or data.get("content_hash", "").startswith(jd_arg):
+                    return f
+            except Exception:
+                pass
     raise FileNotFoundError(f"Job Description not found for '{jd_arg}'. Looked in {jds_dir}")
 
 
