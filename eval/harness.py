@@ -406,10 +406,14 @@ def main():
     )
     parser.add_argument(
         "--golden-path",
+        "--golden_path",
+        "--golden-dir",
+        "--golden_dir",
         "-g",
+        dest="golden_path",
         type=str,
         default="data/golden/golden_labels.csv",
-        help="Path to golden labels CSV",
+        help="Path to golden labels CSV or golden directory",
     )
     parser.add_argument(
         "--output",
@@ -430,6 +434,8 @@ def main():
     init_logger(console_output=True)
 
     golden_path = PROJECT_ROOT / args.golden_path
+    if golden_path.is_dir():
+        golden_path = golden_path / "golden_labels.csv"
     output_path = PROJECT_ROOT / args.output
 
     report = run_full_evaluation(
