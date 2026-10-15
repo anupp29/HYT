@@ -113,6 +113,33 @@ def test_gate7_condition3_clean_high_advance(clean_high_ledger):
     assert "Exceptional candidate fit" in res.reason
 
 
+def test_gate7_condition3_industry_standard_75pct_advance():
+    """Industry standard ATS: Candidate satisfying 75% of must-haves (e.g. 12/16 or 3/4) with score >= 68 -> AUTO_ADVANCE."""
+    breakdown = ScoringBreakdown(
+        technical_score=80.0, experience_score=90.0, seniority_score=100.0, education_score=100.0, location_score=100.0, weighted_total=87.0
+    )
+    # 4 must-haves, 1 missing secondary tool -> 3/4 = 75% match
+    adv_ledger = ScoringLedger(
+        candidate_id="cand_adv_75",
+        job_id="test_job_101",
+        entries=[
+            LedgerEntry(dimension=DimensionType.TECHNICAL, requirement="Must-Have: Python", evidence="Python dev", is_verified=True, score_contribution=100.0),
+            LedgerEntry(dimension=DimensionType.TECHNICAL, requirement="Must-Have: PostgreSQL", evidence="Postgres dev", is_verified=True, score_contribution=100.0),
+            LedgerEntry(dimension=DimensionType.TECHNICAL, requirement="Must-Have: Docker", evidence="Docker dev", is_verified=True, score_contribution=100.0),
+        ],
+        breakdown=breakdown,
+        hard_failures=["Kubernetes"], # 1 missing tool out of 4 (75% match)
+        hard_failures_count=1,
+        verified_must_haves_count=3,
+        total_must_haves_count=4,
+        is_overqualified=False,
+    )
+    res = evaluate_gate7(ledger=adv_ledger)
+    assert res.decision == DecisionType.AUTO_ADVANCE
+    assert res.matched_condition == 3
+    assert "Exceptional candidate fit" in res.reason
+
+
 def test_gate7_condition4_high_score_with_anomalies(clean_high_ledger):
     """Condition 4: High score but has verification flags or missing must-haves -> ESCALATE."""
     flagged_gate4 = Gate4VerificationReport(

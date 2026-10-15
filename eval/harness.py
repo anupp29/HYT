@@ -77,6 +77,9 @@ def run_full_evaluation(
     output_path: Optional[Path] = None,
     limit: Optional[int] = None,
     sample_dir: Optional[Path] = None,
+    provider: Optional[str] = None,
+    model: Optional[str] = None,
+    delay: float = 0.0,
 ) -> Dict[str, Any]:
     """
     Executes the comprehensive Phase 8 evaluation suite.
@@ -158,6 +161,8 @@ def run_full_evaluation(
                 jd=s_jd,
                 candidate_id=cid,
                 use_cache=True,
+                provider=provider,
+                model=model,
             )
 
             records_by_job[jid].append(record)
@@ -429,9 +434,33 @@ def main():
         default=None,
         help="Limit number of golden pairs to evaluate",
     )
+    parser.add_argument(
+        "--provider",
+        "-p",
+        type=str,
+        default=None,
+        help="LLM provider override ('gemini', 'groq', 'ollama')",
+    )
+    parser.add_argument(
+        "--model",
+        "-m",
+        type=str,
+        default=None,
+        help="LLM model name override",
+    )
+    parser.add_argument(
+        "--delay",
+        "-d",
+        type=float,
+        default=0.0,
+        help="Delay in seconds between candidate evaluations (to avoid 429 TPM rate limits)",
+    )
 
     args = parser.parse_args()
     init_logger(console_output=True)
+
+    if args.delay and args.delay > 0:
+        os.environ["GROQ_PACING_INTERVAL"] = str(args.delay)
 
     golden_path = PROJECT_ROOT / args.golden_path
     if golden_path.is_dir():
@@ -442,6 +471,9 @@ def main():
         golden_csv=golden_path,
         output_path=output_path,
         limit=args.limit,
+        provider=args.provider,
+        model=args.model,
+        delay=args.delay,
     )
     print_evaluation_summary(report)
 

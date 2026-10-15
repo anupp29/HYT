@@ -29,13 +29,14 @@ class PathsConfig(BaseModel):
 
 
 class LLMConfig(BaseModel):
-    provider: str = "ollama" # "ollama", "gemini", "groq", "openai", "anthropic"
-    model: str = "qwen2.5-coder:1.5b"
+    provider: str = "gemini" # "gemini", "groq", "ollama", "openai", "anthropic"
+    model: str = "models/gemini-2.5-flash"
     temperature: float = Field(default=0.0, ge=0.0, le=1.0)
     max_tokens: int = Field(default=2048, ge=256, le=8192)
     max_retries: int = Field(default=3, ge=0, le=10)
     retry_backoff_seconds: int = Field(default=2, ge=1, le=30)
-    timeout_seconds: int = Field(default=120, ge=5, le=300)
+    timeout_seconds: int = Field(default=180, ge=5, le=300)
+    num_ctx: int = Field(default=4096, ge=1024, le=32768)
     ollama_base_url: str = Field(default="http://localhost:11434")
 
 
@@ -115,7 +116,7 @@ class Gate6SeniorityScores(BaseModel):
     one_level_below: float = Field(default=0.70, ge=0.0, le=1.0)
     two_levels_below: float = Field(default=0.40, ge=0.0, le=1.0)
     overqualified: float = Field(default=0.65, ge=0.0, le=1.0)
-    overqualified_flag_threshold: float = Field(default=12.0, ge=1.0, le=30.0)
+    overqualified_flag_threshold: float = Field(default=4.0, ge=1.0, le=30.0)
 
 
 class Gate6Config(BaseModel):
@@ -129,9 +130,11 @@ class Gate6Config(BaseModel):
 
 
 class Gate7Config(BaseModel):
-    high_threshold: float = Field(default=75.0, ge=0.0, le=100.0)
-    low_threshold: float = Field(default=40.0, ge=0.0, le=100.0)
-    auto_reject_hard_failure_proportion: float = Field(default=0.60, ge=0.0, le=1.0)
+    high_threshold: float = Field(default=58.0, ge=0.0, le=100.0)
+    low_threshold: float = Field(default=38.0, ge=0.0, le=100.0)
+    min_must_have_ratio: float = Field(default=0.45, ge=0.20, le=1.0)
+    min_verified_must_haves: int = Field(default=1, ge=0)
+    auto_reject_hard_failure_proportion: float = Field(default=0.70, ge=0.0, le=1.0)
 
     @model_validator(mode="after")
     def validate_thresholds(self) -> "Gate7Config":

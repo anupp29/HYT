@@ -29,7 +29,13 @@ from src.models.schemas import (
 from src.gates.jd_embedding import get_embedding_model, embed_job_requirements
 from src.utils.config import get_config
 from src.utils.logger import get_logger
-from src.utils.taxonomy import canonicalize_skill, are_skills_equivalent, are_skills_related
+from src.utils.taxonomy import (
+    canonicalize_skill,
+    are_skills_equivalent,
+    are_skills_related,
+    are_skills_in_same_cluster,
+    does_skill_subsume,
+)
 
 logger = get_logger("GATE_6_SCORING_ENGINE")
 
@@ -56,6 +62,19 @@ def _compute_cosine_sim(vec1: List[float], vec2: List[float]) -> float:
     return float(np.dot(a, b) / (norm_a * norm_b))
 
 
+def _split_compound_requirement(requirement: str) -> List[str]:
+    """
+    Splits compound requirements like 'JavaScript/TypeScript', 'AWS, Azure, or GCP',
+    'HTML5/CSS3', 'CI/CD pipelines' into constituent searchable tokens.
+    """
+    req = requirement.strip()
+    parts = re.split(r'\s*/\s*|\s+or\s+|,\s*', req, flags=re.IGNORECASE)
+    parts = [p.strip() for p in parts if len(p.strip()) >= 2]
+    if req not in parts:
+        parts.insert(0, req)
+    return parts if parts else [req]
+
+
 def _find_best_skill_match(
     requirement: str,
     skills: List[Skill],
@@ -63,34 +82,46 @@ def _find_best_skill_match(
     model: Any,
     precomputed_vecs: Optional[np.ndarray] = None,
 ) -> Tuple[float, Optional[Skill]]:
-    """Finds best matching candidate skill for a requirement via taxonomy + cosine similarity."""
+    """
+    Finds best matching candidate skill for a requirement via taxonomy,
+    compound token disaggregation, subsumption, umbrella clusters, and cosine similarity.
+    """
     if not skills:
         return 0.0, None
 
-    req_clean = requirement.lower().strip()
+    req_tokens = _split_compound_requirement(requirement)
 
-    # 1. Exact or Canonical Taxonomy Match Shortcut (O(1) resolution)
-    for s in skills:
-        s_clean = s.name.lower().strip()
-        if req_clean == s_clean or are_skills_equivalent(req_clean, s_clean):
-            return 1.0, s
-        # Word boundary match (e.g. "PostgreSQL" in "PostgreSQL 14" or "Core Java")
-        # Prevents false positive substring matches like "Java" inside "JavaScript"
-        if len(req_clean) >= 3 and re.search(rf"\b{re.escape(req_clean)}\b", s_clean):
-            return 1.0, s
+    # 1. Exact, Canonical, Subsumption, or Umbrella Cluster Match
+    for token in req_tokens:
+        tok_clean = token.lower().strip()
+        for s in skills:
+            s_clean = s.name.lower().strip()
+            # Exact or canonical alias
+            if tok_clean == s_clean or are_skills_equivalent(tok_clean, s_clean):
+                return 1.0, s
+            # Direct subsumption (e.g. candidate has TypeScript, token is JavaScript)
+            if does_skill_subsume(s_clean, tok_clean):
+                return 1.0, s
+            # Umbrella cluster transferability (e.g. candidate has AWS, token is Azure/GCP)
+            if are_skills_in_same_cluster(s_clean, tok_clean):
+                return 1.0, s
+            # Word boundary match (e.g. "PostgreSQL" in "PostgreSQL 14")
+            if len(tok_clean) >= 3 and re.search(rf"\b{re.escape(tok_clean)}\b", s_clean):
+                return 1.0, s
 
     # 2. Lexical word overlap fallback
     if model == "FALLBACK" or req_vec is None:
-        req_words = set(re.findall(r'\w+', req_clean))
         best_sim = 0.0
         best_skill = None
-        for s in skills:
-            s_words = set(re.findall(r'\w+', s.name.lower()))
-            overlap = len(req_words.intersection(s_words))
-            score = overlap / max(len(req_words), 1)
-            if score > best_sim:
-                best_sim = score
-                best_skill = s
+        for token in req_tokens:
+            tok_words = set(re.findall(r'\w+', token.lower()))
+            for s in skills:
+                s_words = set(re.findall(r'\w+', s.name.lower()))
+                overlap = len(tok_words.intersection(s_words))
+                score = overlap / max(len(tok_words), 1)
+                if score > best_sim:
+                    best_sim = score
+                    best_skill = s
         return best_sim, best_skill
 
     # 3. Neural Embedding Cosine Similarity
@@ -170,17 +201,12 @@ def evaluate_gate6(
     for must_have in jd.must_have_skills:
         req_vec = must_have_vecs.get(must_have)
 
-        # 1. Hard Gate Check: Best match among VERIFIED skills only
+        # 1. First check among VERIFIED skills (demonstrated with bullet evidence)
         v_sim, v_skill = _find_best_skill_match(
             must_have, verified_skills, req_vec, model, precomputed_vecs=verified_vecs
         )
 
-        if v_sim < hard_gate_threshold:
-            hard_failures.append(must_have)
-
-        # 2. Technical Score Contribution
         if v_sim >= hard_gate_threshold and v_skill:
-            # Full Credit for Verified Must-Have
             must_have_contributions.append(1.0)
             verified_must_haves_count += 1
             ledger_entries.append(
@@ -194,28 +220,27 @@ def evaluate_gate6(
                 )
             )
         else:
-            # Check for Unverified / Listed-Only Skill (Partial Credit)
+            # 2. Check among UNVERIFIED / skills summary list
             u_sim, u_skill = _find_best_skill_match(
                 must_have, unverified_skills, req_vec, model, precomputed_vecs=unverified_vecs
             )
+
             if u_sim >= hard_gate_threshold and u_skill:
-                partial_weight = cfg.gate6.unverified_skill_weight
-                must_have_contributions.append(partial_weight)
+                # Skill is listed on resume -> Award full 100% credit (Enterprise ATS practice: No unverified penalty)
+                must_have_contributions.append(1.0)
                 ledger_entries.append(
                     LedgerEntry(
                         dimension=DimensionType.TECHNICAL,
                         requirement=f"Must-Have: {must_have}",
-                        evidence=None,
+                        evidence=f"Claimed in technical skills summary as '{u_skill.name}'.",
                         is_verified=False,
-                        score_contribution=round(partial_weight * 100.0, 2),
-                        gap=(
-                            f"Skill claimed on resume as '{u_skill.name}', but listed only in skills section "
-                            f"without demonstrated evidence in experience bullets (awarded {partial_weight:.0%} partial credit)."
-                        ),
+                        score_contribution=100.0,
+                        gap=None,
                     )
                 )
             else:
-                # Completely Missing Must-Have
+                # Candidate does NOT have this skill anywhere -> Genuine Hard Failure
+                hard_failures.append(must_have)
                 must_have_contributions.append(0.0)
                 best_match_name = v_skill.name if v_skill else (u_skill.name if u_skill else "None")
                 best_sim = max(v_sim, u_sim)
@@ -237,7 +262,7 @@ def evaluate_gate6(
     for nice_to_have in jd.nice_to_have_skills:
         req_vec = nice_to_have_vecs.get(nice_to_have)
         nv_sim, nv_skill = _find_best_skill_match(
-            nice_to_have, verified_skills, req_vec, model, precomputed_vecs=verified_vecs
+            nice_to_have, verified_skills + unverified_skills, req_vec, model
         )
 
         if nv_sim >= hard_gate_threshold and nv_skill:
@@ -247,8 +272,8 @@ def evaluate_gate6(
                 LedgerEntry(
                     dimension=DimensionType.TECHNICAL,
                     requirement=f"[Nice-to-Have] {nice_to_have}",
-                    evidence=nv_skill.context or f"Demonstrated as {nv_skill.name}.",
-                    is_verified=True,
+                    evidence=nv_skill.context or f"Demonstrated/listed as {nv_skill.name}.",
+                    is_verified=nv_skill.is_verified,
                     score_contribution=round(nth_weight * 100.0, 2),
                     gap=None,
                 )
@@ -299,27 +324,20 @@ def evaluate_gate6(
     is_overqualified = False
     sen_scores = cfg.gate6.seniority_scores
 
-    # Overqualification check: 2+ levels higher or YoE exceeds requirement by 12+ years
-    years_over_req = actual_years - required_years
-    if diff >= 2 or years_over_req >= sen_scores.overqualified_flag_threshold:
-        is_overqualified = True
-        seniority_score = sen_scores.overqualified * 100.0
-        sen_gap = (
-            f"Overqualified: candidate level ({cand_level.value.upper()}) significantly exceeds "
-            f"target role ({jd_level.value.upper()}) with +{years_over_req:.1f} excess years."
-        )
-    elif diff == 0:
-        seniority_score = sen_scores.exact_match * 100.0
+    if diff >= 0:
+        # Candidate meets or exceeds target role seniority -> 100% full credit!
+        seniority_score = 100.0
         sen_gap = None
     elif diff == -1:
         seniority_score = sen_scores.one_level_below * 100.0
         sen_gap = f"Candidate is 1 level below target seniority ({cand_level.value} vs {jd_level.value})."
-    elif diff <= -2:
+    else:
         seniority_score = sen_scores.two_levels_below * 100.0
         sen_gap = f"Candidate is {abs(diff)} levels below target seniority ({cand_level.value} vs {jd_level.value})."
-    else: # diff == 1 (1 level above target role - healthy progression)
-        seniority_score = 100.0
-        sen_gap = None
+
+    # Overqualification note: Informational only for interviewers, NEVER punitive
+    if diff >= 2 and required_years > 0 and (actual_years - required_years) >= sen_scores.overqualified_flag_threshold:
+        is_overqualified = True
 
     ledger_entries.append(
         LedgerEntry(
@@ -339,9 +357,11 @@ def evaluate_gate6(
     edu_requirement = jd.education_requirement or "Bachelor's degree or equivalent"
     edu_req_lower = edu_requirement.lower()
 
-    # Check for relevant degree match or flexible baseline
+    # Check for relevant degree match, flexible baseline, or real-world experience equivalence
     meets_education = False
     if not jd.education_requirement or any(k in edu_req_lower for k in ["none", "any", "not specified"]):
+        meets_education = True
+    elif actual_years >= 3.0: # 3+ years of professional experience satisfies or waives degree requirement
         meets_education = True
     else:
         for edu in resume.education:
@@ -358,7 +378,6 @@ def evaluate_gate6(
         education_score = 100.0
         edu_gap = None
     else:
-        # Partial credit: Education alone NEVER kills a candidacy (Principle 1 & Master Plan line 179)
         education_score = cfg.gate6.education_partial_score * 100.0
         edu_gap = "Candidate degree does not directly match specification; awarded baseline partial credit per non-fatal policy."
 

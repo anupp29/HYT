@@ -120,6 +120,103 @@ def are_skills_equivalent(skill1: str, skill2: str) -> bool:
     return c1 == c2
 
 
+# ------------------------------------------------------------------------------
+# Production Umbrella Technology Clusters (Functional Equivalences)
+# In enterprise tech recruiting, skills within the same cluster represent
+# directly transferable competencies (e.g. AWS engineer easily adapts to Azure/GCP).
+# ------------------------------------------------------------------------------
+UMBRELLA_CLUSTERS: Dict[str, Set[str]] = {
+    "cloud_infrastructure": {
+        "amazon web services", "aws", "amazon cloud", "aws cloud",
+        "microsoft azure", "azure", "azure cloud", "ms azure",
+        "google cloud platform", "gcp", "google cloud",
+        "cloud computing", "cloud infrastructure", "cloud architecture", "cloud"
+    },
+    "relational_databases": {
+        "postgresql", "postgres", "psql", "mysql", "sql server", "mssql",
+        "oracle", "sqlite", "mariadb", "rdbms", "sql", "relational database"
+    },
+    "nosql_databases": {
+        "mongodb", "mongo", "dynamodb", "dynamo db", "cassandra",
+        "couchbase", "redis", "nosql", "document database"
+    },
+    "containers_orchestration": {
+        "docker", "containerization", "containers", "docker container",
+        "kubernetes", "k8s", "kube", "container orchestration",
+        "ecs", "eks", "gke", "helm", "podman"
+    },
+    "cicd_devops": {
+        "ci/cd", "cicd", "continuous integration", "continuous deployment", "continuous delivery",
+        "jenkins", "github actions", "gitlab ci", "circleci", "travis ci", "devops", "pipelines"
+    },
+    "version_control": {
+        "git", "github", "gitlab", "bitbucket", "version control", "source control"
+    },
+    "web_frontend_core": {
+        "html", "html5", "css", "css3", "responsive design", "responsive web design",
+        "frontend", "ui development", "user interface", "web standards"
+    },
+    "testing_qa": {
+        "unit testing", "integration testing", "automated testing", "end to end testing",
+        "jest", "mocha", "pytest", "junit", "testing", "qa", "test automation"
+    },
+}
+
+# ------------------------------------------------------------------------------
+# Direct Subsumption Graph (Superset -> Subset Relations)
+# Candidate having the parent skill fundamentally guarantees mastery of the child.
+# E.g., TypeScript implies JavaScript; React implies Frontend/JS; C++ implies C.
+# ------------------------------------------------------------------------------
+SUBSUMPTION_MAP: Dict[str, Set[str]] = {
+    "typescript": {"javascript", "frontend", "web development", "js"},
+    "c++": {"c", "systems programming"},
+    "react": {"javascript", "frontend", "ui development", "web development", "js"},
+    "vue": {"javascript", "frontend", "ui development", "web development", "js"},
+    "angular": {"typescript", "javascript", "frontend", "ui development", "js"},
+    "next.js": {"react", "javascript", "typescript", "frontend", "ssr"},
+    "fastapi": {"python", "rest api", "backend", "api development"},
+    "django": {"python", "backend", "web development"},
+    "flask": {"python", "backend", "api development"},
+    "spring": {"java", "backend", "enterprise software"},
+    "spring boot": {"java", "spring", "backend", "microservices"},
+    "express.js": {"node.js", "javascript", "backend", "node"},
+    "node.js": {"javascript", "backend", "node"},
+    "kubernetes": {"docker", "containers", "containerization", "devops"},
+    "terraform": {"cloud", "infrastructure as code", "devops"},
+    "postgresql": {"sql", "relational database", "rdbms"},
+    "mysql": {"sql", "relational database", "rdbms"},
+}
+
+
+def are_skills_in_same_cluster(skill1: str, skill2: str) -> bool:
+    """Returns True if skill1 and skill2 belong to the same transferable functional cluster."""
+    if not skill1 or not skill2:
+        return False
+    c1 = canonicalize_skill(skill1).lower().strip()
+    c2 = canonicalize_skill(skill2).lower().strip()
+    if c1 == c2:
+        return True
+    for cluster_skills in UMBRELLA_CLUSTERS.values():
+        if (c1 in cluster_skills or skill1.lower().strip() in cluster_skills) and \
+           (c2 in cluster_skills or skill2.lower().strip() in cluster_skills):
+            return True
+    return False
+
+
+def does_skill_subsume(candidate_skill: str, requirement: str) -> bool:
+    """Returns True if candidate_skill supersedes or subsumes requirement (e.g. TypeScript -> JavaScript)."""
+    if not candidate_skill or not requirement:
+        return False
+    c_cand = canonicalize_skill(candidate_skill).lower().strip()
+    c_req = canonicalize_skill(requirement).lower().strip()
+    if c_cand == c_req:
+        return True
+    implied = SUBSUMPTION_MAP.get(c_cand, set())
+    if c_req in implied or requirement.lower().strip() in implied:
+        return True
+    return False
+
+
 def are_skills_related(skill1: str, skill2: str) -> bool:
     """
     Returns True if skill1 and skill2 belong to the same technical stack ecosystem
@@ -132,6 +229,9 @@ def are_skills_related(skill1: str, skill2: str) -> bool:
     c2 = canonicalize_skill(skill2)
 
     if c1 == c2:
+        return True
+
+    if are_skills_in_same_cluster(skill1, skill2) or does_skill_subsume(skill1, skill2):
         return True
 
     rel1 = _RELATED_MAP.get(c1, set())
@@ -148,3 +248,4 @@ def get_skill_category(skill_name: str) -> Optional[str]:
     if info:
         return info.get("category")
     return None
+

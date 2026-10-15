@@ -55,7 +55,21 @@ class LLMClient:
 
         # Credentials
         self.gemini_key = os.getenv("GEMINI_API_KEY")
-        self.groq_key = os.getenv("GROQ_API_KEY")
+
+        # Load all Groq keys for cyclic round-robin rotation
+        raw_keys = os.getenv("GROQ_API_KEYS", "")
+        self.groq_keys: List[str] = [k.strip() for k in raw_keys.split(",") if k.strip()]
+        if not self.groq_keys:
+            for i in range(1, 10):
+                k = os.getenv(f"GROQ_API_KEY_{i}")
+                if k and k.strip():
+                    self.groq_keys.append(k.strip())
+            if not self.groq_keys:
+                single_k = os.getenv("GROQ_API_KEY")
+                if single_k and single_k.strip():
+                    self.groq_keys.append(single_k.strip())
+        self.groq_key = self.groq_keys[0] if self.groq_keys else None
+
         self.openai_key = os.getenv("OPENAI_API_KEY")
         self.anthropic_key = os.getenv("ANTHROPIC_API_KEY")
 
@@ -98,7 +112,9 @@ class LLMClient:
 
     def _resolve_groq_model(self, requested: Optional[str]) -> str:
         req = (requested or "").lower()
-        if "gemma" in req:
+        if "qwen" in req:
+            return "qwen/qwen3.8-27b"
+        elif "gemma" in req:
             return "gemma2-9b-it"
         elif "mixtral" in req:
             return "mixtral-8x7b-32768"
@@ -106,9 +122,9 @@ class LLMClient:
             return "llama-3.1-8b-instant"
         elif "llama" in req or "70b" in req:
             return "llama-3.3-70b-versatile"
-        elif requested and not requested.startswith("models/") and "gpt" not in requested:
+        elif requested and not requested.startswith("models/") and "gpt" not in requested and "coder" not in requested:
             return requested
-        return "llama-3.3-70b-versatile"
+        return "qwen/qwen3.8-27b"
 
     def _resolve_ollama_model(self, requested: Optional[str]) -> str:
         """Dynamically resolves Ollama models, supporting Gemma 4 (swift-12b) and Qwen."""
@@ -251,15 +267,17 @@ class LLMClient:
         json_mode: bool = True,
         override_provider: Optional[str] = None,
         override_model: Optional[str] = None,
+        max_tokens: Optional[int] = None,
     ) -> str:
         """
         Executes LLM completion with automatic multi-provider failover.
         """
         active_provider = (override_provider or self.provider).lower()
         active_model = override_model or self.model_name
+        token_limit = max_tokens or self.max_tokens
 
         providers_to_try = [active_provider]
-        fallbacks = ["gemini", "ollama", "groq", "openai", "anthropic"]
+        fallbacks = ["ollama", "gemini", "groq", "openai", "anthropic"]
         for fb in fallbacks:
             if fb not in providers_to_try:
                 providers_to_try.append(fb)
@@ -272,23 +290,25 @@ class LLMClient:
                     if p == "gemini" and self.gemini_key:
                         m_name = self._resolve_gemini_model(active_model)
                         self.active_resolved_model = m_name
-                        return self._complete_gemini(system_prompt, user_prompt, json_mode, m_name)
+                        return self._complete_gemini(system_prompt, user_prompt, json_mode, m_name, max_tokens=token_limit)
                     elif p == "groq" and self.groq_key:
                         m_name = self._resolve_groq_model(active_model)
                         self.active_resolved_model = m_name
-                        return self._complete_groq(system_prompt, user_prompt, json_mode, m_name)
+                        return self._complete_groq(system_prompt, user_prompt, json_mode, m_name, max_tokens=token_limit)
                     elif p == "ollama":
-                        m_name = self._resolve_ollama_model(active_model)
+                        # If falling over from cloud provider, use local Ollama model (qwen2.5-coder:7b)
+                        target_model = active_model if p == active_provider else self.config.llm.model
+                        m_name = self._resolve_ollama_model(target_model)
                         self.active_resolved_model = m_name
-                        return self._complete_ollama(system_prompt, user_prompt, json_mode, m_name)
+                        return self._complete_ollama(system_prompt, user_prompt, json_mode, m_name, max_tokens=token_limit)
                     elif p == "openai" and self.openai_key:
                         m_name = self._resolve_openai_model(active_model)
                         self.active_resolved_model = m_name
-                        return self._complete_openai(system_prompt, user_prompt, json_mode, m_name)
+                        return self._complete_openai(system_prompt, user_prompt, json_mode, m_name, max_tokens=token_limit)
                     elif p == "anthropic" and self.anthropic_key:
                         m_name = active_model if "claude" in active_model else "claude-3-5-haiku-20241022"
                         self.active_resolved_model = m_name
-                        return self._complete_anthropic(system_prompt, user_prompt, json_mode, m_name)
+                        return self._complete_anthropic(system_prompt, user_prompt, json_mode, m_name, max_tokens=token_limit)
                     else:
                         break  # Skip provider if credentials missing
                 except Exception as e:
@@ -302,6 +322,17 @@ class LLMClient:
                             gate="LLM_CLIENT",
                         )
                         break
+
+                    # Handle Rate Limits (429) specifically: ONLY sleep when 429 occurs, then sleep 60s to reset quota
+                    if "429" in err_str or "rate_limit" in err_str:
+                        match = re.search(r"try again in ([\d\.]+)s", str(e), re.IGNORECASE)
+                        wait_seconds = max(float(match.group(1)) + 1.0, 60.0) if match else 60.0
+                        logger.warning(
+                            f"[GROQ 429 RATE LIMIT] Quota limit reached on '{p}'. Sleeping for {wait_seconds:.0f}s to reset window before retrying (attempt {attempt}/{self.max_retries})...",
+                            gate="LLM_CLIENT",
+                        )
+                        time.sleep(wait_seconds)
+                        continue
 
                     logger.warning(
                         f"LLM attempt {attempt}/{self.max_retries} with '{p}' failed: {e}",
@@ -363,13 +394,13 @@ class LLMClient:
     # --------------------------------------------------------------------------
     # 1. Google Gemini Provider
     # --------------------------------------------------------------------------
-    def _complete_gemini(self, system_prompt: str, user_prompt: str, json_mode: bool, model_name: str) -> str:
+    def _complete_gemini(self, system_prompt: str, user_prompt: str, json_mode: bool, model_name: str, max_tokens: Optional[int] = None) -> str:
         import google.generativeai as genai
         genai.configure(api_key=self.gemini_key)
 
         generation_config = {
             "temperature": self.temperature,
-            "max_output_tokens": self.max_tokens,
+            "max_output_tokens": max_tokens or self.max_tokens,
         }
         if json_mode:
             generation_config["response_mime_type"] = "application/json"
@@ -382,34 +413,79 @@ class LLMClient:
         response = model.generate_content(user_prompt)
         return response.text
 
-    # --------------------------------------------------------------------------
-    # 2. Groq Cloud Provider (Ultra-Fast Inference)
-    # --------------------------------------------------------------------------
-    def _complete_groq(self, system_prompt: str, user_prompt: str, json_mode: bool, model_name: str) -> str:
-        from groq import Groq
-        client = Groq(api_key=self.groq_key)
+    _groq_key_idx: int = 0
 
+    # --------------------------------------------------------------------------
+    # 2. Groq Cloud Provider (Cyclic Multi-Key Rotation with Instant 429 Failover)
+    # --------------------------------------------------------------------------
+    def _complete_groq(self, system_prompt: str, user_prompt: str, json_mode: bool, model_name: str, max_tokens: Optional[int] = None) -> str:
+        from groq import Groq
+
+        if not self.groq_keys:
+            raise ValueError("No Groq API keys found in environment.")
+
+        num_keys = len(self.groq_keys)
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ]
+        capped_tokens = max_tokens or self.max_tokens
+        if "qwen" in model_name.lower():
+            capped_tokens = min(capped_tokens, 950)
+
         kwargs = {
             "model": model_name,
             "messages": messages,
             "temperature": self.temperature,
-            "max_tokens": self.max_tokens,
+            "max_tokens": capped_tokens,
         }
         if json_mode:
             kwargs["response_format"] = {"type": "json_object"}
 
-        response = client.chat.completions.create(**kwargs)
-        return response.choices[0].message.content or ""
+        last_groq_err = None
+
+        # Cycle through available keys in round-robin order
+        for key_attempt in range(num_keys):
+            active_idx = (LLMClient._groq_key_idx + key_attempt) % num_keys
+            active_key = self.groq_keys[active_idx]
+
+            try:
+                client = Groq(api_key=active_key)
+                response = client.chat.completions.create(**kwargs)
+                # Successful call: advance index for next call (round-robin load balancing)
+                LLMClient._groq_key_idx = (active_idx + 1) % num_keys
+                return response.choices[0].message.content or ""
+            except Exception as e:
+                err_str = str(e).lower()
+                last_groq_err = e
+
+                # On 429 rate limit: immediately rotate to next key in cycle without sleeping!
+                if "429" in err_str or "rate_limit" in err_str:
+                    next_idx = (active_idx + 1) % num_keys
+                    logger.warning(
+                        f"[GROQ MULTI-KEY ROTATION] Key #{active_idx + 1} ({active_key[:10]}...) hit 429 rate limit. "
+                        f"Instantly rotating to Key #{next_idx + 1} ({self.groq_keys[next_idx][:10]}...)...",
+                        gate="LLM_CLIENT",
+                    )
+                    continue
+
+                # Non-429 error: log and try next key
+                logger.warning(
+                    f"Groq Key #{active_idx + 1} ({active_key[:10]}...) error: {e}. Trying next key in cycle...",
+                    gate="LLM_CLIENT",
+                )
+                continue
+
+        # If all keys in cycle were exhausted, raise so top-level handler can wait or fall back
+        LLMClient._groq_key_idx = (LLMClient._groq_key_idx + 1) % num_keys
+        raise last_groq_err or RuntimeError("All configured Groq keys failed.")
 
     # --------------------------------------------------------------------------
     # 3. Local Ollama Provider (Supports Gemma 4 / swift-12b & Qwen)
     # --------------------------------------------------------------------------
-    def _complete_ollama(self, system_prompt: str, user_prompt: str, json_mode: bool, model_name: str) -> str:
+    def _complete_ollama(self, system_prompt: str, user_prompt: str, json_mode: bool, model_name: str, max_tokens: Optional[int] = None) -> str:
         url = f"{self.ollama_base_url}/api/chat"
+        num_predict = max_tokens or self.max_tokens
 
         payload = {
             "model": model_name,
@@ -420,8 +496,8 @@ class LLMClient:
             "stream": False,
             "options": {
                 "temperature": self.temperature,
-                "num_predict": max(self.max_tokens, 4096),
-                "num_ctx": 16384,
+                "num_predict": num_predict,
+                "num_ctx": getattr(self.config.llm, "num_ctx", 4096),
             },
         }
         if json_mode:
@@ -447,14 +523,14 @@ class LLMClient:
     # --------------------------------------------------------------------------
     # 4. OpenAI Provider
     # --------------------------------------------------------------------------
-    def _complete_openai(self, system_prompt: str, user_prompt: str, json_mode: bool, model_name: str) -> str:
+    def _complete_openai(self, system_prompt: str, user_prompt: str, json_mode: bool, model_name: str, max_tokens: Optional[int] = None) -> str:
         import openai
         client = openai.OpenAI(api_key=self.openai_key)
 
         kwargs = {
             "model": model_name,
             "temperature": self.temperature,
-            "max_tokens": self.max_tokens,
+            "max_tokens": max_tokens or self.max_tokens,
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
@@ -469,13 +545,13 @@ class LLMClient:
     # --------------------------------------------------------------------------
     # 5. Anthropic Provider
     # --------------------------------------------------------------------------
-    def _complete_anthropic(self, system_prompt: str, user_prompt: str, json_mode: bool, model_name: str) -> str:
+    def _complete_anthropic(self, system_prompt: str, user_prompt: str, json_mode: bool, model_name: str, max_tokens: Optional[int] = None) -> str:
         import anthropic
         client = anthropic.Anthropic(api_key=self.anthropic_key)
 
         response = client.messages.create(
             model=model_name,
-            max_tokens=self.max_tokens,
+            max_tokens=max_tokens or self.max_tokens,
             temperature=self.temperature,
             system=system_prompt,
             messages=[{"role": "user", "content": user_prompt}],

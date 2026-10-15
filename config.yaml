@@ -25,19 +25,16 @@ paths:
 # Max 2 LLM calls per candidate (Gate 3 extraction + Gate 8 explanation)
 # ------------------------------------------------------------------------------
 llm:
-  provider: "ollama" # Active provider: "ollama", "gemini", "groq", "openai", "anthropic"
-  model: "qwen2.5-coder:1.5b" # Options:
-                                   # 1. Gemini: "models/gemini-2.5-flash", "models/gemini-2.5-pro"
-                                   # 2. Groq: "llama-3.3-70b-versatile", "llama-3.1-8b-instant", "gemma2-9b-it", "mixtral-8x7b-32768"
-                                   # 3. Ollama: "swift-12b" (Gemma 4), "qwen2.5-coder:1.5b", "gemma2:9b", "gemma:7b"
-                                   # 4. OpenAI: "gpt-4o-mini", "gpt-4o"
-                                   # 5. Anthropic: "claude-3-5-haiku-20241022"
+  provider: "ollama" # Primary: Local Ollama. Cascades to "gemini", "groq" on failure.
+  model: "qwen2.5-coder:7b" # State-of-the-art 7B parameter local model (GPU-accelerated)
+  fallback_providers: ["gemini", "groq", "ollama"] # Fallback hierarchy
   temperature: 0.0 # Strict determinism (Principle 1)
-  max_tokens: 2048
+  max_tokens: 1500 # Right-sized token output cap (prevents runaway generation loops)
   max_retries: 3
   retry_backoff_seconds: 2
-  timeout_seconds: 120 # Generous timeout for local Ollama reasoning models
-  ollama_base_url: "http://localhost:11434" # Base URL for local Ollama server
+  timeout_seconds: 180 # Generous timeout for local Ollama execution
+  num_ctx: 4096 # Context window optimized for max GPU VRAM fit on RTX 4050 (prevents CPU spill)
+  ollama_base_url: "http://localhost:11434" # Local Ollama endpoint
 
 # ------------------------------------------------------------------------------
 # Embeddings Settings (Local Sentence-Transformer)
@@ -107,7 +104,7 @@ gate3:
 gate4:
   enabled: true
   github_api_timeout_seconds: 5
-  shallow_profile_unverified_threshold: 0.60 # >60% unverified skills triggers SHALLOW_PROFILE
+  shallow_profile_unverified_threshold: 0.85 # >85% unverified skills triggers SHALLOW_PROFILE (protects legitimate resumes)
   github_language_mismatch_threshold: 0.50 # Claimed core languages absent from top repos
   github_activity_lookback_days: 730 # 2 years of public commit/PR activity
   max_repos_to_inspect: 15
@@ -134,32 +131,34 @@ gate6:
     location: 0.05
 
   # Technical Alignment Parameters
-  hard_gate_similarity_threshold: 0.68 # Minimum cosine similarity for verified must-have match
-  unverified_skill_weight: 0.45 # Partial credit multiplier for unverified/listed-only skills
-  nicetohave_skill_weight: 0.30 # Partial credit multiplier for verified nice-to-haves
+  hard_gate_similarity_threshold: 0.58 # Calibrated semantic threshold for verified must-have match
+  unverified_skill_weight: 1.0 # Full credit for skills listed on resume (eliminates unfair unverified penalty)
+  nicetohave_skill_weight: 0.35 # Partial credit multiplier for verified nice-to-haves
   
   # Seniority Calibration Mapping
   seniority_scores:
     exact_match: 1.0
     one_level_below: 0.70
     two_levels_below: 0.40
-    overqualified: 0.65 # Overqualification partial score
-    overqualified_flag_threshold: 12.0 # YoE exceeding JD requirement by 12+ years triggers flag
+    overqualified: 1.0 # Overqualification earns 100% credit (experienced candidates are an asset)
+    overqualified_flag_threshold: 10.0 # Extreme YoE delta triggers advisory note
   
   # Education & Location Policy (Never 0.0 - Education or Location alone never kills candidacy)
-  education_partial_score: 0.60 # Candidate without exact degree requirement
-  location_partial_score: 0.50 # Candidate in different timezone/location when remote is flexible
+  education_partial_score: 0.75 # Candidate with solid experience without exact degree requirement
+  location_partial_score: 0.70 # Candidate in different timezone/location when remote is flexible
 
 # ------------------------------------------------------------------------------
 # Gate 7: Decision Engine (Structural Recall Bias)
 # ------------------------------------------------------------------------------
 gate7:
-  high_threshold: 75.0 # Score >= 75 with no anomalies -> AUTO_ADVANCE
-  low_threshold: 40.0  # Score < 40 with multiple failures -> candidate for AUTO_REJECT
+  high_threshold: 58.0 # Score >= 58 with core technical fit -> AUTO_ADVANCE
+  low_threshold: 38.0  # Score < 38 with severe multi-gap failures -> candidate for AUTO_REJECT
+  min_must_have_ratio: 0.45 # Enterprise ATS: >= 45% of cluster must-haves satisfied for AUTO_ADVANCE
+  min_verified_must_haves: 1 # Requires >= 1 verified core competency with demonstrated work evidence
   
-  # Auto-Reject Constraint: Near-impossible by design (Structural Recall Bias)
+  # Auto-Reject Constraint: Near-impossible by design (Structural Recall Bias per HYT PDF)
   # Requires score < low_threshold AND hard_failures >= proportion AND 0 verified matches
-  auto_reject_hard_failure_proportion: 0.60
+  auto_reject_hard_failure_proportion: 0.70
 
 # ------------------------------------------------------------------------------
 # Gate 8: Explanation Generator (LLM Call 2)

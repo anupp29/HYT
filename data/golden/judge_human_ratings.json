@@ -208,5 +208,59 @@
     "gap_specificity": 3,
     "actionability": 3,
     "composite_score": 3.0
+  },
+  "83816738": {
+    "citation_quality": 3,
+    "gap_specificity": 3,
+    "actionability": 3,
+    "composite_score": 3.0
+  },
+  "20824105": {
+    "citation_quality": 3,
+    "gap_specificity": 3,
+    "actionability": 3,
+    "composite_score": 3.0
+  },
+  "29051656": {
+    "citation_quality": 3,
+    "gap_specificity": 3,
+    "actionability": 3,
+    "composite_score": 3.0
+  },
+  "12635195": {
+    "citation_quality": 3,
+    "gap_specificity": 2,
+    "actionability": 3,
+    "composite_score": 2.67
+  },
+  "12763627": {
+    "citation_quality": 2,
+    "gap_specificity": 3,
+    "actionability": 3,
+    "composite_score": 2.67
+  },
+  "30223363": {
+    "citation_quality": 3,
+    "gap_specificity": 2,
+    "actionability": 3,
+    "composite_score": 2.67
+  },
+  "50328713": {
+    "citation_quality": 2,
+    "gap_specificity": 3,
+    "actionability": 3,
+    "composite_score": 2.67
+  },
+  "10839851": {
+    "citation_quality": 2,
+    "gap_specificity": 3,
+    "actionability": 3,
+    "composite_score": 2.67
+  },
+  "27485716": {
+    "citation_quality": 2,
+    "gap_specificity": 3,
+    "actionability": 3,
+    "composite_score": 2.67
   }
 }

@@ -160,6 +160,7 @@ def evaluate_gate8(
             json_mode=True,
             override_provider=provider,
             override_model=model,
+            max_tokens=300,
         )
         parsed_json = _clean_and_parse_explanation(response)
     except Exception as exc:

@@ -156,6 +156,7 @@ Please audit this resume and extract the structured JSON according to the instru
             json_mode=True,
             override_provider=provider,
             override_model=model,
+            max_tokens=1500,
         )
         cleaned_json = llm._clean_json_markdown(raw_json_str)
         parsed_dict = json.loads(cleaned_json)
@@ -178,6 +179,7 @@ Please audit this resume and extract the structured JSON according to the instru
                 json_mode=True,
                 override_provider=provider,
                 override_model=model,
+                max_tokens=1500,
             )
             retry_clean = llm._clean_json_markdown(retry_raw)
             parsed_dict = json.loads(retry_clean)
@@ -201,25 +203,35 @@ Please audit this resume and extract the structured JSON according to the instru
             continue
         ctx = s.get("context")
         is_ver = bool(s.get("is_verified", False)) and bool(ctx and str(ctx).strip())
+        s_years = s.get("years_experience")
+        try:
+            parsed_s_years = float(s_years) if s_years is not None else 1.0
+        except (ValueError, TypeError):
+            parsed_s_years = 1.0
         skills_list.append(
             Skill(
                 name=s_name,
                 context=str(ctx).strip() if ctx else None,
                 is_verified=is_ver,
-                years_experience=float(s.get("years_experience", 1.0)) if s.get("years_experience") else None,
+                years_experience=parsed_s_years,
             )
         )
 
     # Parse Experience
     exp_list: List[ExperienceEntry] = []
     for exp in parsed_dict.get("experience", []):
+        years_val = exp.get("years")
+        try:
+            parsed_years = float(years_val) if years_val is not None else 1.0
+        except (ValueError, TypeError):
+            parsed_years = 1.0
         exp_list.append(
             ExperienceEntry(
                 title=str(exp.get("title", "Software Engineer")).strip(),
                 company=str(exp.get("company", "Company")).strip(),
                 start_date=str(exp.get("start_date", "")).strip() or None,
                 end_date=str(exp.get("end_date", "")).strip() or None,
-                years=float(exp.get("years", 1.0)),
+                years=parsed_years,
                 bullets=[str(b).strip() for b in exp.get("bullets", []) if str(b).strip()],
                 skills_demonstrated=[str(sk).strip() for sk in exp.get("skills_demonstrated", []) if str(sk).strip()],
             )
@@ -228,12 +240,17 @@ Please audit this resume and extract the structured JSON according to the instru
     # Parse Education
     edu_list: List[EducationEntry] = []
     for edu in parsed_dict.get("education", []):
+        grad_val = edu.get("graduation_year")
+        try:
+            parsed_grad = int(grad_val) if grad_val is not None and str(grad_val).isdigit() else None
+        except (ValueError, TypeError):
+            parsed_grad = None
         edu_list.append(
             EducationEntry(
                 institution=str(edu.get("institution", "")).strip() or None,
                 degree=str(edu.get("degree", "")).strip() or None,
                 field_of_study=str(edu.get("field_of_study", "")).strip() or None,
-                graduation_year=int(edu["graduation_year"]) if edu.get("graduation_year") and str(edu["graduation_year"]).isdigit() else None,
+                graduation_year=parsed_grad,
             )
         )
 

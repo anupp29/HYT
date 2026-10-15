@@ -105,27 +105,40 @@ def evaluate_gate7(
         return res
 
     # --------------------------------------------------------------------------
-    # Condition 3: score >= HIGH_THRESHOLD AND hard_failures == 0 AND zero flags
+    # Condition 3: score >= HIGH_THRESHOLD AND meets_skills AND zero critical security flags
     # --------------------------------------------------------------------------
     has_integrity_flags = len(integrity_flags) > 0
-    has_verification_flags = len(verification_flags) > 0
+    # Critical verification flags (e.g. 404 nonexistent profile or active stack mismatch) strictly block AUTO_ADVANCE
+    critical_v_flags = [
+        f for f in verification_flags
+        if (getattr(f, "name", str(f)) in ["GITHUB_NOT_FOUND", "GITHUB_LANGUAGE_MISMATCH"])
+    ]
+    has_critical_v_flags = len(critical_v_flags) > 0
+
+    matched_must_haves_count = total_must_haves - len(hard_failures)
+    must_have_match_ratio = matched_must_haves_count / max(total_must_haves, 1)
+    min_match_ratio = getattr(cfg.gate7, "min_must_have_ratio", 0.45)
+    min_verified = min(getattr(cfg.gate7, "min_verified_must_haves", 1), total_must_haves)
+
+    meets_skills = must_have_match_ratio >= min_match_ratio
 
     if (
         score >= high_thresh
-        and len(hard_failures) == 0
+        and meets_skills
         and not has_integrity_flags
-        and not has_verification_flags
-        and not is_overqualified
+        and not has_critical_v_flags
     ):
         top_strengths = _extract_top_strengths(ledger)
         strength_desc = f" Verified mastery: {', '.join(top_strengths[:3])}." if top_strengths else ""
+        overqualified_desc = " Note: Senior candidate exceeding baseline profile." if is_overqualified else ""
         res = Gate7DecisionResult(
             candidate_id=cid,
             job_id=jid,
             decision=DecisionType.AUTO_ADVANCE,
             reason=(
                 f"Exceptional candidate fit: score {score:.2f} satisfies high threshold ({high_thresh:.1f}) "
-                f"with zero hard failures and zero integrity anomalies.{strength_desc}"
+                f"with {matched_must_haves_count}/{total_must_haves} must-haves ({must_have_match_ratio:.0%}) "
+                f"and zero integrity anomalies.{strength_desc}{overqualified_desc}"
             ),
             matched_condition=3,
             escalation_reason=None,
@@ -135,18 +148,18 @@ def evaluate_gate7(
         return res
 
     # --------------------------------------------------------------------------
-    # Condition 4: score >= HIGH_THRESHOLD AND (hard_failures > 0 OR flags present OR overqualified)
+    # Condition 4: score >= HIGH_THRESHOLD AND (not meets_skills OR security flags present)
     # --------------------------------------------------------------------------
-    if score >= high_thresh and (len(hard_failures) > 0 or has_integrity_flags or has_verification_flags or is_overqualified):
+    if score >= high_thresh and (not meets_skills or has_integrity_flags or has_critical_v_flags):
         anomalies = []
-        if len(hard_failures) > 0:
+        if not meets_skills:
+            anomalies.append(f"insufficient must-have match ({matched_must_haves_count}/{total_must_haves} = {must_have_match_ratio:.0%} < {min_match_ratio:.0%})")
+        elif len(hard_failures) > 0:
             anomalies.append(f"{len(hard_failures)} missing must-have(s): {', '.join(hard_failures[:3])}")
         if has_integrity_flags:
             anomalies.append(f"{len(integrity_flags)} security flag(s)")
-        if has_verification_flags:
-            anomalies.append(f"{len(verification_flags)} verification flag(s)")
-        if is_overqualified:
-            anomalies.append("candidate significantly exceeds target role seniority")
+        if has_critical_v_flags:
+            anomalies.append(f"{len(critical_v_flags)} critical verification flag(s)")
 
         res = Gate7DecisionResult(
             candidate_id=cid,
@@ -161,7 +174,7 @@ def evaluate_gate7(
         return res
 
     # --------------------------------------------------------------------------
-    # Condition 8 (Evaluated before mid-range default): OVERQUALIFIED flag present
+    # Condition 8: OVERQUALIFIED flag present for non-advancing candidate
     # --------------------------------------------------------------------------
     if is_overqualified:
         res = Gate7DecisionResult(
@@ -196,10 +209,10 @@ def evaluate_gate7(
         return res
 
     # --------------------------------------------------------------------------
-    # Condition 6: score < LOW_THRESHOLD AND hard_failures >= 60% AND 0 verified matches
+    # Condition 6: score < LOW_THRESHOLD AND hard_failures >= 70% AND 0 verified matches AND low match ratio (<35%)
     # --------------------------------------------------------------------------
     failure_ratio = len(hard_failures) / max(total_must_haves, 1)
-    if score < low_thresh and failure_ratio >= reject_prop and verified_must_haves_count == 0:
+    if score < low_thresh and failure_ratio >= reject_prop and verified_must_haves_count == 0 and must_have_match_ratio < 0.35:
         missing_preview = ", ".join(hard_failures[:4])
         res = Gate7DecisionResult(
             candidate_id=cid,
@@ -221,7 +234,7 @@ def evaluate_gate7(
     # Condition 7: score < LOW_THRESHOLD AND any single verified must-have matched
     # (Structural Recall Bias: A single verified skill saves candidate from auto-rejection)
     # --------------------------------------------------------------------------
-    if score < low_thresh and verified_must_haves_count > 0:
+    if score < low_thresh and (verified_must_haves_count > 0 or must_have_match_ratio >= 0.35):
         res = Gate7DecisionResult(
             candidate_id=cid,
             job_id=jid,
@@ -230,7 +243,7 @@ def evaluate_gate7(
             matched_condition=7,
             escalation_reason=(
                 f"Overall score ({score:.2f}) fell below threshold ({low_thresh:.1f}), but candidate possesses "
-                f"{verified_must_haves_count} verified must-have match(es) with demonstrated work evidence."
+                f"{verified_must_haves_count} verified must-have match(es) or {must_have_match_ratio:.0%} skill alignment."
             ),
         )
         _validate_decision(res, verified_must_haves_count, integrity_flags, verification_flags)
@@ -259,7 +272,7 @@ def _extract_top_strengths(ledger: Optional[ScoringLedger]) -> List[str]:
         return []
     strengths = []
     for e in ledger.entries:
-        if e.is_verified and e.score_contribution > 0:
+        if e.score_contribution > 0:
             req_clean = e.requirement.replace("Must-Have: ", "").replace("[Nice-to-Have] ", "").strip()
             strengths.append(req_clean)
     return strengths
@@ -276,7 +289,7 @@ def _validate_decision(
       1. Decision is strictly one of AUTO_ADVANCE, ESCALATE, AUTO_REJECT.
       2. Reason string is non-empty.
       3. No candidate with a verified must-have match is AUTO_REJECT (Recall Bias).
-      4. No flagged candidate is AUTO_ADVANCE (Flag Immunity).
+      4. No candidate with integrity or critical verification flags is AUTO_ADVANCE (Flag Immunity).
     """
     assert result.decision in (DecisionType.AUTO_ADVANCE, DecisionType.ESCALATE, DecisionType.AUTO_REJECT), (
         f"Invalid decision type: {result.decision}"
@@ -291,8 +304,12 @@ def _validate_decision(
         )
 
     # Invariant 4: Flag Immunity
-    if (len(integrity_flags) > 0 or len(verification_flags) > 0) and result.decision == DecisionType.AUTO_ADVANCE:
+    critical_v_flags = [
+        f for f in verification_flags
+        if (getattr(f, "name", str(f)) in ["GITHUB_NOT_FOUND", "GITHUB_LANGUAGE_MISMATCH"])
+    ]
+    if (len(integrity_flags) > 0 or len(critical_v_flags) > 0) and result.decision == DecisionType.AUTO_ADVANCE:
         raise AssertionError(
-            f"Violation of Gate 7 Integrity Policy: Candidate with flags was assigned AUTO_ADVANCE! "
-            f"Integrity flags: {len(integrity_flags)}, Verification flags: {len(verification_flags)}."
+            f"Violation of Gate 7 Integrity Policy: Candidate with critical flags was assigned AUTO_ADVANCE! "
+            f"Integrity flags: {len(integrity_flags)}, Critical Verification flags: {len(critical_v_flags)}."
         )

@@ -103,9 +103,16 @@ def evaluate_gate5(
                 mean_mh = mean_mh / norm
             similarities.append(float(np.dot(cand_vec, mean_mh)))
 
-            # Compare against max individual must-have match (guarantees specialist never filtered out)
+            # Compare against max individual must-have match against composite string
             indiv_sims = [float(np.dot(cand_vec, v)) for v in must_have_vectors]
             similarities.append(max(indiv_sims))
+
+            # Compare against pairwise individual candidate skill vs JD must-have skill (guarantees specialists never filtered out)
+            if candidate_skills:
+                indiv_cand_vecs = model.encode(candidate_skills, normalize_embeddings=True)
+                cand_arr = np.array(indiv_cand_vecs, dtype=np.float32)
+                pairwise_matrix = np.dot(cand_arr, mh_arr.T)
+                similarities.append(float(np.max(pairwise_matrix)))
 
         # Compare against overall domain vector
         if domain_vec:

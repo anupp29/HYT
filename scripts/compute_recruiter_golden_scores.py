@@ -451,41 +451,42 @@ def evaluate_candidate_for_job(meta: dict, jd: dict):
     # Composite Score (0 - 100)
     total_score = p1_tech + p2_seniority + p3_complexity + p4_evidence
 
-    # Map to 1-5 Fit Score
-    if total_score >= 82.0:
+    # Map to 1-5 Fit Score with balanced, realistic recruiter percentiles
+    if total_score >= 72.0:
         fit_score = 5
-    elif total_score >= 67.0:
+    elif total_score >= 58.0:
         fit_score = 4
-    elif total_score >= 48.0:
+    elif total_score >= 46.0:
         fit_score = 3
-    elif total_score >= 28.0:
+    elif total_score >= 35.0:
         fit_score = 2
     else:
         fit_score = 1
 
-    # Overqualification & Career Switcher routing policies:
-    # 1. Overqualified candidates must never be auto-advanced to misaligned levels; route to escalate.
-    if is_overqualified == "yes":
+    # Seniority Gap Guardrail: Severe underqualification for Staff/Lead roles must not advance
+    seniority_gap = target_yoe - c_yoe
+    if seniority_gap >= 5.0 and target_yoe >= 7.0:
+        fit_score = min(fit_score, 2)
+        decision = "reject"
+        is_overqualified = "no"
+        special_notes_list.append(f"Severe experience gap (-{seniority_gap:.0f} yrs for {target_yoe:.0f}+ yr role); cannot advance.")
+    # Fundamental Mismatch or weak profile (fit_score <= 2) is strictly rejected
+    elif fit_score <= 2:
+        decision = "reject"
+        is_overqualified = "no"  # Cannot be overqualified if fundamentally unqualified
+    # Overqualification for viable senior candidates (fit_score >= 3)
+    elif is_overqualified == "yes":
         decision = "escalate"
-        if fit_score >= 4:
-            fit_score = 3
-    # 2. Career switchers with strong potential should be escalated for human recruiter review.
+        fit_score = 3
+    # Career Switchers with viable transferable skills
     elif is_career_switcher == "yes":
         decision = "escalate"
-        if fit_score >= 4:
-            fit_score = 3
-    # 3. Standard fit-based decision logic
+        fit_score = 3
     elif fit_score >= 4:
         decision = "advance"
     elif fit_score == 3:
         decision = "escalate"
-    elif fit_score == 2:
-        # If candidate has adjacent transferable potential, escalate; else reject
-        if meta["is_software_dev"] and c_yoe >= 2:
-            decision = "escalate"
-        else:
-            decision = "reject"
-    else: # fit_score == 1
+    else:
         decision = "reject"
 
     # Construct professional recruiter rationale
@@ -582,7 +583,12 @@ def main():
                 with open(clean_path, "r", encoding="utf-8", errors="ignore") as f:
                     text = f.read()
             else:
-                text = ""
+                pdf_path = os.path.join(SAMPLE_DIR, f"{cid}.pdf")
+                if os.path.exists(pdf_path):
+                    from src.gates.gate1 import extract_clean_text
+                    text = extract_clean_text(pdf_path)
+                else:
+                    text = ""
             resume_cache[cid] = extract_resume_metadata(text)
             
         meta = resume_cache[cid]

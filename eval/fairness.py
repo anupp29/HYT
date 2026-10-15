@@ -56,19 +56,10 @@ def create_counterfactual_variant(
     Creates an exact counterfactual copy of a structured resume, modifying only demographic/institution cues.
     """
     variant = copy.deepcopy(base_resume)
-    # 1. Perturb Education Institution
+    # 1. Perturb Education Institution strictly on existing entries (do not inject net-new degrees)
     if variant.education:
         for edu in variant.education:
             edu.institution = college_perturbation
-    else:
-        variant.education = [
-            EducationEntry(
-                degree="Bachelor of Science",
-                field_of_study="Computer Science",
-                institution=college_perturbation,
-                graduation_year=2021,
-            )
-        ]
     return variant
 
 

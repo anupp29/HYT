@@ -1,0 +1,38 @@
+Job Description: Senior Embedded Systems Engineer
+Job Title: Senior Embedded Systems Engineer
+Experience Required: 8–10 years
+Employment Type: Full-time
+
+Job Summary
+We are seeking an experienced Embedded Systems Engineer specializing in firmware development, hardware interfacing, and real-time operating systems for automotive and industrial control systems.
+
+Key Responsibilities
+Develop embedded firmware using Embedded C and Assembly language.
+Design and implement device drivers for microcontrollers and microprocessors.
+Work with ARM Cortex-M, AVR, and PIC architectures.
+Develop and debug firmware using JTAG, oscilloscopes, and logic analyzers.
+Implement real-time applications using FreeRTOS, VxWorks, and Zephyr RTOS.
+Design communication interfaces using CAN, LIN, SPI, I2C, and UART protocols.
+Perform PCB-level debugging and hardware-software integration.
+Ensure compliance with ISO 26262 and MISRA C coding standards.
+Optimize firmware for memory usage, power consumption, and execution speed.
+Lead embedded engineering teams and manage hardware product development.
+Mandatory Technical Skills
+Embedded C and Assembly
+Microcontroller programming
+ARM Cortex-M, AVR, and PIC
+FreeRTOS, VxWorks, and Zephyr
+Device driver development
+PCB design and debugging
+CAN, LIN, SPI, I2C, and UART
+JTAG debugging tools
+ISO 26262 and MISRA C
+Hardware-software integration
+Educational Qualifications
+Bachelor’s or Master’s degree in Electrical Engineering, Electronics Engineering, or Embedded Systems Engineering.
+
+Experience Requirements
+Minimum 8 years of professional embedded firmware development.
+At least 5 years of experience with automotive embedded systems.
+Proven experience leading embedded product development teams.
+Demonstrated expertise in real-time operating systems and hardware debugging.
