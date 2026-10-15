@@ -129,8 +129,8 @@ def process_candidate(
         jd_embeddings=jd_embeddings,
     )
 
-    # If Pre-Filter escalated (Job family mismatch suspected)
-    if not prefilter_result.passed or prefilter_result.skip_scoring:
+    # If Pre-Filter explicitly requested to skip scoring (rare, e.g. corruption)
+    if prefilter_result.skip_scoring:
         logger.info(f"[{cid}] Pre-Filter triggered: skipping Gate 6 scoring, routing to ESCALATE.", gate="GATE_5", candidate_id=cid)
         decision_result = evaluate_gate7(
             ledger=None,

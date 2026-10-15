@@ -104,7 +104,16 @@ def canonicalize_skill(skill_name: str) -> str:
     if no_punct in _ALIAS_TO_CANONICAL:
         return _ALIAS_TO_CANONICAL[no_punct]
 
-    # 3. If unknown, return clean original
+    # 3. Version number stripped check (e.g. 'sql server 2005' -> 'sql server', 'oracle 11g' -> 'oracle', 'drupal 8' -> 'drupal')
+    no_ver = re.sub(r'\b(v?\d+(\.\d+)*[a-z]?|\d{4})\b', '', clean).strip()
+    no_ver = re.sub(r'[\s\-_]+', ' ', no_ver).strip()
+    if no_ver and no_ver in _ALIAS_TO_CANONICAL:
+        return _ALIAS_TO_CANONICAL[no_ver]
+    no_ver_punct = re.sub(r'[^a-z0-9 ]', '', no_ver).strip()
+    if no_ver_punct and no_ver_punct in _ALIAS_TO_CANONICAL:
+        return _ALIAS_TO_CANONICAL[no_ver_punct]
+
+    # 4. If unknown, return clean original
     return clean
 
 
@@ -126,6 +135,21 @@ def are_skills_equivalent(skill1: str, skill2: str) -> bool:
 # directly transferable competencies (e.g. AWS engineer easily adapts to Azure/GCP).
 # ------------------------------------------------------------------------------
 UMBRELLA_CLUSTERS: Dict[str, Set[str]] = {
+    "backend_programming_languages": {
+        "python", "java", "golang", "go", "rust", "c++", "c", "c#", "csharp", "dotnet", ".net",
+        "ruby", "rails", "php", "laravel", "symfony", "drupal", "wordpress",
+        "node.js", "nodejs", "express", "express.js", "fastapi", "django", "flask", "spring", "spring boot",
+        "scala", "kotlin", "elixir", "coldfusion"
+    },
+    "message_queues": {
+        "kafka", "rabbitmq", "activemq", "sqs", "sns", "pub/sub", "message queue", "message broker", "event-driven", "celery", "zeromq"
+    },
+    "caching_inmemory": {
+        "redis", "memcached", "in-memory database", "cache", "caching"
+    },
+    "mobile_development": {
+        "ios", "android", "ios development suite", "android development suite", "react native", "flutter", "mobile development", "swift", "kotlin"
+    },
     "cloud_infrastructure": {
         "amazon web services", "aws", "amazon cloud", "aws cloud",
         "microsoft azure", "azure", "azure cloud", "ms azure",
@@ -150,15 +174,18 @@ UMBRELLA_CLUSTERS: Dict[str, Set[str]] = {
         "jenkins", "github actions", "gitlab ci", "circleci", "travis ci", "devops", "pipelines"
     },
     "version_control": {
-        "git", "github", "gitlab", "bitbucket", "version control", "source control"
+        "git", "github", "gitlab", "bitbucket", "version control", "source control", "versioning management systems"
     },
     "web_frontend_core": {
         "html", "html5", "css", "css3", "responsive design", "responsive web design",
-        "frontend", "ui development", "user interface", "web standards"
+        "frontend", "ui development", "user interface", "web standards", "javascript", "typescript", "jquery", "ajax"
     },
     "testing_qa": {
         "unit testing", "integration testing", "automated testing", "end to end testing",
-        "jest", "mocha", "pytest", "junit", "testing", "qa", "test automation"
+        "jest", "mocha", "pytest", "junit", "testing", "qa", "test automation", "selenium", "katalon", "behat", "cypress", "playwright"
+    },
+    "api_design": {
+        "api design", "rest api", "rest", "api", "api development", "graphql", "grpc", "microservices", "web services", "endpoints"
     },
 }
 
@@ -169,22 +196,47 @@ UMBRELLA_CLUSTERS: Dict[str, Set[str]] = {
 # ------------------------------------------------------------------------------
 SUBSUMPTION_MAP: Dict[str, Set[str]] = {
     "typescript": {"javascript", "frontend", "web development", "js"},
-    "c++": {"c", "systems programming"},
+    "c++": {"c", "systems programming", "software engineering"},
     "react": {"javascript", "frontend", "ui development", "web development", "js"},
     "vue": {"javascript", "frontend", "ui development", "web development", "js"},
     "angular": {"typescript", "javascript", "frontend", "ui development", "js"},
     "next.js": {"react", "javascript", "typescript", "frontend", "ssr"},
-    "fastapi": {"python", "rest api", "backend", "api development"},
-    "django": {"python", "backend", "web development"},
+    "jquery": {"javascript", "frontend", "ui development", "web development", "js"},
+    "ajax": {"javascript", "rest api", "api", "web development", "frontend"},
+    "html5": {"html", "frontend", "web development"},
+    "css3": {"css", "frontend", "web development", "responsive design"},
+    "drupal": {"php", "backend", "web development", "cms", "software engineering", "programming", "software development"},
+    "wordpress": {"php", "backend", "web development", "cms"},
+    "python": {"backend", "software engineering", "programming", "software development"},
+    "fastapi": {"python", "rest api", "backend", "api development", "api design"},
+    "django": {"python", "backend", "web development", "mvc", "software engineering"},
     "flask": {"python", "backend", "api development"},
     "spring": {"java", "backend", "enterprise software"},
     "spring boot": {"java", "spring", "backend", "microservices"},
     "express.js": {"node.js", "javascript", "backend", "node"},
-    "node.js": {"javascript", "backend", "node"},
+    "node.js": {"javascript", "backend", "node", "software development"},
     "kubernetes": {"docker", "containers", "containerization", "devops"},
     "terraform": {"cloud", "infrastructure as code", "devops"},
-    "postgresql": {"sql", "relational database", "rdbms"},
-    "mysql": {"sql", "relational database", "rdbms"},
+    "postgresql": {"sql", "relational database", "rdbms", "database", "database optimization"},
+    "mysql": {"sql", "relational database", "rdbms", "database", "database optimization"},
+    "oracle": {"sql", "relational database", "rdbms", "database", "database optimization"},
+    "sql server": {"sql", "relational database", "rdbms", "database", "mssql", "database optimization"},
+    "mongodb": {"nosql", "database", "document database"},
+    "dynamodb": {"nosql", "database", "cloud database"},
+    "cassandra": {"nosql", "database"},
+    "redis": {"nosql", "database", "cache", "in-memory database"},
+    "database": {"sql", "relational database", "nosql", "rdbms"},
+    "php": {"backend", "web development", "software engineering", "programming", "software development"},
+    "laravel": {"php", "backend", "web development", "mvc", "rest api", "software engineering"},
+    "symfony": {"php", "backend", "web development", "mvc", "rest api"},
+    "ruby": {"backend", "web development", "software engineering", "programming", "software development"},
+    "rails": {"ruby", "backend", "web development", "mvc", "rest api", "software engineering"},
+    "c#": {".net", "csharp", "backend", "software engineering", "programming", "software development"},
+    "java": {"backend", "software engineering", "programming", "object-oriented programming", "software development"},
+    "golang": {"go", "backend", "software engineering", "programming", "concurrency", "systems programming"},
+    "rust": {"systems programming", "software engineering", "backend", "concurrency", "c++"},
+    "selenium": {"qa", "testing", "test automation", "automated testing"},
+    "katalon": {"qa", "testing", "test automation", "automated testing", "selenium"},
 }
 
 

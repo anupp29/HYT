@@ -85,6 +85,42 @@ def evaluate_gate7(
         logger.info(f"[{cid}] Gate 7 Condition 1 triggered -> ESCALATE (QUARANTINE).", gate="GATE_7", candidate_id=cid)
         return res
 
+    matched_must_haves_count = total_must_haves - len(hard_failures)
+    must_have_match_ratio = matched_must_haves_count / max(total_must_haves, 1)
+    min_match_ratio = getattr(cfg.gate7, "min_must_have_ratio", 0.45)
+    min_verified = min(getattr(cfg.gate7, "min_verified_must_haves", 1), total_must_haves)
+    failure_ratio = len(hard_failures) / max(total_must_haves, 1)
+
+    # --------------------------------------------------------------------------
+    # Condition 2.5: Non-Compensatory Technical Disqualification (Zero Technical Fit)
+    # In enterprise technical recruitment, a candidate with literally 0.0% technical
+    # alignment (fails all core requirements with zero verified technical skills)
+    # cannot be considered for a software engineering position. Non-compensatory
+    # recruitment principles dictate that high education or location scores cannot
+    # override complete absence of technical competence.
+    # --------------------------------------------------------------------------
+    if (
+        ledger is not None
+        and ledger.breakdown.technical_score == 0.0
+        and failure_ratio >= 0.70
+        and verified_must_haves_count == 0
+        and must_have_match_ratio < 0.15
+    ):
+        res = Gate7DecisionResult(
+            candidate_id=cid,
+            job_id=jid,
+            decision=DecisionType.AUTO_REJECT,
+            reason=(
+                f"Candidate did not meet baseline technical requirements: 0.0% technical alignment "
+                f"across all {total_must_haves} core job competencies. Non-compensatory disqualifier applied."
+            ),
+            matched_condition=6,
+            escalation_reason=None,
+        )
+        _validate_decision(res, verified_must_haves_count, integrity_flags, verification_flags)
+        logger.info(f"[{cid}] Gate 7 Non-Compensatory Disqualification triggered -> AUTO_REJECT.", gate="GATE_7", candidate_id=cid)
+        return res
+
     # --------------------------------------------------------------------------
     # Condition 2: PRE_FILTER triggered (Domain mismatch)
     # --------------------------------------------------------------------------
@@ -114,11 +150,6 @@ def evaluate_gate7(
         if (getattr(f, "name", str(f)) in ["GITHUB_NOT_FOUND", "GITHUB_LANGUAGE_MISMATCH"])
     ]
     has_critical_v_flags = len(critical_v_flags) > 0
-
-    matched_must_haves_count = total_must_haves - len(hard_failures)
-    must_have_match_ratio = matched_must_haves_count / max(total_must_haves, 1)
-    min_match_ratio = getattr(cfg.gate7, "min_must_have_ratio", 0.45)
-    min_verified = min(getattr(cfg.gate7, "min_verified_must_haves", 1), total_must_haves)
 
     meets_skills = must_have_match_ratio >= min_match_ratio
 

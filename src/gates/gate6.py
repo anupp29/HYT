@@ -62,17 +62,44 @@ def _compute_cosine_sim(vec1: List[float], vec2: List[float]) -> float:
     return float(np.dot(a, b) / (norm_a * norm_b))
 
 
-def _split_compound_requirement(requirement: str) -> List[str]:
+def _split_compound_tokens(text: str) -> List[str]:
     """
-    Splits compound requirements like 'JavaScript/TypeScript', 'AWS, Azure, or GCP',
-    'HTML5/CSS3', 'CI/CD pipelines' into constituent searchable tokens.
+    Splits compound requirements or candidate skill strings into constituent searchable tokens.
+    Handles delimiters: '/', 'or', 'and', '&', ',', and extracts parenthetical items.
+    Also strips trailing version numbers ('SQL Server 2005' -> 'SQL Server').
     """
-    req = requirement.strip()
-    parts = re.split(r'\s*/\s*|\s+or\s+|,\s*', req, flags=re.IGNORECASE)
-    parts = [p.strip() for p in parts if len(p.strip()) >= 2]
-    if req not in parts:
-        parts.insert(0, req)
-    return parts if parts else [req]
+    if not text:
+        return []
+    raw = text.strip()
+    tokens = [raw]
+    
+    # Extract parenthetical contents e.g. "AWS (EC2, S3, Lambda)" -> adds "EC2", "S3", "Lambda"
+    paren_matches = re.findall(r'\((.*?)\)', raw)
+    for pm in paren_matches:
+        for sub in re.split(r'[,/]|(?:\s+or\s+)|\betc\.?\b', pm, flags=re.IGNORECASE):
+            s = sub.strip()
+            if len(s) >= 2 and s.lower() not in [t.lower() for t in tokens]:
+                tokens.append(s)
+
+    # Split text on common compound separators
+    clean_base = re.sub(r'\(.*?\)', '', raw)
+    parts = re.split(r'\s*/\s*|\s+or\s+|\s+and\s+|\s*&\s*|,\s*', clean_base, flags=re.IGNORECASE)
+    for p in parts:
+        p_clean = p.strip()
+        if len(p_clean) >= 2 and p_clean.lower() not in [t.lower() for t in tokens]:
+            tokens.append(p_clean)
+        # Check sub-words
+        subwords = p_clean.split()
+        if len(subwords) > 1:
+            for w in subwords:
+                if len(w) >= 3 and w.lower() not in [t.lower() for t in tokens]:
+                    tokens.append(w)
+        # Version-stripped version
+        no_ver = re.sub(r'\b(v?\d+(\.\d+)*[a-z]?|\d{4})\b', '', p_clean).strip()
+        if len(no_ver) >= 2 and no_ver.lower() not in [t.lower() for t in tokens]:
+            tokens.append(no_ver)
+            
+    return tokens
 
 
 def _find_best_skill_match(
@@ -89,25 +116,29 @@ def _find_best_skill_match(
     if not skills:
         return 0.0, None
 
-    req_tokens = _split_compound_requirement(requirement)
+    req_tokens = _split_compound_tokens(requirement)
 
     # 1. Exact, Canonical, Subsumption, or Umbrella Cluster Match
     for token in req_tokens:
         tok_clean = token.lower().strip()
         for s in skills:
-            s_clean = s.name.lower().strip()
-            # Exact or canonical alias
-            if tok_clean == s_clean or are_skills_equivalent(tok_clean, s_clean):
-                return 1.0, s
-            # Direct subsumption (e.g. candidate has TypeScript, token is JavaScript)
-            if does_skill_subsume(s_clean, tok_clean):
-                return 1.0, s
-            # Umbrella cluster transferability (e.g. candidate has AWS, token is Azure/GCP)
-            if are_skills_in_same_cluster(s_clean, tok_clean):
-                return 1.0, s
-            # Word boundary match (e.g. "PostgreSQL" in "PostgreSQL 14")
-            if len(tok_clean) >= 3 and re.search(rf"\b{re.escape(tok_clean)}\b", s_clean):
-                return 1.0, s
+            cand_tokens = _split_compound_tokens(s.name)
+            for cand_tok in cand_tokens:
+                cand_clean = cand_tok.lower().strip()
+                # Exact or canonical alias
+                if tok_clean == cand_clean or are_skills_equivalent(tok_clean, cand_clean):
+                    return 1.0, s
+                # Direct subsumption (e.g. candidate has TypeScript, token is JavaScript; or candidate has jQuery, token is JavaScript)
+                if does_skill_subsume(cand_clean, tok_clean):
+                    return 1.0, s
+                # Umbrella cluster transferability (e.g. candidate has AWS, token is Azure/GCP; or candidate has PHP, token is Golang/Python)
+                if are_skills_in_same_cluster(cand_clean, tok_clean):
+                    return 1.0, s
+                # Word boundary match (e.g. "PostgreSQL" in "PostgreSQL 14", or "SQL" in "SQL Server")
+                if len(tok_clean) >= 3 and re.search(rf"\b{re.escape(tok_clean)}\b", cand_clean):
+                    return 1.0, s
+                if len(cand_clean) >= 3 and re.search(rf"\b{re.escape(cand_clean)}\b", tok_clean):
+                    return 1.0, s
 
     # 2. Lexical word overlap fallback
     if model == "FALLBACK" or req_vec is None:
@@ -176,6 +207,45 @@ def evaluate_gate6(
 
     verified_skills = [s for s in resume.skills if s.is_verified]
     unverified_skills = [s for s in resume.skills if not s.is_verified]
+
+    # Harvest additional verified skills directly from experience bullets and demonstrated skills
+    existing_verified_names = {s.name.lower().strip() for s in verified_skills}
+    for exp in resume.experience:
+        context_str = exp.bullets[0] if exp.bullets else exp.title
+        for sd in exp.skills_demonstrated:
+            sd_clean = sd.strip()
+            if sd_clean and sd_clean.lower() not in existing_verified_names:
+                verified_skills.append(
+                    Skill(
+                        name=sd_clean,
+                        context=f"Demonstrated in {exp.title} ({exp.company or 'Role'}): {context_str}",
+                        is_verified=True,
+                        years_experience=exp.years,
+                    )
+                )
+                existing_verified_names.add(sd_clean.lower())
+
+        # Check bullets for explicit technical keywords from taxonomy
+        for b in exp.bullets:
+            b_lower = b.lower()
+            for tech_kw in [
+                "python", "golang", "java", "c#", "c++", "rust", "php", "ruby", "node.js", "nodejs",
+                "javascript", "typescript", "react", "angular", "vue", "docker", "kubernetes", "k8s",
+                "aws", "azure", "gcp", "postgresql", "mysql", "mongodb", "oracle", "sql server", "sql",
+                "kafka", "rabbitmq", "redis", "rest", "graphql", "selenium", "katalon", "behat",
+                "git", "ci/cd", "cicd", "jenkins", "linux", "unix"
+            ]:
+                if re.search(rf"\b{re.escape(tech_kw)}\b", b_lower):
+                    if tech_kw not in existing_verified_names:
+                        verified_skills.append(
+                            Skill(
+                                name=tech_kw.capitalize(),
+                                context=b,
+                                is_verified=True,
+                                years_experience=exp.years,
+                            )
+                        )
+                        existing_verified_names.add(tech_kw)
 
     # Precompute skill embedding vectors once across all requirements for maximum throughput
     verified_vecs = None
@@ -285,20 +355,29 @@ def evaluate_gate6(
     technical_score = min(raw_tech, 1.0) * 100.0
 
     # --------------------------------------------------------------------------
-    # Step 2.2: Experience Alignment Scoring
+    # Step 2.2: Experience Alignment Scoring (Domain-Modulated)
     # --------------------------------------------------------------------------
     actual_years = resume.estimated_years_experience
     required_years = jd.min_years_experience
 
+    # In professional recruitment, experience must be relevant to the target domain.
+    # A candidate with 10 years in unrelated non-technical work (e.g. desktop hardware maintenance,
+    # cashier, office admin) applying for software engineering receives baseline non-technical credit (25%),
+    # not full 100% relevant engineering experience.
+    # Conversely, any candidate demonstrating real technical competency (raw_tech > 0) receives 100% full relevance.
+    domain_relevance_factor = 1.0 if raw_tech > 0.0 else 0.25
+
     if required_years > 0:
-        exp_ratio = actual_years / required_years
+        exp_ratio = (actual_years / required_years) * domain_relevance_factor
         experience_score = min(exp_ratio, 1.0) * 100.0
     else:
-        experience_score = 100.0
+        experience_score = 100.0 * domain_relevance_factor
 
     exp_gap = None
     if actual_years < required_years:
         exp_gap = f"Experience deficit: candidate has {actual_years:.1f} years vs {required_years:.1f} years required."
+    elif raw_tech == 0.0:
+        exp_gap = f"Candidate experience ({actual_years:.1f} years) lacks demonstrated technical alignment with target domain."
 
     ledger_entries.append(
         LedgerEntry(
@@ -324,7 +403,11 @@ def evaluate_gate6(
     is_overqualified = False
     sen_scores = cfg.gate6.seniority_scores
 
-    if diff >= 0:
+    if raw_tech == 0.0 and diff >= 0:
+        # Non-technical candidate whose job title rank nominally matches but lacks domain competence
+        seniority_score = sen_scores.two_levels_below * 100.0
+        sen_gap = f"Seniority title lacks demonstrated technical competency in target engineering domain."
+    elif diff >= 0:
         # Candidate meets or exceeds target role seniority -> 100% full credit!
         seniority_score = 100.0
         sen_gap = None

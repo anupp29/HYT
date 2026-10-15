@@ -74,7 +74,7 @@ def evaluate_gate5(
             threshold=threshold,
             decision=DecisionType.ESCALATE,
             reason="Job family mismatch suspected. Candidate has no demonstrated technical skills.",
-            skip_scoring=True,
+            skip_scoring=False,
         )
 
     # 3. Dense Vector Encoding of Candidate Skills
@@ -143,7 +143,7 @@ def evaluate_gate5(
             threshold=threshold,
             decision=DecisionType.ESCALATE,
             reason="Job family mismatch suspected. Human confirmation required.",
-            skip_scoring=True,
+            skip_scoring=False,
         )
 
     logger.info(
