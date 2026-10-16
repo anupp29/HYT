@@ -454,6 +454,14 @@ def evaluate_gate4(
     all_flags.extend(gh_flags)
     all_ledger_notes.extend(gh_notes)
 
+    # Propagate any Gate 3 flags (e.g. concurrent overlapping full-time dates)
+    if hasattr(resume, "verification_flags") and resume.verification_flags:
+        for f in resume.verification_flags:
+            f_val = getattr(f, "value", str(f))
+            if f_val == "DATE_SUSPICIOUS" and VerificationFlag.DATE_SUSPICIOUS not in all_flags:
+                all_flags.append(VerificationFlag.DATE_SUSPICIOUS)
+                all_ledger_notes.append("DATE_SUSPICIOUS: Concurrent full-time employment date overlap detected.")
+
     # Dedup flags while preserving order
     unique_flags: List[VerificationFlag] = []
     for f in all_flags:

@@ -203,6 +203,12 @@ Please audit this resume and extract the structured JSON according to the instru
             continue
         ctx = s.get("context")
         is_ver = bool(s.get("is_verified", False)) and bool(ctx and str(ctx).strip())
+        
+        # Post-extraction blocklist for in-training / learning skills (F7)
+        s_lower = s_name.lower()
+        if any(term in s_lower for term in ["(learning)", "(basic)", "(studying)", "(transitioning)", "learning ", "studying "]):
+            is_ver = False
+
         s_years = s.get("years_experience")
         try:
             parsed_s_years = float(s_years) if s_years is not None else 1.0

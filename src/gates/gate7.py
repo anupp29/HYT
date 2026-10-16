@@ -63,6 +63,7 @@ def evaluate_gate7(
     verification_flags = gate4_report.flags if gate4_report else []
 
     score = ledger.breakdown.weighted_total if ledger else 0.0
+    tech_score = ledger.breakdown.technical_score if (ledger and ledger.breakdown) else 0.0
     hard_failures = ledger.hard_failures if ledger else []
     total_must_haves = ledger.total_must_haves_count if ledger else 1
     verified_must_haves_count = ledger.verified_must_haves_count if ledger else 0
@@ -123,8 +124,27 @@ def evaluate_gate7(
 
     # --------------------------------------------------------------------------
     # Condition 2: PRE_FILTER triggered (Domain mismatch)
+    # Severe domain mismatch with 0 verified core skills -> AUTO_REJECT
+    # Borderline domain mismatch -> ESCALATE to human recruiter
     # --------------------------------------------------------------------------
     if prefilter_result is not None and (not prefilter_result.passed or prefilter_result.skip_scoring):
+        tech_score = ledger.breakdown.technical_score if (ledger and ledger.breakdown) else 0.0
+        if verified_must_haves_count == 0 and tech_score < 30.0:
+            res = Gate7DecisionResult(
+                candidate_id=cid,
+                job_id=jid,
+                decision=DecisionType.AUTO_REJECT,
+                reason=(
+                    f"Severe domain mismatch: candidate failed domain pre-filter ({prefilter_result.similarity:.2f} < "
+                    f"{prefilter_result.threshold:.2f}) with zero verified must-haves and negligible technical score ({tech_score:.1f})."
+                ),
+                matched_condition=2,
+                escalation_reason=None,
+            )
+            _validate_decision(res, verified_must_haves_count, integrity_flags, verification_flags)
+            logger.info(f"[{cid}] Gate 7 Condition 2 triggered -> AUTO_REJECT (Domain Mismatch).", gate="GATE_7", candidate_id=cid)
+            return res
+
         res = Gate7DecisionResult(
             candidate_id=cid,
             job_id=jid,
@@ -140,28 +160,50 @@ def evaluate_gate7(
         logger.info(f"[{cid}] Gate 7 Condition 2 triggered -> ESCALATE (PRE_FILTER).", gate="GATE_7", candidate_id=cid)
         return res
 
-    # --------------------------------------------------------------------------
-    # Condition 3: score >= HIGH_THRESHOLD AND meets_skills AND zero critical security flags
-    # --------------------------------------------------------------------------
-    has_integrity_flags = len(integrity_flags) > 0
-    # Critical verification flags (e.g. 404 nonexistent profile or active stack mismatch) strictly block AUTO_ADVANCE
+    # Critical verification flags strictly block AUTO_ADVANCE
     critical_v_flags = [
         f for f in verification_flags
-        if (getattr(f, "name", str(f)) in ["GITHUB_NOT_FOUND", "GITHUB_LANGUAGE_MISMATCH"])
+        if (getattr(f, "name", str(f)) in [
+            "GITHUB_NOT_FOUND",
+            "GITHUB_LANGUAGE_MISMATCH",
+            "SHALLOW_PROFILE",
+            "DATE_SUSPICIOUS",
+        ])
     ]
     has_critical_v_flags = len(critical_v_flags) > 0
-
+    has_integrity_flags = len(integrity_flags) > 0
     meets_skills = must_have_match_ratio >= min_match_ratio
 
+    # --------------------------------------------------------------------------
+    # Condition 8: OVERQUALIFIED check (P1 Fix: Intercepts BEFORE AUTO_ADVANCE)
+    # Human recruiter review required to assess flight risk and salary alignment
+    # --------------------------------------------------------------------------
+    if is_overqualified:
+        res = Gate7DecisionResult(
+            candidate_id=cid,
+            job_id=jid,
+            decision=DecisionType.ESCALATE,
+            reason="Candidate appears overqualified. Human confirmation of role fit required.",
+            matched_condition=8,
+            escalation_reason="Candidate seniority level and experience exceed target job profile scope.",
+        )
+        _validate_decision(res, verified_must_haves_count, integrity_flags, verification_flags)
+        logger.info(f"[{cid}] Gate 7 Condition 8 triggered -> ESCALATE (OVERQUALIFIED).", gate="GATE_7", candidate_id=cid)
+        return res
+
+    # --------------------------------------------------------------------------
+    # Condition 3: score >= HIGH_THRESHOLD AND meets_skills AND tech_score >= 60 AND verified evidence AND zero critical flags
+    # --------------------------------------------------------------------------
     if (
         score >= high_thresh
         and meets_skills
+        and tech_score >= 60.0
+        and verified_must_haves_count >= min_verified
         and not has_integrity_flags
         and not has_critical_v_flags
     ):
         top_strengths = _extract_top_strengths(ledger)
         strength_desc = f" Verified mastery: {', '.join(top_strengths[:3])}." if top_strengths else ""
-        overqualified_desc = " Note: Senior candidate exceeding baseline profile." if is_overqualified else ""
         res = Gate7DecisionResult(
             candidate_id=cid,
             job_id=jid,
@@ -169,7 +211,7 @@ def evaluate_gate7(
             reason=(
                 f"Exceptional candidate fit: score {score:.2f} satisfies high threshold ({high_thresh:.1f}) "
                 f"with {matched_must_haves_count}/{total_must_haves} must-haves ({must_have_match_ratio:.0%}) "
-                f"and zero integrity anomalies.{strength_desc}{overqualified_desc}"
+                f"({verified_must_haves_count} verified, tech score: {tech_score:.1f}) and zero integrity anomalies.{strength_desc}"
             ),
             matched_condition=3,
             escalation_reason=None,
@@ -179,12 +221,22 @@ def evaluate_gate7(
         return res
 
     # --------------------------------------------------------------------------
-    # Condition 4: score >= HIGH_THRESHOLD AND (not meets_skills OR security flags present)
+    # Condition 4: score >= HIGH_THRESHOLD AND (not meets_skills OR low tech fit OR no verified skills OR security flags present)
     # --------------------------------------------------------------------------
-    if score >= high_thresh and (not meets_skills or has_integrity_flags or has_critical_v_flags):
+    if score >= high_thresh and (
+        not meets_skills
+        or tech_score < 60.0
+        or verified_must_haves_count < min_verified
+        or has_integrity_flags
+        or has_critical_v_flags
+    ):
         anomalies = []
         if not meets_skills:
             anomalies.append(f"insufficient must-have match ({matched_must_haves_count}/{total_must_haves} = {must_have_match_ratio:.0%} < {min_match_ratio:.0%})")
+        elif tech_score < 60.0:
+            anomalies.append(f"technical alignment score below auto-advance baseline ({tech_score:.1f} < 60.0)")
+        elif verified_must_haves_count < min_verified:
+            anomalies.append(f"no verified core competencies with demonstrated work evidence ({verified_must_haves_count} < {min_verified})")
         elif len(hard_failures) > 0:
             anomalies.append(f"{len(hard_failures)} missing must-have(s): {', '.join(hard_failures[:3])}")
         if has_integrity_flags:
@@ -202,22 +254,6 @@ def evaluate_gate7(
         )
         _validate_decision(res, verified_must_haves_count, integrity_flags, verification_flags)
         logger.info(f"[{cid}] Gate 7 Condition 4 triggered -> ESCALATE (High Score Anomalies).", gate="GATE_7", candidate_id=cid)
-        return res
-
-    # --------------------------------------------------------------------------
-    # Condition 8: OVERQUALIFIED flag present for non-advancing candidate
-    # --------------------------------------------------------------------------
-    if is_overqualified:
-        res = Gate7DecisionResult(
-            candidate_id=cid,
-            job_id=jid,
-            decision=DecisionType.ESCALATE,
-            reason="Candidate appears overqualified. Human confirmation of role fit required.",
-            matched_condition=8,
-            escalation_reason="Candidate seniority level and experience exceed target job profile scope.",
-        )
-        _validate_decision(res, verified_must_haves_count, integrity_flags, verification_flags)
-        logger.info(f"[{cid}] Gate 7 Condition 8 triggered -> ESCALATE (OVERQUALIFIED).", gate="GATE_7", candidate_id=cid)
         return res
 
     # --------------------------------------------------------------------------

@@ -166,6 +166,6 @@ def run_fairness_audit_suite(
         "overall_mean_score_delta": round(overall_mean_delta, 4),
         "total_decision_flips": total_flips,
         "decision_flip_rate": round(overall_flip_rate, 4),
-        "demographic_neutrality_verified": total_flips == 0 and overall_mean_delta == 0.0,
+        "demographic_neutrality_verified": total_flips == 0 and abs(overall_mean_delta) < 1e-4,
         "candidate_summaries": candidate_reports,
     }

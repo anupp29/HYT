@@ -296,15 +296,16 @@ def evaluate_gate6(
             )
 
             if u_sim >= hard_gate_threshold and u_skill:
-                # Skill is listed on resume -> Award full 100% credit (Enterprise ATS practice: No unverified penalty)
-                must_have_contributions.append(1.0)
+                # Skill is merely listed in summary without work evidence -> Award partial credit per anti-gaming policy (F1)
+                u_weight = getattr(cfg.gate6, "unverified_skill_weight", 0.5)
+                must_have_contributions.append(u_weight)
                 ledger_entries.append(
                     LedgerEntry(
                         dimension=DimensionType.TECHNICAL,
                         requirement=f"Must-Have: {must_have}",
-                        evidence=f"Claimed in technical skills summary as '{u_skill.name}'.",
+                        evidence=f"Claimed in technical skills summary as '{u_skill.name}' (unverified, awarded {u_weight:.0%} credit).",
                         is_verified=False,
-                        score_contribution=100.0,
+                        score_contribution=round(u_weight * 100.0, 2),
                         gap=None,
                     )
                 )
@@ -403,8 +404,18 @@ def evaluate_gate6(
     is_overqualified = False
     sen_scores = cfg.gate6.seniority_scores
 
-    if raw_tech == 0.0 and diff >= 0:
-        # Non-technical candidate whose job title rank nominally matches but lacks domain competence
+    # Overqualification check: excess experience and seniority level over target role (F2/F15)
+    # Overqualification only applies if the candidate meets baseline technical competence (not a domain mismatch)
+    excess_years = actual_years - max(required_years, 0.0)
+    is_excessively_senior = (
+        diff >= 2 and excess_years >= sen_scores.overqualified_flag_threshold
+    )
+    if is_excessively_senior and raw_tech >= 0.40:
+        is_overqualified = True
+        seniority_score = getattr(sen_scores, "overqualified", 0.70) * 100.0
+        sen_gap = f"Candidate seniority ({cand_level.value}, {actual_years:.1f} yrs) exceeds target requirement ({jd_level.value}, {required_years:.1f} yrs); routed for overqualification review."
+    elif raw_tech < 0.40 and diff >= 0:
+        # Candidate lacks domain competence; inflated title rank does not confer seniority bonus
         seniority_score = sen_scores.two_levels_below * 100.0
         sen_gap = f"Seniority title lacks demonstrated technical competency in target engineering domain."
     elif diff >= 0:
@@ -417,10 +428,6 @@ def evaluate_gate6(
     else:
         seniority_score = sen_scores.two_levels_below * 100.0
         sen_gap = f"Candidate is {abs(diff)} levels below target seniority ({cand_level.value} vs {jd_level.value})."
-
-    # Overqualification note: Informational only for interviewers, NEVER punitive
-    if diff >= 2 and required_years > 0 and (actual_years - required_years) >= sen_scores.overqualified_flag_threshold:
-        is_overqualified = True
 
     ledger_entries.append(
         LedgerEntry(

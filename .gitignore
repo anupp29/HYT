@@ -1,4 +1,4 @@
-﻿# Raw and processed data - never commit PII
+# Raw and processed data - never commit PII
 data/raw/
 data/sample/
 data/adversarial/
@@ -34,3 +34,6 @@ build/
 
 # Golden set - commit only golden_labels.csv and golden_summary.json (no PDFs)
 # data/golden/ IS committed - it contains labels only (no raw resumes)
+
+# Synthetic evaluation runs
+check/

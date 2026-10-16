@@ -128,6 +128,25 @@ Please extract the structured job requirements JSON."""
         elif "director" in sen_str or "vp" in sen_str: seniority = SeniorityLevel.EXECUTIVE
         else: seniority = SeniorityLevel.MID
 
+    # Architectural Seniority Calibration (Title & YoE Precedence over LLM Hallucinations)
+    jd_title_lower = str(parsed_dict.get("title") or raw_jd.title or "").lower().strip()
+    min_exp_val = float(parsed_dict.get("min_years_experience", 2.0))
+    if "intern" in jd_title_lower:
+        seniority = SeniorityLevel.ENTRY
+    elif any(k in jd_title_lower for k in ["associate", "entry", "graduate"]) or min_exp_val == 0.0:
+        if not any(k in jd_title_lower for k in ["staff", "principal", "lead", "director", "executive"]):
+            seniority = SeniorityLevel.ENTRY
+    elif any(k in jd_title_lower for k in ["junior", "jr.", "jr "]):
+        seniority = SeniorityLevel.JUNIOR
+    elif "principal" in jd_title_lower:
+        seniority = SeniorityLevel.PRINCIPAL
+    elif "staff" in jd_title_lower:
+        seniority = SeniorityLevel.STAFF
+    elif "lead" in jd_title_lower:
+        seniority = SeniorityLevel.LEAD
+    elif any(k in jd_title_lower for k in ["senior", "sr.", "sr "]):
+        seniority = SeniorityLevel.SENIOR
+
     must_haves = [str(s).strip() for s in parsed_dict.get("must_have_skills", []) if str(s).strip()]
     nice_to_haves = [str(s).strip() for s in parsed_dict.get("nice_to_have_skills", []) if str(s).strip()]
     
@@ -180,7 +199,9 @@ def _heuristic_jd_fallback(raw_jd: JobDescriptionRaw) -> Dict[str, Any]:
         sen = "lead"
     elif any(k in text for k in ["senior software", "senior engineer", "sr."]):
         sen = "senior"
-    elif any(k in text for k in ["junior", "associate", "entry level", "entry-level"]):
+    elif any(k in text for k in ["associate", "entry level", "entry-level", "intern"]) or min_yoe == 0.0:
+        sen = "entry"
+    elif any(k in text for k in ["junior", "jr."]):
         sen = "junior"
     else:
         sen = "mid"
