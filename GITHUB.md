@@ -1,5 +1,6 @@
 # GitHub Candidate Extraction via GitHub-Readme-Stats
 > Architectural Catalog & Route Specification for Gate 4 Candidate Verification  
+**Author:** Anup Patil ([@anupp29](https://github.com/anupp29)) — Graduate 2027 SDE Intern Applicant  
 > Target Service: `https://github-readme-stats.vercel.app`  
 > Upstream Repository: [`anuraghazra/github-readme-stats`](https://github.com/anuraghazra/github-readme-stats)
 
@@ -184,10 +185,10 @@ Measures verified active coding time, IDE hours, and daily language usage.
 
 | Screening Signal | Target Route | Threshold / Condition | Screening Action |
 |---|---|---|:---:|
-| **Language Mismatch** | `/api/top-langs` | Core JD languages $\le 5\%$ of total repo bytes | Trigger `GITHUB_LANGUAGE_MISMATCH` flag $\rightarrow$ Escalate |
-| **Dormant Profile** | `/api` | Lifetime commits $< 10$ or 0 in past year | Trigger `GITHUB_INACTIVE` flag |
-| **High Conviction Profile** | `/api` | Rank `A` or `S`, Commits $> 500$, PRs $> 20$ | Boost Pillar 4 Evidence Score (+5.0 pts) |
-| **Flagship Project Verif.** | `/api/pin` | Stargazers $\ge 50$, Forks $\ge 10$ | Mark matching skill in Ledger as `is_verified = True` |
+| **Language Mismatch** | `/api/top-langs` | Core JD languages <= 5% of total repo bytes | Trigger `GITHUB_LANGUAGE_MISMATCH` flag -> Escalate |
+| **Dormant Profile** | `/api` | Lifetime commits < 10 or 0 in past year | Trigger `GITHUB_INACTIVE` flag |
+| **High Conviction Profile** | `/api` | Rank `A` or `S`, Commits > 500, PRs > 20 | Boost Pillar 4 Evidence Score (+5.0 pts) |
+| **Flagship Project Verif.** | `/api/pin` | Stargazers >= 50, Forks >= 10 | Mark matching skill in Ledger as `is_verified = True` |
 | **Non-Existent Profile** | `/api` | HTTP 404 or "User not found" SVG error | Trigger `GITHUB_NOT_FOUND` flag (Non-blocking) |
 
 ---

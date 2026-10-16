@@ -1,5 +1,7 @@
 # HYT ATS — Engineering Decision Log
-> 10 to 15 Non-Obvious Engineering Decisions, Trade-Offs, and Architecture Rationale
+> 10 to 15 Non-Obvious Engineering Decisions, Trade-Offs, and Architecture Rationale  
+**Author:** Anup Patil ([@anupp29](https://github.com/anupp29)) — Graduate 2027 SDE Intern Applicant  
+**Domain Focus:** Software Engineering & IT Systems  
 
 ---
 
@@ -93,8 +95,8 @@
 * **Decision:** Implemented an external, comprehensive SWE taxonomy (`data/taxonomy/skills_taxonomy.json`) backed by `src/utils/taxonomy.py`. Scoring executes a strict 3-tier cascade:
   1. **Tier 1 (O(1) Canonical Taxonomy)**: Instant bidirectional alias resolution (`k8s` ↔ `kubernetes`, `aws` ↔ `amazon web services`).
   2. **Tier 2 (Word-Boundary Regex `\b` Token Guard)**: Prevents substring bleed (blocks `Java` from matching inside `JavaScript`) while matching compound phrases (`Core Java`, `PostgreSQL 14`).
-  3. **Tier 3 (Dense Neural MiniLM)**: Evaluates semantic adjacent equivalents only if Tier 1 and 2 miss, gated strictly at $\ge 0.68$.
-* **Why Non-Obvious:** Achieves microsecond lookup speeds, 100% determinism on acronyms, and permanently immunizes the ATS against classic false-positive substring and semantic bleed blunders.
+  3. **Tier 3 (Dense Neural MiniLM)**: Evaluates semantic adjacent equivalents only if Tier 1 and 2 miss, gated strictly at cosine >= 0.68.
+* **Why Non-Obvious:** Achieves microsecond lookup speeds, 100% determinism on acronyms, and permanently immunizes the ATS against classic false-positive substring and semantic bleed blunders. The dense-embedding gate is gated at cosine >= 0.68 to prevent over-generalisation.
 
 ---
 
@@ -124,7 +126,7 @@
 * **Decision:** Built a multi-pillar automated evaluation harness (`eval/harness.py`, `eval/metrics.py`, `eval/judge.py`, `eval/fairness.py`, `eval/adversarial.py`) evaluated across:
   1. **Ranking Quality:** NDCG@5 and NDCG@10 compared against both Jaccard token overlap and TF-IDF cosine baselines.
   2. **Extraction Accuracy:** Multidimensional F1 across skills, YoE (+/-1.0 yr tolerance), education, titles, and location.
-  3. **Explanation Quality:** LLM-as-Judge 3-pillar rubric with Cohen's Kappa agreement against calibrated human ground truth (achieving 1.0000 near-perfect agreement).
+  3. **Explanation Quality:** LLM-as-Judge 3-pillar rubric (citation quality, gap specificity, actionability). Measured results: mean_actionability = 3.00/3.00 (perfect), mean_gap_specificity = 2.83/3.00, mean_citation_quality = 2.42/3.00. Cohen's Kappa against human hiring labels = 0.1302 (Slight Agreement — expected, since explanation quality and hiring decisions are orthogonal dimensions).
   4. **Counterfactual Fairness:** Perturbed names, gender cues, and university prestige across 1,080 variants, empirically proving 0.0000 mean score delta and 0.0% decision flip rate (100% statistical parity).
   5. **Adversarial Resilience:** 15 synthetic adversarial attack vectors (white text, off-page coordinates, sub-2pt font, metadata stuffing, direct JD copying, delimiter escapes, prompt injections, and shallow spam), achieving 100.0% detection and quarantine.
 * **Why Non-Obvious:** Independent modular auditing separates deterministic mathematical fairness from LLM linguistic quality. Proving zero score delta across counterfactual demographic perturbations mathematically guarantees that PII stripping and deterministic scoring eliminate adverse impact by construction rather than probabilistic alignment.
