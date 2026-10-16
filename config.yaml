@@ -164,13 +164,12 @@ gate6:
 # Gate 7: Decision Engine (Structural Recall Bias)
 # ------------------------------------------------------------------------------
 gate7:
-  high_threshold: 75.0 # Score >= 75 with core technical fit -> AUTO_ADVANCE
-  low_threshold: 40.0  # Score < 40 with severe multi-gap failures -> candidate for AUTO_REJECT (F9)
+  high_threshold: 85.0 # Score >= 85 with verified technical mastery -> AUTO_ADVANCE (Option 3 Calibration)
+  low_threshold: 50.0  # Score < 50 with zero verified skills -> AUTO_REJECT (Option 3 Calibration)
   min_must_have_ratio: 0.60 # Enterprise ATS: >= 60% of cluster must-haves satisfied for AUTO_ADVANCE (F10)
   min_verified_must_haves: 1 # Requires >= 1 verified core competency with demonstrated work evidence
   
-  # Auto-Reject Constraint: Near-impossible by design (Structural Recall Bias per HYT PDF)
-  # Requires score < low_threshold AND hard_failures >= proportion AND 0 verified matches
+  # Auto-Reject Constraint: Score < low_threshold AND 0 verified must-have matches
   auto_reject_hard_failure_proportion: 0.70
 
 # ------------------------------------------------------------------------------
