@@ -202,11 +202,19 @@ def _fetch_from_github_readme_stats(handle: str, timeout: int) -> Optional[Dict[
             if rm:
                 rank = rm.group(1).strip()
 
+            # Stars
+            sm = re.search(r'data-testid="stars">([^<]+)</text>', svg_text)
+            stars = sm.group(1).strip() if sm else "0"
+
+            # Contribs
+            ctm = re.search(r'data-testid="contribs">([^<]+)</text>', svg_text)
+            contribs = ctm.group(1).strip() if ctm else "0"
+
             active_in_lookback = (total_commits > 0 or total_prs > 0 or len(languages) > 0)
 
         logger.info(
             f"Successfully extracted GitHub stats via proxy for '{handle}': "
-            f"{len(languages)} languages, ~{total_commits} commits.",
+            f"{len(languages)} languages, ~{total_commits} commits, {stars} stars, {total_prs} PRs.",
             gate="GATE_4",
         )
         return {
@@ -214,6 +222,8 @@ def _fetch_from_github_readme_stats(handle: str, timeout: int) -> Optional[Dict[
             "languages": languages,
             "recent_commits": total_commits,
             "total_prs": total_prs,
+            "stars": stars,
+            "contribs": contribs,
             "rank": rank,
             "active_in_lookback": active_in_lookback,
             "source": "github-readme-stats",
@@ -290,6 +300,87 @@ def _fetch_from_github_rest_api(handle: str, timeout: int) -> Optional[Dict[str,
     except Exception as e:
         logger.warning(f"Direct GitHub REST API failed for '{handle}': {e}", gate="GATE_4")
         return None
+
+
+def fetch_repo_pin(
+    owner: str,
+    repo: str,
+    timeout: int = 10,
+    use_cache: bool = True,
+) -> Dict[str, Any]:
+    """
+    Fetches flagship repository statistics (stars, forks, primary language)
+    via github-readme-stats Route 3 (/api/pin). Zero-token required.
+    """
+    clean_repo = repo.strip().rstrip("/")
+    if "/" in clean_repo:
+        parts = clean_repo.split("/")
+        owner, clean_repo = parts[-2], parts[-1]
+
+    cache = get_cache_manager()
+    cache_key = f"pin_{owner.lower()}_{clean_repo.lower()}"
+    if use_cache:
+        cached = cache.get("github", cache_key)
+        if cached:
+            return cached
+
+    url = f"https://github-readme-stats.vercel.app/api/pin/?username={owner}&repo={clean_repo}"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 HYT-ATS/1.0",
+        "Accept": "image/svg+xml,application/xml,text/xml,*/*",
+    }
+    try:
+        r = requests.get(url, headers=headers, timeout=timeout)
+        if r.status_code != 200:
+            return {"repo": f"{owner}/{clean_repo}", "error": f"HTTP {r.status_code}"}
+
+        svg = r.text
+        if "Repo not found" in svg or "User not found" in svg:
+            return {"repo": f"{owner}/{clean_repo}", "error": "Repository not found"}
+
+        lang_m = re.search(r'data-testid="lang-name"[^>]*>(.*?)</text>', svg)
+        stars_m = re.search(r'data-testid="stargazers"[^>]*>(.*?)</text>', svg)
+        forks_m = re.search(r'data-testid="forkcount"[^>]*>(.*?)</text>', svg)
+
+        res = {
+            "repo": f"{owner}/{clean_repo}",
+            "primary_language": lang_m.group(1).strip() if lang_m else "Unknown",
+            "stars": stars_m.group(1).strip() if stars_m else "0",
+            "forks": forks_m.group(1).strip() if forks_m else "0",
+        }
+        if use_cache:
+            cache.set("github", cache_key, res)
+        return res
+    except Exception as e:
+        return {"repo": f"{owner}/{clean_repo}", "error": str(e)}
+
+
+def verify_live_url(url: str, timeout: int = 5) -> Dict[str, Any]:
+    """Tests if a candidate live project deployment is reachable (HTTP 200)."""
+    clean_url = url.strip()
+    if not clean_url.startswith("http"):
+        clean_url = "https://" + clean_url
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 HYT-ATS/1.0",
+        "Accept": "*/*",
+    }
+    try:
+        r = requests.head(clean_url, headers=headers, timeout=timeout, allow_redirects=True)
+        if r.status_code in (405, 403):
+            r = requests.get(clean_url, headers=headers, timeout=timeout)
+        return {
+            "url": clean_url,
+            "status_code": r.status_code,
+            "is_live": r.status_code < 400,
+        }
+    except Exception as e:
+        return {
+            "url": clean_url,
+            "status_code": None,
+            "is_live": False,
+            "error": str(e),
+        }
 
 
 def cross_check_github(
@@ -408,6 +499,8 @@ def evaluate_gate4(
     github_handle: Optional[str] = None,
     candidate_id: Optional[str] = None,
     use_cache: bool = True,
+    project_repos: Optional[List[str]] = None,
+    live_urls: Optional[List[str]] = None,
 ) -> Gate4VerificationReport:
     """
     Orchestrates Gate 4 Verification Layer for a structured resume profile.
@@ -418,6 +511,8 @@ def evaluate_gate4(
         github_handle: Optional GitHub username from Gate 2.
         candidate_id: Unique candidate identifier.
         use_cache: Whether to use disk caching for GitHub lookups.
+        project_repos: Optional list of project repository strings (e.g. ['owner/repo']).
+        live_urls: Optional list of live deployment demo URLs.
         
     Returns:
         Immutable Gate4VerificationReport Pydantic model.
@@ -438,7 +533,7 @@ def evaluate_gate4(
         all_flags.append(VerificationFlag.SHALLOW_PROFILE)
     all_ledger_notes.append(depth_note)
 
-    # 2. GitHub Cross-Check
+    # 2. GitHub Profile Cross-Check
     effective_url = github_url
     effective_handle = github_handle
     if not effective_handle and resume.github_handle:
@@ -453,6 +548,36 @@ def evaluate_gate4(
     )
     all_flags.extend(gh_flags)
     all_ledger_notes.extend(gh_notes)
+
+    # 3. Project Repositories Pin Audit (Route 3)
+    verified_project_repos: List[Dict[str, Any]] = []
+    if project_repos:
+        for r_spec in project_repos:
+            owner = effective_handle or "unknown"
+            clean_r = r_spec.strip()
+            if "/" in clean_r:
+                parts = clean_r.split("/")
+                owner = parts[-2]
+                clean_r = parts[-1]
+            pin_data = fetch_repo_pin(owner, clean_r, timeout=cfg.gate4.github_api_timeout_seconds, use_cache=use_cache)
+            if not pin_data.get("error"):
+                verified_project_repos.append(pin_data)
+                all_ledger_notes.append(
+                    f"Flagship Project Corroborated: '{pin_data['repo']}' "
+                    f"({pin_data['primary_language']}, {pin_data['stars']} stars, {pin_data['forks']} forks) "
+                    f"verified via GitHub Pin."
+                )
+
+    # 4. Live Project Deployment Verification
+    verified_live_urls: List[Dict[str, Any]] = []
+    if live_urls:
+        for u in live_urls:
+            live_res = verify_live_url(u, timeout=5)
+            verified_live_urls.append(live_res)
+            if live_res.get("is_live"):
+                all_ledger_notes.append(
+                    f"Live Deployment Verified: '{live_res['url']}' is active (HTTP {live_res['status_code']} OK)."
+                )
 
     # Propagate any Gate 3 flags (e.g. concurrent overlapping full-time dates)
     if hasattr(resume, "verification_flags") and resume.verification_flags:
@@ -493,6 +618,12 @@ def evaluate_gate4(
         github_language_breakdown=gh_languages,
         github_active_in_lookback=gh_data.get("active_in_lookback", True),
         recent_public_commits=gh_data.get("recent_commits", 0),
+        github_rank=gh_data.get("rank", "N/A"),
+        github_stars=gh_data.get("stars", "0"),
+        github_prs=gh_data.get("total_prs", 0),
+        github_contribs=gh_data.get("contribs", "0"),
+        project_repos=verified_project_repos,
+        live_urls=verified_live_urls,
         inactive_skills=inactive_skills,
         ledger_notes=all_ledger_notes,
         is_verified=len(unique_flags) == 0,
@@ -500,7 +631,8 @@ def evaluate_gate4(
 
     logger.info(
         f"[{cid}] Gate 4 Complete: {len(unique_flags)} flags triggered, "
-        f"unverified_ratio={unverified_ratio:.1%}, github_langs={top_langs}",
+        f"unverified_ratio={unverified_ratio:.1%}, github_langs={top_langs}, "
+        f"verified_repos={len(verified_project_repos)}, live_urls={len(verified_live_urls)}",
         gate="GATE_4",
         candidate_id=cid,
     )

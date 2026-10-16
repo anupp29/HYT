@@ -14,7 +14,7 @@ Guarantees:
 
 import re
 from typing import Tuple, Optional, Dict, Any, List
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from src.utils.logger import get_logger
 
@@ -36,6 +36,21 @@ GITHUB_REGEX = re.compile(
     re.IGNORECASE,
 )
 
+PROJECT_REPO_REGEX = re.compile(
+    r'(?:https?://)?(?:www\.)?github\.com/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_.-]+)',
+    re.IGNORECASE,
+)
+
+LIVE_URL_REGEX = re.compile(
+    r'\[(?:Live|Demo|App|Site|Website|Preview)\]\((https?://[^\s\)]+)\)',
+    re.IGNORECASE,
+)
+
+DEPLOYMENT_URL_REGEX = re.compile(
+    r'https?://[a-zA-Z0-9.-]+\.(?:vercel\.app|co\.in|netlify\.app|pages\.dev|herokuapp\.com|render\.com)[^\s<>"\'\)]*',
+    re.IGNORECASE,
+)
+
 LINKEDIN_REGEX = re.compile(r'(?:https?://)?(?:www\.)?linkedin\.com/in/[a-zA-Z0-9_\-\.%]+/?', re.IGNORECASE)
 GENERIC_URL_REGEX = re.compile(r'https?://(?!(?:www\.)?github\.com)[^\s<>"\'\)]+', re.IGNORECASE)
 WWW_URL_REGEX = re.compile(r'\bwww\.(?!(?:www\.)?github\.com)[^\s<>"\'\)]+', re.IGNORECASE)
@@ -51,6 +66,8 @@ class PIIMaskResult(BaseModel):
     masked_clean_text: str
     github_url: Optional[str] = None
     github_handle: Optional[str] = None
+    project_repos: List[str] = Field(default_factory=list)
+    live_urls: List[str] = Field(default_factory=list)
     redacted_email_count: int = 0
     redacted_phone_count: int = 0
     redacted_url_count: int = 0
@@ -59,7 +76,7 @@ class PIIMaskResult(BaseModel):
 
 def mask_pii(clean_text: str, candidate_id: Optional[str] = None) -> PIIMaskResult:
     """
-    Extracts GitHub credentials and redacts contact PII from clean resume text.
+    Extracts GitHub credentials, project repos, and live URLs, and redacts contact PII.
     
     Args:
         clean_text: Layout-aware plain text from Gate 1.
@@ -71,12 +88,17 @@ def mask_pii(clean_text: str, candidate_id: Optional[str] = None) -> PIIMaskResu
     cid = candidate_id or "UNKNOWN"
     text = clean_text
 
-    # 1. Extract GitHub URL and Handle (before any masking)
-    github_url, github_handle = _extract_github_profile(text)
+    # 1. Extract GitHub URL, Handle, Project Repos, and Live URLs (before any masking)
+    github_url, github_handle, project_repos, live_urls = _extract_github_and_project_links(text)
     if github_handle:
         logger.info(f"Extracted candidate GitHub handle: @{github_handle}", gate="GATE_2", candidate_id=cid)
     else:
         logger.info("No GitHub profile link detected in resume text.", gate="GATE_2", candidate_id=cid)
+
+    if project_repos:
+        logger.info(f"Extracted {len(project_repos)} project repository references: {project_repos}", gate="GATE_2", candidate_id=cid)
+    if live_urls:
+        logger.info(f"Extracted {len(live_urls)} live deployment URLs: {live_urls}", gate="GATE_2", candidate_id=cid)
 
     # 2. Redact Emails
     email_matches = EMAIL_REGEX.findall(text)
@@ -90,9 +112,13 @@ def mask_pii(clean_text: str, candidate_id: Optional[str] = None) -> PIIMaskResu
         redacted_phone_count += len(p_matches)
         text = p_regex.sub("[PHONE]", text)
 
-    # 4. Redact LinkedIn and Non-GitHub URLs
+    # 4. Redact LinkedIn and Non-GitHub URLs (preserve live demo anchors)
     linkedin_matches = LINKEDIN_REGEX.findall(text)
     text = LINKEDIN_REGEX.sub("[LINKEDIN]", text)
+
+    # Replace live URLs with [LIVE_DEMO] placeholder to prevent leaking private domains
+    for u in live_urls:
+        text = text.replace(u, "[LIVE_DEMO_URL]")
 
     generic_matches = GENERIC_URL_REGEX.findall(text)
     text = GENERIC_URL_REGEX.sub("[URL]", text)
@@ -116,6 +142,8 @@ def mask_pii(clean_text: str, candidate_id: Optional[str] = None) -> PIIMaskResu
         masked_clean_text=text,
         github_url=github_url,
         github_handle=github_handle,
+        project_repos=project_repos,
+        live_urls=live_urls,
         redacted_email_count=redacted_email_count,
         redacted_phone_count=redacted_phone_count,
         redacted_url_count=redacted_url_count,
@@ -123,16 +151,44 @@ def mask_pii(clean_text: str, candidate_id: Optional[str] = None) -> PIIMaskResu
     )
 
 
-def _extract_github_profile(text: str) -> Tuple[Optional[str], Optional[str]]:
-    """Identifies and normalizes GitHub URL and handle."""
-    match = GITHUB_REGEX.search(text)
-    if match:
-        handle = match.group(1).strip()
-        # Exclude reserved words or invalid handles
+def _extract_github_and_project_links(text: str) -> Tuple[Optional[str], Optional[str], List[str], List[str]]:
+    """
+    Identifies candidate GitHub handle, all referenced project repositories,
+    and all live deployment demo URLs.
+    """
+    # 1. Project repositories
+    project_repos: List[str] = []
+    for m in PROJECT_REPO_REGEX.finditer(text):
+        owner = m.group(1).strip()
+        repo = m.group(2).strip().rstrip("/")
+        if repo.lower() not in {"repositories", "stars", "followers", "following", "tab", "settings", "orgs", "issues", "pulls"}:
+            full_repo = f"{owner}/{repo}"
+            if full_repo not in project_repos:
+                project_repos.append(full_repo)
+
+    # 2. Candidate profile handle
+    github_url, github_handle = None, None
+    for m in GITHUB_REGEX.finditer(text):
+        handle = m.group(1).strip()
         if handle.lower() not in {"explore", "topics", "trending", "collections", "events", "features", "about"}:
-            clean_url = f"https://github.com/{handle}"
-            return clean_url, handle
-    return None, None
+            if not github_handle:
+                github_handle = handle
+                github_url = f"https://github.com/{handle}"
+                break
+
+    # 3. Live demo URLs
+    live_urls: List[str] = []
+    for u in LIVE_URL_REGEX.findall(text):
+        clean_u = u.strip()
+        if clean_u not in live_urls:
+            live_urls.append(clean_u)
+
+    for u in DEPLOYMENT_URL_REGEX.findall(text):
+        clean_u = u.strip()
+        if clean_u not in live_urls:
+            live_urls.append(clean_u)
+
+    return github_url, github_handle, project_repos, live_urls
 
 
 def _mask_candidate_name(text: str) -> Tuple[str, bool]:

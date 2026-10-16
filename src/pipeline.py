@@ -118,6 +118,8 @@ def process_candidate(
         github_handle=pii_res.github_handle,
         candidate_id=cid,
         use_cache=use_cache and not force_refresh,
+        project_repos=pii_res.project_repos,
+        live_urls=pii_res.live_urls,
     )
     verification_flags = [f.name if hasattr(f, "name") else str(f) for f in gate4_report.flags]
 
@@ -219,6 +221,17 @@ def process_candidate(
         verification_flags=verification_flags,
         is_quarantined=gate0_report.is_quarantined,
         is_overqualified=ledger.is_overqualified,
+        github_stats={
+            "handle": gate4_report.github_handle,
+            "rank": gate4_report.github_rank,
+            "commits": gate4_report.recent_public_commits,
+            "prs": gate4_report.github_prs,
+            "stars": gate4_report.github_stars,
+            "contribs": gate4_report.github_contribs,
+            "languages": gate4_report.github_top_languages,
+        } if gate4_report.github_handle else None,
+        project_repos=gate4_report.project_repos,
+        live_urls=gate4_report.live_urls,
         explanation=explanation,
         processed_at=datetime.now().isoformat(),
     )

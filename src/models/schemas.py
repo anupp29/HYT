@@ -225,6 +225,12 @@ class Gate4VerificationReport(BaseModel):
     github_language_breakdown: Dict[str, float] = Field(default_factory=dict)
     github_active_in_lookback: bool = True
     recent_public_commits: int = 0
+    github_rank: Optional[str] = "N/A"
+    github_stars: Optional[str] = "0"
+    github_prs: Optional[int] = 0
+    github_contribs: Optional[str] = "0"
+    project_repos: List[Dict[str, Any]] = Field(default_factory=list)
+    live_urls: List[Dict[str, Any]] = Field(default_factory=list)
     inactive_skills: List[str] = Field(default_factory=list)
     ledger_notes: List[str] = Field(default_factory=list)
     is_verified: bool = True
@@ -303,6 +309,9 @@ class CandidateRecord(BaseModel):
     verification_flags: List[str] = Field(default_factory=list)
     is_quarantined: bool = False
     is_overqualified: bool = False
+    github_stats: Optional[Dict[str, Any]] = None
+    project_repos: List[Dict[str, Any]] = Field(default_factory=list)
+    live_urls: List[Dict[str, Any]] = Field(default_factory=list)
     explanation: Optional[RecruiterExplanation] = None
     processed_at: str
 

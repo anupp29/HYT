@@ -73,6 +73,30 @@ def format_candidate_record(record: CandidateRecord, include_full_ledger: bool =
     else:
         lines.append("  * No critical deficits identified.")
 
+    # GitHub Profile & Flagship Projects Verification (Gate 4 Zero-Token Live Audit)
+    if record.github_stats or record.project_repos or record.live_urls:
+        lines.append(sub_sep)
+        lines.append("GITHUB & FLAGSHIP PROJECT AUDIT (Gate 4 Zero-Token Live Verification):")
+        if record.github_stats:
+            gs = record.github_stats
+            lines.append(f"  * Candidate GitHub:     @{gs.get('handle', 'N/A')}")
+            lines.append(f"  * Developer Rank Grade: {gs.get('rank', 'N/A')}")
+            lines.append(f"  * Lifetime Commits:     {gs.get('commits', 0)} (PRs: {gs.get('prs', 0)}, Stars: {gs.get('stars', '0')}, Contribs: {gs.get('contribs', '0')})")
+            langs = gs.get("languages", [])
+            if langs:
+                lines.append(f"  * Codebase Top Stacks:  {', '.join(langs[:5])}")
+
+        if record.project_repos:
+            lines.append("  * Flagship Project Repositories:")
+            for p in record.project_repos:
+                lines.append(f"      - {p.get('repo', 'repo'):<28} | Lang: {p.get('primary_language', 'N/A'):<12} | Stars: {p.get('stars', '0'):<4} | Forks: {p.get('forks', '0'):<4}")
+
+        if record.live_urls:
+            lines.append("  * Live Deployments:")
+            for l in record.live_urls:
+                status_str = f"HTTP {l.get('status_code', 'OK')} (ONLINE)" if l.get("is_live") else "OFFLINE"
+                lines.append(f"      - {l.get('url', ''):<45} -> {status_str}")
+
     # 5-Dimensional Scorecard
     b = record.scoring_breakdown
     lines.append(sub_sep)

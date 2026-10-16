@@ -137,6 +137,12 @@ def main():
     score_parser.add_argument("--provider", "-p", type=str, default=None, help="LLM provider for extraction")
     score_parser.add_argument("--model", "-m", type=str, default=None, help="AI model name")
 
+    # Command: verify-github
+    gh_parser = subparsers.add_parser("verify-github", help="Run zero-token GitHub and project verification via github-readme-stats")
+    gh_parser.add_argument("--username", "-u", type=str, required=True, help="GitHub username to inspect")
+    gh_parser.add_argument("--repos", "-r", type=str, default=None, help="Optional comma-separated project repos")
+    gh_parser.add_argument("--live", "-l", type=str, default=None, help="Optional comma-separated live deployment URLs")
+
     args = parser.parse_args()
 
     # Initialize structured logger
@@ -164,6 +170,8 @@ def main():
         rank_command(args)
     elif args.command == "override":
         override_command(args)
+    elif args.command == "verify-github":
+        verify_github_command(args)
     else:
         parser.print_help()
 
@@ -821,6 +829,14 @@ def override_command(args):
     print(f"Timestamp:        {entry['timestamp']}")
     print(f"Audit Trail File: logs/overrides.jsonl")
     print("=" * 70 + "\n")
+
+
+def verify_github_command(args):
+    """Executes zero-token GitHub and project verification."""
+    from scripts.inspect_github_profile import run_full_inspection
+    repos = [r.strip() for r in args.repos.split(",") if r.strip()] if args.repos else []
+    live = [l.strip() for l in args.live.split(",") if l.strip()] if args.live else []
+    run_full_inspection(args.username, repos, live)
 
 
 if __name__ == "__main__":

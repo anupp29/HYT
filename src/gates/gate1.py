@@ -75,15 +75,56 @@ def _extract_page_layout_aware(page: fitz.Page) -> str:
         # Fallback to plain text if no structured blocks
         return page.get_text("text")
 
+    # Extract page links for markdown hyperlink preservation
+    links = page.get_links()
+
     # Filter out off-page noise (blocks outside visible canvas)
     valid_blocks: List[Dict[str, Any]] = []
     for b in raw_blocks:
         bx0, by0, bx1, by1 = b.get("bbox", [0, 0, 0, 0])
         if bx0 >= -5 and by0 >= -5 and bx0 <= width + 5 and by0 <= height + 5:
-            # Reconstruct text of block
+            # Reconstruct text of block with link preservation
             block_lines: List[str] = []
             for line in b.get("lines", []):
-                line_text = "".join(span.get("text", "") for span in line.get("spans", []))
+                tokens = []
+                for span in line.get("spans", []):
+                    span_text = span.get("text", "")
+                    span_rect = fitz.Rect(span.get("bbox", [0, 0, 0, 0]))
+                    matched_uri = None
+                    for lk in links:
+                        lk_rect = fitz.Rect(lk.get("from", [0, 0, 0, 0]))
+                        if span_rect.intersects(lk_rect) and lk.get("uri"):
+                            matched_uri = lk["uri"]
+                            break
+                    tokens.append((span_text, matched_uri))
+
+                # Merge adjacent spans sharing the same URI
+                merged_tokens: List[List[Any]] = []
+                for t_text, t_uri in tokens:
+                    if not merged_tokens:
+                        merged_tokens.append([t_text, t_uri])
+                    else:
+                        if t_uri and merged_tokens[-1][1] == t_uri:
+                            merged_tokens[-1][0] += t_text
+                        else:
+                            merged_tokens.append([t_text, t_uri])
+
+                line_parts: List[str] = []
+                for t_text, t_uri in merged_tokens:
+                    clean_t = t_text.strip()
+                    if t_uri and clean_t:
+                        if t_uri.lower() in clean_t.lower() or clean_t.startswith("http"):
+                            line_parts.append(t_text)
+                        elif t_uri.startswith("mailto:"):
+                            line_parts.append(t_text)
+                        else:
+                            leading = " " if t_text.startswith(" ") else ""
+                            trailing = " " if t_text.endswith(" ") else ""
+                            line_parts.append(f"{leading}[{clean_t}]({t_uri}){trailing}")
+                    else:
+                        line_parts.append(t_text)
+
+                line_text = "".join(line_parts)
                 if line_text.strip():
                     block_lines.append(line_text.strip())
             if block_lines:
