@@ -96,14 +96,21 @@ def evaluate_gate8(
         )
         return None
 
-    # Compute deterministic cache key (candidate_id + job_id + content hash)
+    # Compute deterministic cache key (candidate_id + job content hash per Master Plan Section 5)
     cache = get_cache_manager()
     jd_hash = jd.content_hash if jd else jid
-    cache_key = hashlib.sha256(f"{cid}:{jd_hash}:{ledger.breakdown.weighted_total}".encode("utf-8")).hexdigest()
+    cache_key = hashlib.sha256(f"{cid}:{jd_hash}".encode("utf-8")).hexdigest()
 
     # 1. Disk Cache Check (Principle 7)
     if use_cache and not force_refresh:
         cached = cache.get_model("explanations", cache_key, RecruiterExplanation)
+        if cached is None:
+            # Fallback to legacy score-appended cache key if exists
+            alt_k = hashlib.sha256(f"{cid}:{jd_hash}:{ledger.breakdown.weighted_total}".encode("utf-8")).hexdigest()
+            cached = cache.get_model("explanations", alt_k, RecruiterExplanation)
+            if cached is not None:
+                cache.set_model("explanations", cache_key, cached)
+
         if cached is not None:
             logger.info(
                 f"[{cid}] Cache HIT for candidate explanation (hash: {cache_key[:12]}). Zero LLM calls made.",

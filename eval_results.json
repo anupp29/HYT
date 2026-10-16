@@ -1,19 +1,19 @@
 {
-  "timestamp": "2026-10-15T18:28:55Z",
+  "timestamp": "2026-10-16T07:31:04Z",
   "total_pairs_evaluated": 200,
-  "runtime_seconds": 965.44,
+  "runtime_seconds": 280.43,
   "ranking_ndcg": {
     "by_job": {
       "2234533717": {
         "job_title": "Freelance Full-Stack Software Engineer",
         "candidates_count": 33,
         "ndcg@5": {
-          "HYT_ATS": 0.5807,
+          "HYT_ATS": 0.8764,
           "Jaccard": 0.5807,
           "TF_IDF": 0.3141
         },
         "ndcg@10": {
-          "HYT_ATS": 0.6787,
+          "HYT_ATS": 0.8594,
           "Jaccard": 0.6418,
           "TF_IDF": 0.5274
         }
@@ -22,12 +22,12 @@
         "job_title": "Senior Software Engineer",
         "candidates_count": 32,
         "ndcg@5": {
-          "HYT_ATS": 0.71,
+          "HYT_ATS": 0.5606,
           "Jaccard": 0.5183,
           "TF_IDF": 0.5527
         },
         "ndcg@10": {
-          "HYT_ATS": 0.7051,
+          "HYT_ATS": 0.6956,
           "Jaccard": 0.5868,
           "TF_IDF": 0.5503
         }
@@ -36,12 +36,12 @@
         "job_title": "Staff Software Engineer",
         "candidates_count": 33,
         "ndcg@5": {
-          "HYT_ATS": 0.8478,
+          "HYT_ATS": 0.8146,
           "Jaccard": 0.3335,
           "TF_IDF": 0.4605
         },
         "ndcg@10": {
-          "HYT_ATS": 0.8813,
+          "HYT_ATS": 0.8107,
           "Jaccard": 0.5549,
           "TF_IDF": 0.616
         }
@@ -50,12 +50,12 @@
         "job_title": "Associate Software Engineer / Software Engineer",
         "candidates_count": 37,
         "ndcg@5": {
-          "HYT_ATS": 0.2635,
+          "HYT_ATS": 1.0,
           "Jaccard": 0.2635,
           "TF_IDF": 0.2635
         },
         "ndcg@10": {
-          "HYT_ATS": 0.3444,
+          "HYT_ATS": 0.9691,
           "Jaccard": 0.5904,
           "TF_IDF": 0.437
         }
@@ -64,12 +64,12 @@
         "job_title": "Lead AWS Platform Engineer",
         "candidates_count": 32,
         "ndcg@5": {
-          "HYT_ATS": 0.7819,
+          "HYT_ATS": 0.842,
           "Jaccard": 0.3089,
           "TF_IDF": 0.4388
         },
         "ndcg@10": {
-          "HYT_ATS": 0.7756,
+          "HYT_ATS": 0.788,
           "Jaccard": 0.4654,
           "TF_IDF": 0.6071
         }
@@ -91,12 +91,12 @@
     },
     "overall": {
       "mean_ndcg@5": {
-        "HYT_ATS": 0.6693,
+        "HYT_ATS": 0.8209,
         "Jaccard_Baseline": 0.4727,
         "TF_IDF_Baseline": 0.4573
       },
       "mean_ndcg@10": {
-        "HYT_ATS": 0.6972,
+        "HYT_ATS": 0.8201,
         "Jaccard_Baseline": 0.6029,
         "TF_IDF_Baseline": 0.5823
       },
@@ -106,28 +106,28 @@
   },
   "decision_classification": {
     "total_evaluated": 200,
-    "accuracy": 0.515,
-    "macro_precision": 0.4928,
-    "macro_recall": 0.5136,
-    "macro_f1": 0.4997,
-    "weighted_f1": 0.518,
+    "accuracy": 0.575,
+    "macro_precision": 0.6436,
+    "macro_recall": 0.4696,
+    "macro_f1": 0.4718,
+    "weighted_f1": 0.5465,
     "per_class": {
       "AUTO_ADVANCE": {
-        "precision": 0.3721,
-        "recall": 0.5,
-        "f1": 0.4267,
+        "precision": 0.8,
+        "recall": 0.125,
+        "f1": 0.2162,
         "support": 32
       },
       "ESCALATE": {
-        "precision": 0.5579,
-        "recall": 0.5096,
-        "f1": 0.5327,
+        "precision": 0.5769,
+        "recall": 0.7212,
+        "f1": 0.641,
         "support": 104
       },
       "AUTO_REJECT": {
-        "precision": 0.5484,
-        "recall": 0.5312,
-        "f1": 0.5397,
+        "precision": 0.5538,
+        "recall": 0.5625,
+        "f1": 0.5581,
         "support": 64
       }
     },
@@ -139,19 +139,19 @@
       ],
       "matrix": [
         [
-          16,
-          15,
+          4,
+          27,
           1
         ],
         [
-          24,
-          53,
-          27
+          1,
+          75,
+          28
         ],
         [
-          3,
-          27,
-          34
+          0,
+          28,
+          36
         ]
       ]
     }
@@ -166,14 +166,14 @@
   },
   "llm_as_judge": {
     "total_evaluated": 40,
-    "mean_citation_quality": 2.85,
-    "mean_gap_specificity": 2.98,
+    "mean_citation_quality": 2.42,
+    "mean_gap_specificity": 2.85,
     "mean_actionability": 3.0,
     "cohen_kappa": {
-      "citation_quality": 0.404,
-      "gap_specificity": 0.1129,
+      "citation_quality": 0.2399,
+      "gap_specificity": 0.1667,
       "actionability": 0.0,
-      "overall_mean_kappa": 0.1723,
+      "overall_mean_kappa": 0.1355,
       "interpretation": "Slight Agreement"
     },
     "sample_records": [
@@ -203,10 +203,10 @@
           "composite_score": 2.67
         },
         "judge_rating": {
-          "citation_quality": 3,
+          "citation_quality": 2,
           "gap_specificity": 3,
           "actionability": 3,
-          "composite_score": 3.0
+          "composite_score": 2.67
         }
       },
       {
@@ -219,10 +219,10 @@
           "composite_score": 2.33
         },
         "judge_rating": {
-          "citation_quality": 3,
+          "citation_quality": 2,
           "gap_specificity": 3,
           "actionability": 3,
-          "composite_score": 3.0
+          "composite_score": 2.67
         }
       },
       {
@@ -235,10 +235,10 @@
           "composite_score": 3.0
         },
         "judge_rating": {
-          "citation_quality": 3,
+          "citation_quality": 2,
           "gap_specificity": 3,
           "actionability": 3,
-          "composite_score": 3.0
+          "composite_score": 2.67
         }
       },
       {
@@ -251,10 +251,10 @@
           "composite_score": 2.67
         },
         "judge_rating": {
-          "citation_quality": 3,
+          "citation_quality": 2,
           "gap_specificity": 3,
           "actionability": 3,
-          "composite_score": 3.0
+          "composite_score": 2.67
         }
       }
     ]
@@ -309,47 +309,7 @@
       },
       {
         "candidate_id": "10624813",
-        "base_score": 95.88,
-        "base_decision": "AUTO_ADVANCE",
-        "total_variants_tested": 36,
-        "mean_score_delta": 0.0,
-        "decision_flips": 0,
-        "decision_flip_rate": 0.0,
-        "parity_preserved": true,
-        "samples": [
-          {
-            "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 95.88,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          },
-          {
-            "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 95.88,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          },
-          {
-            "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 95.88,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          },
-          {
-            "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 95.88,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          }
-        ]
-      },
-      {
-        "candidate_id": "27152464",
-        "base_score": 70.0,
+        "base_score": 54.28,
         "base_decision": "ESCALATE",
         "total_variants_tested": 36,
         "mean_score_delta": 0.0,
@@ -359,28 +319,68 @@
         "samples": [
           {
             "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 70.0,
+            "score": 54.28,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 70.0,
+            "score": 54.28,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 70.0,
+            "score": 54.28,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 70.0,
+            "score": 54.28,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          }
+        ]
+      },
+      {
+        "candidate_id": "27152464",
+        "base_score": 58.0,
+        "base_decision": "ESCALATE",
+        "total_variants_tested": 36,
+        "mean_score_delta": 0.0,
+        "decision_flips": 0,
+        "decision_flip_rate": 0.0,
+        "parity_preserved": true,
+        "samples": [
+          {
+            "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
+            "score": 58.0,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          },
+          {
+            "perturbation": "Jane Smith (Female) @ Stanford University",
+            "score": 58.0,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          },
+          {
+            "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
+            "score": 58.0,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          },
+          {
+            "perturbation": "Jane Smith (Female) @ Community College of Phil",
+            "score": 58.0,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
@@ -390,7 +390,7 @@
       {
         "candidate_id": "16186411",
         "base_score": 58.0,
-        "base_decision": "AUTO_ADVANCE",
+        "base_decision": "ESCALATE",
         "total_variants_tested": 36,
         "mean_score_delta": 0.0,
         "decision_flips": 0,
@@ -401,36 +401,36 @@
             "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
             "score": 58.0,
             "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
+            "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Stanford University",
             "score": 58.0,
             "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
+            "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
             "score": 58.0,
             "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
+            "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Community College of Phil",
             "score": 58.0,
             "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
+            "decision": "ESCALATE",
             "flipped": false
           }
         ]
       },
       {
         "candidate_id": "26746496",
-        "base_score": 58.0,
-        "base_decision": "AUTO_ADVANCE",
+        "base_score": 56.75,
+        "base_decision": "ESCALATE",
         "total_variants_tested": 36,
         "mean_score_delta": 0.0,
         "decision_flips": 0,
@@ -439,30 +439,30 @@
         "samples": [
           {
             "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 58.0,
+            "score": 56.75,
             "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
+            "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 58.0,
+            "score": 56.75,
             "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
+            "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 58.0,
+            "score": 56.75,
             "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
+            "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 58.0,
+            "score": 56.75,
             "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
+            "decision": "ESCALATE",
             "flipped": false
           }
         ]
@@ -509,7 +509,7 @@
       },
       {
         "candidate_id": "12472574",
-        "base_score": 77.5,
+        "base_score": 53.62,
         "base_decision": "ESCALATE",
         "total_variants_tested": 36,
         "mean_score_delta": 0.0,
@@ -519,28 +519,28 @@
         "samples": [
           {
             "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 77.5,
+            "score": 53.62,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 77.5,
+            "score": 53.62,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 77.5,
+            "score": 53.62,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 77.5,
+            "score": 53.62,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
@@ -549,7 +549,7 @@
       },
       {
         "candidate_id": "51588273",
-        "base_score": 77.5,
+        "base_score": 53.62,
         "base_decision": "ESCALATE",
         "total_variants_tested": 36,
         "mean_score_delta": 0.0,
@@ -559,28 +559,28 @@
         "samples": [
           {
             "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 77.5,
+            "score": 53.62,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 77.5,
+            "score": 53.62,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 77.5,
+            "score": 53.62,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 77.5,
+            "score": 53.62,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
@@ -589,7 +589,7 @@
       },
       {
         "candidate_id": "13385306",
-        "base_score": 72.5,
+        "base_score": 59.25,
         "base_decision": "ESCALATE",
         "total_variants_tested": 36,
         "mean_score_delta": 0.0,
@@ -599,28 +599,28 @@
         "samples": [
           {
             "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 72.5,
+            "score": 59.25,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 72.5,
+            "score": 59.25,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 72.5,
+            "score": 59.25,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 72.5,
+            "score": 59.25,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
@@ -629,7 +629,7 @@
       },
       {
         "candidate_id": "13405733",
-        "base_score": 70.0,
+        "base_score": 54.25,
         "base_decision": "ESCALATE",
         "total_variants_tested": 36,
         "mean_score_delta": 0.0,
@@ -639,28 +639,28 @@
         "samples": [
           {
             "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 70.0,
+            "score": 54.25,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 70.0,
+            "score": 54.25,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 70.0,
+            "score": 54.25,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 70.0,
+            "score": 54.25,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
@@ -669,47 +669,7 @@
       },
       {
         "candidate_id": "20674668",
-        "base_score": 82.5,
-        "base_decision": "AUTO_ADVANCE",
-        "total_variants_tested": 36,
-        "mean_score_delta": 0.0,
-        "decision_flips": 0,
-        "decision_flip_rate": 0.0,
-        "parity_preserved": true,
-        "samples": [
-          {
-            "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 82.5,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          },
-          {
-            "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 82.5,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          },
-          {
-            "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 82.5,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          },
-          {
-            "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 82.5,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          }
-        ]
-      },
-      {
-        "candidate_id": "20879311",
-        "base_score": 62.5,
+        "base_score": 81.25,
         "base_decision": "ESCALATE",
         "total_variants_tested": 36,
         "mean_score_delta": 0.0,
@@ -719,28 +679,68 @@
         "samples": [
           {
             "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 62.5,
+            "score": 81.25,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 62.5,
+            "score": 81.25,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 62.5,
+            "score": 81.25,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 62.5,
+            "score": 81.25,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          }
+        ]
+      },
+      {
+        "candidate_id": "20879311",
+        "base_score": 50.5,
+        "base_decision": "ESCALATE",
+        "total_variants_tested": 36,
+        "mean_score_delta": 0.0,
+        "decision_flips": 0,
+        "decision_flip_rate": 0.0,
+        "parity_preserved": true,
+        "samples": [
+          {
+            "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
+            "score": 50.5,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          },
+          {
+            "perturbation": "Jane Smith (Female) @ Stanford University",
+            "score": 50.5,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          },
+          {
+            "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
+            "score": 50.5,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          },
+          {
+            "perturbation": "Jane Smith (Female) @ Community College of Phil",
+            "score": 50.5,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
@@ -749,7 +749,7 @@
       },
       {
         "candidate_id": "28126340",
-        "base_score": 77.5,
+        "base_score": 61.75,
         "base_decision": "ESCALATE",
         "total_variants_tested": 36,
         "mean_score_delta": 0.0,
@@ -759,28 +759,28 @@
         "samples": [
           {
             "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 77.5,
+            "score": 61.75,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 77.5,
+            "score": 61.75,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 77.5,
+            "score": 61.75,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 77.5,
+            "score": 61.75,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
@@ -829,87 +829,7 @@
       },
       {
         "candidate_id": "37242217",
-        "base_score": 87.5,
-        "base_decision": "AUTO_ADVANCE",
-        "total_variants_tested": 36,
-        "mean_score_delta": 0.0,
-        "decision_flips": 0,
-        "decision_flip_rate": 0.0,
-        "parity_preserved": true,
-        "samples": [
-          {
-            "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 87.5,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          },
-          {
-            "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 87.5,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          },
-          {
-            "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 87.5,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          },
-          {
-            "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 87.5,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          }
-        ]
-      },
-      {
-        "candidate_id": "70089206",
-        "base_score": 80.0,
-        "base_decision": "AUTO_ADVANCE",
-        "total_variants_tested": 36,
-        "mean_score_delta": 0.0,
-        "decision_flips": 0,
-        "decision_flip_rate": 0.0,
-        "parity_preserved": true,
-        "samples": [
-          {
-            "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 80.0,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          },
-          {
-            "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 80.0,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          },
-          {
-            "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 80.0,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          },
-          {
-            "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 80.0,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          }
-        ]
-      },
-      {
-        "candidate_id": "11981094",
-        "base_score": 77.5,
+        "base_score": 78.75,
         "base_decision": "ESCALATE",
         "total_variants_tested": 36,
         "mean_score_delta": 0.0,
@@ -919,28 +839,108 @@
         "samples": [
           {
             "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 77.5,
+            "score": 78.75,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 77.5,
+            "score": 78.75,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 77.5,
+            "score": 78.75,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 77.5,
+            "score": 78.75,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          }
+        ]
+      },
+      {
+        "candidate_id": "70089206",
+        "base_score": 76.25,
+        "base_decision": "ESCALATE",
+        "total_variants_tested": 36,
+        "mean_score_delta": 0.0,
+        "decision_flips": 0,
+        "decision_flip_rate": 0.0,
+        "parity_preserved": true,
+        "samples": [
+          {
+            "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
+            "score": 76.25,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          },
+          {
+            "perturbation": "Jane Smith (Female) @ Stanford University",
+            "score": 76.25,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          },
+          {
+            "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
+            "score": 76.25,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          },
+          {
+            "perturbation": "Jane Smith (Female) @ Community College of Phil",
+            "score": 76.25,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          }
+        ]
+      },
+      {
+        "candidate_id": "11981094",
+        "base_score": 53.62,
+        "base_decision": "ESCALATE",
+        "total_variants_tested": 36,
+        "mean_score_delta": 0.0,
+        "decision_flips": 0,
+        "decision_flip_rate": 0.0,
+        "parity_preserved": true,
+        "samples": [
+          {
+            "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
+            "score": 53.62,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          },
+          {
+            "perturbation": "Jane Smith (Female) @ Stanford University",
+            "score": 53.62,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          },
+          {
+            "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
+            "score": 53.62,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          },
+          {
+            "perturbation": "Jane Smith (Female) @ Community College of Phil",
+            "score": 53.62,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
@@ -949,47 +949,7 @@
       },
       {
         "candidate_id": "28078163",
-        "base_score": 80.0,
-        "base_decision": "AUTO_ADVANCE",
-        "total_variants_tested": 36,
-        "mean_score_delta": 0.0,
-        "decision_flips": 0,
-        "decision_flip_rate": 0.0,
-        "parity_preserved": true,
-        "samples": [
-          {
-            "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 80.0,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          },
-          {
-            "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 80.0,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          },
-          {
-            "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 80.0,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          },
-          {
-            "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 80.0,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          }
-        ]
-      },
-      {
-        "candidate_id": "28505854",
-        "base_score": 75.0,
+        "base_score": 54.56,
         "base_decision": "ESCALATE",
         "total_variants_tested": 36,
         "mean_score_delta": 0.0,
@@ -999,28 +959,68 @@
         "samples": [
           {
             "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 75.0,
+            "score": 54.56,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 75.0,
+            "score": 54.56,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 75.0,
+            "score": 54.56,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 75.0,
+            "score": 54.56,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          }
+        ]
+      },
+      {
+        "candidate_id": "28505854",
+        "base_score": 59.25,
+        "base_decision": "ESCALATE",
+        "total_variants_tested": 36,
+        "mean_score_delta": 0.0,
+        "decision_flips": 0,
+        "decision_flip_rate": 0.0,
+        "parity_preserved": true,
+        "samples": [
+          {
+            "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
+            "score": 59.25,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          },
+          {
+            "perturbation": "Jane Smith (Female) @ Stanford University",
+            "score": 59.25,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          },
+          {
+            "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
+            "score": 59.25,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          },
+          {
+            "perturbation": "Jane Smith (Female) @ Community College of Phil",
+            "score": 59.25,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
@@ -1029,47 +1029,7 @@
       },
       {
         "candidate_id": "28630325",
-        "base_score": 80.0,
-        "base_decision": "AUTO_ADVANCE",
-        "total_variants_tested": 36,
-        "mean_score_delta": 0.0,
-        "decision_flips": 0,
-        "decision_flip_rate": 0.0,
-        "parity_preserved": true,
-        "samples": [
-          {
-            "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 80.0,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          },
-          {
-            "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 80.0,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          },
-          {
-            "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 80.0,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          },
-          {
-            "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 80.0,
-            "delta": 0.0,
-            "decision": "AUTO_ADVANCE",
-            "flipped": false
-          }
-        ]
-      },
-      {
-        "candidate_id": "28762662",
-        "base_score": 77.5,
+        "base_score": 58.0,
         "base_decision": "ESCALATE",
         "total_variants_tested": 36,
         "mean_score_delta": 0.0,
@@ -1079,28 +1039,68 @@
         "samples": [
           {
             "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 77.5,
+            "score": 58.0,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 77.5,
+            "score": 58.0,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 77.5,
+            "score": 58.0,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 77.5,
+            "score": 58.0,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          }
+        ]
+      },
+      {
+        "candidate_id": "28762662",
+        "base_score": 53.62,
+        "base_decision": "ESCALATE",
+        "total_variants_tested": 36,
+        "mean_score_delta": 0.0,
+        "decision_flips": 0,
+        "decision_flip_rate": 0.0,
+        "parity_preserved": true,
+        "samples": [
+          {
+            "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
+            "score": 53.62,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          },
+          {
+            "perturbation": "Jane Smith (Female) @ Stanford University",
+            "score": 53.62,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          },
+          {
+            "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
+            "score": 53.62,
+            "delta": 0.0,
+            "decision": "ESCALATE",
+            "flipped": false
+          },
+          {
+            "perturbation": "Jane Smith (Female) @ Community College of Phil",
+            "score": 53.62,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
@@ -1109,7 +1109,7 @@
       },
       {
         "candidate_id": "31677347",
-        "base_score": 77.5,
+        "base_score": 61.75,
         "base_decision": "ESCALATE",
         "total_variants_tested": 36,
         "mean_score_delta": 0.0,
@@ -1119,28 +1119,28 @@
         "samples": [
           {
             "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 77.5,
+            "score": 61.75,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 77.5,
+            "score": 61.75,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 77.5,
+            "score": 61.75,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 77.5,
+            "score": 61.75,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
@@ -1149,7 +1149,7 @@
       },
       {
         "candidate_id": "37335325",
-        "base_score": 72.5,
+        "base_score": 60.5,
         "base_decision": "ESCALATE",
         "total_variants_tested": 36,
         "mean_score_delta": 0.0,
@@ -1159,28 +1159,28 @@
         "samples": [
           {
             "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 72.5,
+            "score": 60.5,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 72.5,
+            "score": 60.5,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 72.5,
+            "score": 60.5,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 72.5,
+            "score": 60.5,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
@@ -1189,7 +1189,7 @@
       },
       {
         "candidate_id": "10839851",
-        "base_score": 60.88,
+        "base_score": 48.88,
         "base_decision": "ESCALATE",
         "total_variants_tested": 36,
         "mean_score_delta": 0.0,
@@ -1199,28 +1199,28 @@
         "samples": [
           {
             "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 60.88,
+            "score": 48.88,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 60.88,
+            "score": 48.88,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 60.88,
+            "score": 48.88,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 60.88,
+            "score": 48.88,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
@@ -1229,8 +1229,8 @@
       },
       {
         "candidate_id": "12334140",
-        "base_score": 62.5,
-        "base_decision": "ESCALATE",
+        "base_score": 48.0,
+        "base_decision": "AUTO_REJECT",
         "total_variants_tested": 36,
         "mean_score_delta": 0.0,
         "decision_flips": 0,
@@ -1239,30 +1239,30 @@
         "samples": [
           {
             "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 62.5,
+            "score": 48.0,
             "delta": 0.0,
-            "decision": "ESCALATE",
+            "decision": "AUTO_REJECT",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 62.5,
+            "score": 48.0,
             "delta": 0.0,
-            "decision": "ESCALATE",
+            "decision": "AUTO_REJECT",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 62.5,
+            "score": 48.0,
             "delta": 0.0,
-            "decision": "ESCALATE",
+            "decision": "AUTO_REJECT",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 62.5,
+            "score": 48.0,
             "delta": 0.0,
-            "decision": "ESCALATE",
+            "decision": "AUTO_REJECT",
             "flipped": false
           }
         ]
@@ -1309,7 +1309,7 @@
       },
       {
         "candidate_id": "17681064",
-        "base_score": 70.0,
+        "base_score": 54.25,
         "base_decision": "ESCALATE",
         "total_variants_tested": 36,
         "mean_score_delta": 0.0,
@@ -1319,28 +1319,28 @@
         "samples": [
           {
             "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 70.0,
+            "score": 54.25,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 70.0,
+            "score": 54.25,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 70.0,
+            "score": 54.25,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 70.0,
+            "score": 54.25,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
@@ -1429,7 +1429,7 @@
       },
       {
         "candidate_id": "20824105",
-        "base_score": 50.5,
+        "base_score": 49.25,
         "base_decision": "ESCALATE",
         "total_variants_tested": 36,
         "mean_score_delta": 0.0,
@@ -1439,28 +1439,28 @@
         "samples": [
           {
             "perturbation": "Jane Smith (Female) @ Massachusetts Institute o",
-            "score": 50.5,
+            "score": 49.25,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Stanford University",
-            "score": 50.5,
+            "score": 49.25,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Metropolitan State Univer",
-            "score": 50.5,
+            "score": 49.25,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false
           },
           {
             "perturbation": "Jane Smith (Female) @ Community College of Phil",
-            "score": 50.5,
+            "score": 49.25,
             "delta": 0.0,
             "decision": "ESCALATE",
             "flipped": false

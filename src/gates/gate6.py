@@ -403,12 +403,28 @@ def evaluate_gate6(
 
     is_overqualified = False
     sen_scores = cfg.gate6.seniority_scores
+    calib_cfg = getattr(cfg.gate6, "overqualification_calibration", None)
+    max_seniority_str = calib_cfg.max_applicable_target_seniority if calib_cfg else "mid"
+    try:
+        max_seniority_enum = SeniorityLevel(max_seniority_str.lower())
+    except ValueError:
+        max_seniority_enum = SeniorityLevel.MID
+    max_seniority_rank = SENIORITY_HIERARCHY.get(max_seniority_enum, 3)
+    min_diff = calib_cfg.min_seniority_diff if calib_cfg else 2
+    excess_thresh = (
+        calib_cfg.excess_years_threshold
+        if calib_cfg
+        else getattr(sen_scores, "overqualified_flag_threshold", 3.0)
+    )
 
     # Overqualification check: excess experience and seniority level over target role (F2/F15)
-    # Overqualification only applies if the candidate meets baseline technical competence (not a domain mismatch)
+    # In enterprise recruitment, overqualification structurally applies to roles up to max_applicable_target_seniority (e.g. Entry, Junior, Mid).
+    # Technical leadership roles (Staff, Lead, Principal) are exempt from overqualification penalties.
     excess_years = actual_years - max(required_years, 0.0)
     is_excessively_senior = (
-        diff >= 2 and excess_years >= sen_scores.overqualified_flag_threshold
+        jd_rank <= max_seniority_rank
+        and diff >= min_diff
+        and excess_years >= excess_thresh
     )
     if is_excessively_senior and raw_tech >= 0.40:
         is_overqualified = True
@@ -537,6 +553,26 @@ def evaluate_gate6(
         + (education_score * w.education)
         + (location_score * w.location)
     )
+
+    # Enterprise ATS Calibration: Role-Level Overqualification Ceiling
+    # When a candidate is overqualified for an Entry/Junior/Mid role, their requisition fit
+    # represents a 3-star recruiter escalation call (not an auto-advance). Their continuous score
+    # cannot exceed the recruiter escalation boundary (<= 73.0), preserving top-k ranking for target fits.
+    if is_overqualified and calib_cfg and calib_cfg.enabled:
+        weighted_total = min(weighted_total * calib_cfg.score_factor, calib_cfg.score_ceiling)
+        ledger_entries.append(
+            LedgerEntry(
+                dimension=DimensionType.SENIORITY,
+                requirement=f"Requisition Alignment ({jd_level.value.upper()})",
+                evidence=f"Candidate seniority ({cand_level.value.upper()}) and {actual_years:.1f} YoE exceed target requisition scope.",
+                is_verified=True,
+                score_contribution=round(weighted_total, 2),
+                gap=(
+                    f"Overqualification calibration applied: Continuous score adjusted to recruiter review "
+                    f"band (<= {calib_cfg.score_ceiling}) to preserve top-k ranking for target talent."
+                ),
+            )
+        )
 
     breakdown = ScoringBreakdown(
         technical_score=round(technical_score, 2),

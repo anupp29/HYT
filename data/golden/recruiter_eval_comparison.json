@@ -1,0 +1,54 @@
+{
+  "previous_golden_labels": {
+    "accuracy": 0.575,
+    "macro_f1": 0.4718,
+    "weighted_f1": 0.5465,
+    "mean_ndcg5": 0.8208717391687905,
+    "mean_ndcg10": 0.8201123003386562,
+    "false_rejections": 1,
+    "false_advances": 0,
+    "confusion_matrix": [
+      [
+        4,
+        27,
+        1
+      ],
+      [
+        1,
+        75,
+        28
+      ],
+      [
+        0,
+        28,
+        36
+      ]
+    ]
+  },
+  "new_recruiter_labels": {
+    "accuracy": 0.585,
+    "macro_f1": 0.5459,
+    "weighted_f1": 0.5936,
+    "mean_ndcg5": 0.7861066671016551,
+    "mean_ndcg10": 0.8033186288694902,
+    "false_rejections": 0,
+    "false_advances": 2,
+    "confusion_matrix": [
+      [
+        3,
+        5,
+        0
+      ],
+      [
+        0,
+        52,
+        3
+      ],
+      [
+        2,
+        73,
+        62
+      ]
+    ]
+  }
+}

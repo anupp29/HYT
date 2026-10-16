@@ -292,5 +292,11 @@
     "gap_specificity": 3,
     "actionability": 3,
     "composite_score": 2.67
+  },
+  "18159866": {
+    "citation_quality": 2,
+    "gap_specificity": 3,
+    "actionability": 3,
+    "composite_score": 2.67
   }
 }

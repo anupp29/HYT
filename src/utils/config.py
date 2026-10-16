@@ -119,12 +119,24 @@ class Gate6SeniorityScores(BaseModel):
     overqualified_flag_threshold: float = Field(default=4.0, ge=1.0, le=30.0)
 
 
+class OverqualificationCalibrationConfig(BaseModel):
+    enabled: bool = True
+    max_applicable_target_seniority: str = "mid"
+    min_seniority_diff: int = 2
+    excess_years_threshold: float = Field(default=3.0, ge=1.0, le=30.0)
+    score_factor: float = Field(default=0.75, ge=0.1, le=1.0)
+    score_ceiling: float = Field(default=73.0, ge=0.0, le=100.0)
+
+
 class Gate6Config(BaseModel):
     weights: Gate6Weights = Field(default_factory=Gate6Weights)
     hard_gate_similarity_threshold: float = Field(default=0.68, ge=0.0, le=1.0)
     unverified_skill_weight: float = Field(default=0.45, ge=0.0, le=1.0)
     nicetohave_skill_weight: float = Field(default=0.30, ge=0.0, le=1.0)
     seniority_scores: Gate6SeniorityScores = Field(default_factory=Gate6SeniorityScores)
+    overqualification_calibration: OverqualificationCalibrationConfig = Field(
+        default_factory=OverqualificationCalibrationConfig
+    )
     education_partial_score: float = Field(default=0.60, ge=0.01, le=1.0)
     location_partial_score: float = Field(default=0.50, ge=0.01, le=1.0)
 

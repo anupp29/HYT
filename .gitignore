@@ -1,15 +1,23 @@
-# Raw and processed data - never commit PII
+# ==============================================================================
+# HYT ATS - Git Ignore Rules
+# ==============================================================================
+
+# Raw and processed data - never commit PII or applicant resumes
 data/raw/
 data/sample/
 data/adversarial/
 
-# LLM cache - regenerable, not source code
+# LLM cache & Embedding models - regenerable, not source code
 cache/
+*.pkl
+*.sqlite
+*.sqlite-journal
 
-# Logs
+# Logs & Diagnostics
 logs/
+*.log
 
-# Python environment
+# Python environment & bytecode
 .env
 __pycache__/
 *.pyc
@@ -18,22 +26,26 @@ __pycache__/
 .venv/
 venv/
 env/
+.pytest_cache/
 
-# OS files
+# OS and Editor files
 .DS_Store
 Thumbs.db
-
-# Editor
 .vscode/
 .idea/
 
-# Build artifacts
+# Build artifacts & distribution
 dist/
 build/
 *.egg-info/
 
-# Golden set - commit only golden_labels.csv and golden_summary.json (no PDFs)
-# data/golden/ IS committed - it contains labels only (no raw resumes)
-
-# Synthetic evaluation runs
+# Evaluation packages & scratch directories
 check/
+scratch/
+recruiter_annotation_kit.zip
+recruiter_annotation_kit/
+/recruiter_human_labels.csv
+
+# Golden Set Policy:
+# Canonical labels live inside data/golden/ (tracked)
+# No raw resumes or PII PDFs are ever committed

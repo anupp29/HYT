@@ -263,12 +263,14 @@ def test_gate8_advance_generates_grounded_explanation(clean_high_ledger, clean_j
     dec = evaluate_gate7(ledger=clean_high_ledger)
     assert dec.decision == DecisionType.AUTO_ADVANCE
 
-    explanation = evaluate_gate8(
-        ledger=clean_high_ledger,
-        decision_result=dec,
-        jd=clean_job,
-        use_cache=False,
-    )
+    mock_json = '{"strengths_sentence": "Candidate demonstrates strong proficiency in Python and Docker with proven production experience.", "gaps_sentence": "Candidate has minor gap in PostgreSQL scaling at petabyte volume.", "interview_focus_sentence": "Recommend live coding exercise focused on PostgreSQL query performance."}'
+    with patch("src.utils.llm_client.LLMClient.complete", return_value=mock_json):
+        explanation = evaluate_gate8(
+            ledger=clean_high_ledger,
+            decision_result=dec,
+            jd=clean_job,
+            use_cache=False,
+        )
     assert explanation is not None
     assert len(explanation.strengths_sentence) > 10
     assert len(explanation.gaps_sentence) > 10
@@ -280,7 +282,9 @@ def test_gate8_advance_generates_grounded_explanation(clean_high_ledger, clean_j
 def test_gate8_disk_caching(clean_high_ledger, clean_job):
     """Subsequent evaluations for same candidate + score return cached explanation with 0 API calls."""
     dec = evaluate_gate7(ledger=clean_high_ledger)
-    exp1 = evaluate_gate8(ledger=clean_high_ledger, decision_result=dec, jd=clean_job, use_cache=True, force_refresh=True)
+    mock_json = '{"strengths_sentence": "Candidate demonstrates strong proficiency in Python and Docker with proven production experience.", "gaps_sentence": "Candidate has minor gap in PostgreSQL scaling at petabyte volume.", "interview_focus_sentence": "Recommend live coding exercise focused on PostgreSQL query performance."}'
+    with patch("src.utils.llm_client.LLMClient.complete", return_value=mock_json):
+        exp1 = evaluate_gate8(ledger=clean_high_ledger, decision_result=dec, jd=clean_job, use_cache=True, force_refresh=True)
     exp2 = evaluate_gate8(ledger=clean_high_ledger, decision_result=dec, jd=clean_job, use_cache=True, force_refresh=False)
 
     assert exp1 is not None and exp2 is not None

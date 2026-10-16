@@ -65,6 +65,10 @@ class CacheManager:
         except Exception:
             return None
 
+    def set_model(self, namespace: str, key: str, model: BaseModel) -> bool:
+        """Serializes and writes a Pydantic model atomically to disk."""
+        return self.set(namespace, key, model)
+
     def set(self, namespace: str, key: str, value: Union[Dict[str, Any], BaseModel, list]) -> bool:
         """
         Serializes and writes an object atomically to disk using a temp file.
