@@ -47,7 +47,7 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
 }) => {
   if (!isOpen || !candidate) return null;
 
-  const [activeTab, setActiveTab] = useState<'ledger' | 'experience' | 'projects' | 'qa' | 'notes'>('ledger');
+  const [activeTab, setActiveTab] = useState<'pipeline' | 'ledger' | 'experience' | 'projects' | 'qa' | 'notes'>('pipeline');
   const [showMoveMenu, setShowMoveMenu] = useState<boolean>(false);
   const [showCopyMenu, setShowCopyMenu] = useState<boolean>(false);
   const [copiedNotification, setCopiedNotification] = useState<string | null>(null);
@@ -88,6 +88,7 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
     setNewNoteText('');
   };
 
+  const totalExpYears = candidate.experience?.reduce((acc, e) => acc + (e.years || 0), 0) || 2.5;
   const currentIndex = candidatesList.findIndex(c => c.candidate_id === candidate.candidate_id);
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < candidatesList.length - 1;
@@ -294,6 +295,59 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
 
         {/* Modal Body Container */}
         <div className="modal-body-scroll">
+          {/* Candidate AI Processing Pipeline Stepper (Matching PDF Page 14) */}
+          <div style={{
+            background: 'var(--bg-surface-subtle)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 'var(--radius-lg)',
+            padding: '12px 20px',
+            marginBottom: 20,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 12
+          }}>
+            {[
+              { step: '1. Resume Received', time: '10:24 AM', status: 'Completed' },
+              { step: '2. Text Extraction', time: '10:25 AM', status: 'Completed' },
+              { step: '3. Information Extraction', time: '10:27 AM', status: 'Completed' },
+              { step: '4. Integrity Check', time: '10:28 AM', status: candidate.is_quarantined ? 'Flagged' : 'Completed' },
+              { step: '5. Matching & Scoring', time: '10:29 AM', status: 'Completed' }
+            ].map((item, idx, arr) => (
+              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                  <div style={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: '50%',
+                    background: item.status === 'Flagged' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.15)',
+                    color: item.status === 'Flagged' ? '#EF4444' : '#10B981',
+                    border: `1px solid ${item.status === 'Flagged' ? 'rgba(239, 68, 68, 0.4)' : 'rgba(16, 185, 129, 0.3)'}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 11,
+                    fontWeight: 800
+                  }}>
+                    {item.status === 'Flagged' ? '!' : '✓'}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>
+                      {item.step}
+                    </div>
+                    <div style={{ fontSize: 10.5, color: item.status === 'Flagged' ? '#EF4444' : 'var(--text-muted)' }}>
+                      {item.status} • {item.time}
+                    </div>
+                  </div>
+                </div>
+                {idx < arr.length - 1 && (
+                  <ChevronRight size={13} color="var(--text-muted)" style={{ opacity: 0.6 }} />
+                )}
+              </div>
+            ))}
+          </div>
+
           {/* Candidate Profile Header Card */}
           <div style={{
             display: 'flex',
@@ -427,13 +481,21 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
           </div>
 
           {/* Navigation Tabs */}
-          <div style={{ display: 'flex', borderBottom: '1px solid var(--border-subtle)', gap: 24 }}>
+          <div style={{ display: 'flex', borderBottom: '1px solid var(--border-subtle)', gap: 20, overflowX: 'auto' }}>
+            <button 
+              className={`tab-btn ${activeTab === 'pipeline' ? 'active' : ''}`}
+              onClick={() => setActiveTab('pipeline')}
+            >
+              <Cpu size={15} />
+              <span>AI Pipeline & Analysis</span>
+            </button>
+
             <button 
               className={`tab-btn ${activeTab === 'ledger' ? 'active' : ''}`}
               onClick={() => setActiveTab('ledger')}
             >
-              <Cpu size={15} />
-              <span>12-Gate Evidence Ledger & AI Audit</span>
+              <ShieldCheck size={15} />
+              <span>12-Gate Evidence Ledger</span>
             </button>
 
             <button 
@@ -449,7 +511,7 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
               onClick={() => setActiveTab('projects')}
             >
               <GitBranch size={15} />
-              <span>Side Projects & Live Proofs ({candidate.project_repos.length})</span>
+              <span>Side Projects ({candidate.project_repos.length})</span>
             </button>
 
             <button 
@@ -468,6 +530,307 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
               <span>Team Evaluation ({teamNotes.length})</span>
             </button>
           </div>
+
+          {/* TAB 0: Candidate Analysis & AI Pipeline (from PDF Page 14) */}
+          {activeTab === 'pipeline' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              {/* Row 1: Resume Details, Extracted Structured Output & Score Breakdown */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr 1.2fr', gap: 16 }}>
+                {/* 1. Resume Details */}
+                <div style={{
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: 16,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between'
+                }}>
+                  <div>
+                    <div style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 10 }}>
+                      Resume Details
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                      <div style={{
+                        width: 38,
+                        height: 38,
+                        borderRadius: 'var(--radius-md)',
+                        background: 'rgba(2, 133, 250, 0.1)',
+                        border: '1px solid rgba(2, 133, 250, 0.25)',
+                        color: 'var(--primary-600)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <FileText size={20} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+                          {candidate.name.toLowerCase().replace(/ /g, '_')}_resume.pdf
+                        </div>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                          PDF • 1.2 MB • 2 Pages
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: 11.5, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                      <div><strong>Uploaded:</strong> {candidate.applied_at}</div>
+                      <div><strong>OCR Status:</strong> Not Needed (Digital Vector PDF)</div>
+                      <div><strong>Parse Confidence:</strong> 98.8% High</div>
+                    </div>
+                  </div>
+
+                  <button
+                    className="btn-secondary"
+                    onClick={() => {
+                      setCopiedNotification('Opening original resume preview in viewer...');
+                      setTimeout(() => setCopiedNotification(null), 3000);
+                    }}
+                    style={{ width: '100%', marginTop: 14, fontSize: 12, padding: '7px 0', justifyContent: 'center' }}
+                  >
+                    <ExternalLink size={13} />
+                    <span>View Full Resume</span>
+                  </button>
+                </div>
+
+                {/* 2. Extracted Information (Structured Output) */}
+                <div style={{
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: 16
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+                    <span style={{ fontSize: 11, fontWeight: 800, background: 'rgba(2, 133, 250, 0.15)', color: 'var(--primary-600)', padding: '2px 6px', borderRadius: 4 }}>
+                      AI
+                    </span>
+                    <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
+                      Extracted Information (Structured)
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, fontSize: 12.5, marginBottom: 12 }}>
+                    <div>
+                      <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>Role:</span>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{candidate.headline}</div>
+                    </div>
+                    <div>
+                      <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>Experience:</span>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{totalExpYears} years</div>
+                    </div>
+                    <div>
+                      <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>Location:</span>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{candidate.location}</div>
+                    </div>
+                    <div>
+                      <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>Education:</span>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>B.Tech Computer Science</div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span style={{ color: 'var(--text-muted)', fontSize: 11, display: 'block', marginBottom: 4 }}>
+                      Skills (Extracted):
+                    </span>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                      {candidate.skills.slice(0, 6).map(s => (
+                        <span key={s.name} style={{
+                          background: 'var(--bg-surface-subtle)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-sm)',
+                          padding: '2px 8px',
+                          fontSize: 11,
+                          fontWeight: 600,
+                          color: 'var(--text-primary)'
+                        }}>
+                          {s.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Score Breakdown */}
+                <div style={{
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: 16
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                    <div style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
+                      Score Breakdown
+                    </div>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--primary-600)', fontFamily: 'var(--font-mono)' }}>
+                      {candidate.final_score.toFixed(1)}/100
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 7, fontSize: 11.5 }}>
+                    {[
+                      { label: 'Technical Skills (40%)', score: '36/40', pct: 90 },
+                      { label: 'Experience Match (20%)', score: '18/20', pct: 90 },
+                      { label: 'Education Match (10%)', score: '9/10', pct: 90 },
+                      { label: 'Project Relevance (15%)', score: '13/15', pct: 86 },
+                      { label: 'Location Match (5%)', score: '5/5', pct: 100 },
+                      { label: 'Soft Skills / Fit (10%)', score: '8/10', pct: 80 }
+                    ].map(b => (
+                      <div key={b.label}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                          <span style={{ color: 'var(--text-secondary)' }}>{b.label}</span>
+                          <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>{b.score}</span>
+                        </div>
+                        <div style={{ width: '100%', height: 4, background: 'var(--bg-surface-subtle)', borderRadius: 2 }}>
+                          <div style={{ width: `${b.pct}%`, height: '100%', background: 'var(--primary-600)', borderRadius: 2 }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Row 2: Requirement-wise Matching Results & Integrity Check Results */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1.45fr 1fr', gap: 16 }}>
+                {/* Requirement-wise Matching Results Table */}
+                <div style={{
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: 18
+                }}>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>
+                    Matching Results (Requirement-wise)
+                  </div>
+
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-muted)', fontSize: 11, textTransform: 'uppercase' }}>
+                        <th style={{ padding: '8px 10px', textAlign: 'left' }}>Job Requirement</th>
+                        <th style={{ padding: '8px 10px', textAlign: 'left' }}>Candidate Evidence</th>
+                        <th style={{ padding: '8px 10px', textAlign: 'center' }}>Match</th>
+                        <th style={{ padding: '8px 10px', textAlign: 'right' }}>Score</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[
+                        { req: 'Python (Must Have)', evidence: 'Listed in skills, verified in GitHub commits', match: '✓', score: '18/20', color: '#10B981' },
+                        { req: 'React (Must Have)', evidence: 'Built web frontend, demo URL verified', match: '✓', score: '16/20', color: '#10B981' },
+                        { req: 'SQL (Must Have)', evidence: 'PostgreSQL migrations, query benchmarks', match: '✓', score: '14/15', color: '#10B981' },
+                        { req: '2-4 yrs Experience', evidence: `${totalExpYears} years verified engineering`, match: '✓', score: '15/15', color: '#10B981' },
+                        { req: 'B.Tech in CS', evidence: 'B.Tech Computer Science verified', match: '✓', score: '10/10', color: '#10B981' },
+                        { req: 'REST APIs (Preferred)', evidence: 'FastAPI REST endpoints in repo', match: '✓', score: '8/10', color: '#10B981' },
+                        { req: 'Docker (Preferred)', evidence: 'Dockerfile container setup', match: '✓', score: '7/10', color: '#10B981' },
+                        { req: 'AWS Cloud (Preferred)', evidence: 'AWS Cloud deployment verified', match: '✓', score: '6/10', color: '#10B981' },
+                        { req: 'System Design (Preferred)', evidence: 'Architectural case study documented', match: '✓', score: '8/10', color: '#10B981' }
+                      ].map((r, i) => (
+                        <tr key={i} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                          <td style={{ padding: '9px 10px', fontWeight: 600, color: 'var(--text-primary)' }}>{r.req}</td>
+                          <td style={{ padding: '9px 10px', color: 'var(--text-secondary)' }}>{r.evidence}</td>
+                          <td style={{ padding: '9px 10px', textAlign: 'center', color: r.color, fontWeight: 800 }}>{r.match}</td>
+                          <td style={{ padding: '9px 10px', textAlign: 'right', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>{r.score}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* 8-Point Integrity Check Results */}
+                <div style={{
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: 18
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>
+                      Integrity Check Results (Gate 0)
+                    </div>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#10B981', background: 'rgba(16, 185, 129, 0.1)', padding: '2px 8px', borderRadius: 4 }}>
+                      8/8 Passed
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+                    {[
+                      { check: 'Hidden Text', result: 'Pass', details: 'No white or invisible font text found' },
+                      { check: 'Tiny Fonts', result: 'Pass', details: 'No unusually small fonts detected (< 4pt)' },
+                      { check: 'Off-page Text', result: 'Pass', details: 'No off-page canvas rendering detected' },
+                      { check: 'Keyword Stuffing', result: 'Pass', details: 'Normal keyword density (1.4%)' },
+                      { check: 'Suspicious Metadata', result: 'Pass', details: 'No metadata tampering found' },
+                      { check: 'Date Overlaps', result: 'Pass', details: 'No overlapping employment dates' },
+                      { check: 'Prompt Injection', result: 'Pass', details: 'No injection delimiters found' },
+                      { check: 'Scanned Document', result: 'Pass', details: 'Text extracted directly without OCR' }
+                    ].map((c, i) => (
+                      <div key={i} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '6px 10px',
+                        background: 'var(--bg-surface-subtle)',
+                        borderRadius: 'var(--radius-sm)',
+                        fontSize: 12
+                      }}>
+                        <div>
+                          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{c.check}: </span>
+                          <span style={{ color: 'var(--text-tertiary)', fontSize: 11 }}>{c.details}</span>
+                        </div>
+                        <span style={{
+                          color: '#10B981',
+                          fontWeight: 700,
+                          fontSize: 11,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 3
+                        }}>
+                          <CheckCircle2 size={12} /> {c.result}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Row 3: AI Explanation & Recommendations */}
+              <div style={{
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-lg)',
+                padding: 18,
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 20
+              }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                    <CheckCircle2 size={15} color="#10B981" />
+                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+                      Why this candidate is a good fit
+                    </span>
+                  </div>
+                  <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                    <li>Strong match in core technical skills (Python, React, SQL) verified by actual commits.</li>
+                    <li>Demonstrated practical experience building real-world web applications.</li>
+                    <li>Good problem-solving and clean algorithmic architecture in submitted repositories.</li>
+                    <li>Verified relevant educational foundation in Computer Science.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                    <AlertTriangle size={15} color="#F59E0B" />
+                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+                      Missing / Areas to Consider
+                    </span>
+                  </div>
+                  <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                    <li>Limited verified experience with enterprise Kubernetes cluster orchestration.</li>
+                    <li>High-load distributed system design experience not explicitly detailed.</li>
+                    <li>Recommend probing database indexing and concurrency patterns during interview.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* TAB 1: 12-Gate Evidence Ledger & AI Audit */}
           {activeTab === 'ledger' && (

@@ -14,13 +14,14 @@ import { OutreachModal } from './components/OutreachModal';
 import { StagesModal } from './components/StagesModal';
 import { CareersPageView } from './components/CareersPageView';
 import { HomePage } from './components/HomePage';
+import { AnalyticsView } from './components/AnalyticsView';
 import { MOCK_JOBS, MOCK_CANDIDATES } from './data/mockdata';
 import { CandidateRecord, CandidateStage, JobDescription } from './types/ats';
 
 export const App: React.FC = () => {
   // Navigation & Role State
   const [activeRole, setActiveRole] = useState<'hr' | 'candidate'>('hr');
-  const [currentView, setCurrentView] = useState<'home' | 'jobs' | 'applicants' | 'candidate-portal' | 'candidate-explore-jobs' | 'careers'>('applicants');
+  const [currentView, setCurrentView] = useState<'home' | 'jobs' | 'applicants' | 'candidate-portal' | 'candidate-explore-jobs' | 'careers' | 'analytics'>('applicants');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [isSidebarExpanded, setIsSidebarExpanded] = useState<boolean>(true);
 
@@ -171,7 +172,7 @@ export const App: React.FC = () => {
           if (view === 'candidate-portal' || view === 'candidate-explore-jobs') {
             setActiveRole('candidate');
           }
-          if (view === 'jobs' || view === 'applicants' || view === 'careers') {
+          if (view === 'jobs' || view === 'applicants' || view === 'careers' || view === 'analytics') {
             setActiveRole('hr');
           }
         }}
@@ -224,6 +225,8 @@ export const App: React.FC = () => {
                 setCurrentView('candidate-explore-jobs');
               }}
             />
+          ) : currentView === 'analytics' ? (
+            <AnalyticsView />
           ) : (
             <ApplicantsDashboard 
               job={selectedJob}

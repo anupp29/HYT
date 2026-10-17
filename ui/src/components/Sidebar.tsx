@@ -12,13 +12,14 @@ import {
   FileCheck2,
   Send,
   Globe,
-  Play
+  Play,
+  BarChart3
 } from 'lucide-react';
 import { CURRENT_HR_USER, CURRENT_CANDIDATE_USER } from '../data/mockdata';
 
 interface SidebarProps {
-  currentView: 'home' | 'jobs' | 'applicants' | 'candidate-portal' | 'candidate-explore-jobs' | 'careers';
-  onNavigate: (view: 'home' | 'jobs' | 'applicants' | 'candidate-portal' | 'candidate-explore-jobs' | 'careers') => void;
+  currentView: 'home' | 'jobs' | 'applicants' | 'candidate-portal' | 'candidate-explore-jobs' | 'careers' | 'analytics';
+  onNavigate: (view: 'home' | 'jobs' | 'applicants' | 'candidate-portal' | 'candidate-explore-jobs' | 'careers' | 'analytics') => void;
   activeRole: 'hr' | 'candidate';
   onOpenSignals: () => void;
   onOpenGateShield: () => void;
@@ -99,6 +100,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
               >
                 <ShieldCheck size={18} />
                 {isExpanded && <span>12-Gate Shield</span>}
+              </button>
+
+              <button
+                className={`sidebar-nav-item ${currentView === 'analytics' ? 'active' : ''}`}
+                onClick={() => onNavigate('analytics')}
+                title="AI Recruitment Pipeline Analytics & Benchmarks"
+              >
+                <BarChart3 size={18} />
+                {isExpanded && <span>Analytics</span>}
               </button>
 
               <button

@@ -16,13 +16,13 @@ import {
 import { CURRENT_HR_USER, CURRENT_CANDIDATE_USER } from '../data/mockdata';
 
 interface HeaderProps {
-  currentView: 'home' | 'jobs' | 'applicants' | 'candidate-portal' | 'candidate-explore-jobs' | 'careers';
+  currentView: 'home' | 'jobs' | 'applicants' | 'candidate-portal' | 'candidate-explore-jobs' | 'careers' | 'analytics';
   currentJobTitle?: string;
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
   activeRole: 'hr' | 'candidate';
   onSwitchRole: (role: 'hr' | 'candidate') => void;
-  onNavigate: (view: 'home' | 'jobs' | 'applicants' | 'candidate-portal' | 'candidate-explore-jobs' | 'careers') => void;
+  onNavigate: (view: 'home' | 'jobs' | 'applicants' | 'candidate-portal' | 'candidate-explore-jobs' | 'careers' | 'analytics') => void;
   onOpenSignals: () => void;
   onOpenTour?: () => void;
 }
@@ -55,6 +55,8 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="breadcrumb-active">Job Postings</span>
             ) : currentView === 'careers' ? (
               <span className="breadcrumb-active">Hosted Careers Page</span>
+            ) : currentView === 'analytics' ? (
+              <span className="breadcrumb-active">AI Pipeline Analytics & Benchmarks</span>
             ) : (
               <>
                 <span 
