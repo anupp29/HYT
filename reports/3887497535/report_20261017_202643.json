@@ -1,0 +1,105 @@
+{
+  "report_id": "REP_3887497535_20261017_202643",
+  "generated_at": "2026-10-17T20:26:43.421444",
+  "job": {
+    "job_id": "3887497535",
+    "title": "Associate Software Engineer / Software Engineer",
+    "company": "UIUC Tech Hub",
+    "location": "Urbana-Champaign, IL / Remote",
+    "seniority_level": "entry",
+    "min_years_experience": 1.0,
+    "must_have_skills": [
+      "Python",
+      "Git",
+      "SQL",
+      "Object-Oriented Programming"
+    ],
+    "scoring_weights_applied": {
+      "technical": 50.0,
+      "experience": 25.0,
+      "seniority": 15.0,
+      "education": 5.0,
+      "location": 5.0
+    }
+  },
+  "executive_summary": {
+    "total_applicants": 44,
+    "shortlisted_count": 24,
+    "shortlisted_rate": 54.5,
+    "under_review_count": 29,
+    "rejected_count": 12,
+    "average_calibrated_score": 67.4,
+    "top_candidate": "Aarav Singh",
+    "top_candidate_score": 92.3
+  },
+  "score_distribution": {
+    "high_tier_85_plus": 7,
+    "mid_tier_70_84": 17,
+    "review_tier_50_69": 12,
+    "low_tier_below_50": 8
+  },
+  "top_ranked_cohort": [
+    {
+      "candidate_id": "83816738",
+      "name": "Aarav Singh",
+      "score": 92.3,
+      "stage": "Shortlisted",
+      "decision": "AUTO_ADVANCE",
+      "top_strengths": [
+        "Strong demonstrable experience in Python, Git.",
+        "Clean verified employment chronology without unexplainable gaps."
+      ],
+      "integrity_flags": []
+    },
+    {
+      "candidate_id": "SYN019",
+      "name": "Candidate SYN019",
+      "score": 92.3,
+      "stage": "Shortlisted",
+      "decision": "AUTO_ADVANCE",
+      "top_strengths": [
+        "Strong demonstrable experience in Python, Git.",
+        "Clean verified employment chronology without unexplainable gaps."
+      ],
+      "integrity_flags": []
+    },
+    {
+      "candidate_id": "SYN043",
+      "name": "Candidate SYN043",
+      "score": 92.3,
+      "stage": "Shortlisted",
+      "decision": "AUTO_ADVANCE",
+      "top_strengths": [
+        "Strong demonstrable experience in Python, Git.",
+        "Clean verified employment chronology without unexplainable gaps."
+      ],
+      "integrity_flags": []
+    },
+    {
+      "candidate_id": "16186411",
+      "name": "Rohan Kapoor",
+      "score": 88.1,
+      "stage": "Shortlisted",
+      "decision": "AUTO_ADVANCE",
+      "top_strengths": [
+        "Strong demonstrable experience in Python, Git.",
+        "Clean verified employment chronology without unexplainable gaps."
+      ],
+      "integrity_flags": []
+    },
+    {
+      "candidate_id": "26746496",
+      "name": "Isha Patel",
+      "score": 88.1,
+      "stage": "Shortlisted",
+      "decision": "AUTO_ADVANCE",
+      "top_strengths": [
+        "Strong demonstrable experience in Python, Git.",
+        "Clean verified employment chronology without unexplainable gaps."
+      ],
+      "integrity_flags": []
+    }
+  ],
+  "audit_trail_count": 0,
+  "recent_audit_trail": []
+}

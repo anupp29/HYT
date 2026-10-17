@@ -45,6 +45,11 @@ scratch/
 recruiter_annotation_kit.zip
 recruiter_annotation_kit/
 /recruiter_human_labels.csv
+a.txt
+sample2.json
+*.tmp
+ui/node_modules/
+node_modules/
 
 # Golden Set Policy:
 # Canonical labels live inside data/golden/ (tracked)

@@ -1,9 +1,9 @@
 # HYT ATS — Technical Evaluation & Architectural Screening Report
 **Candidate Take-Home Assignment:** SDE Intern / Graduate 2027 Engineering Assessment  
 **Author:** Anup Patil ([@anupp29](https://github.com/anupp29)) — Graduate 2027 SDE Intern Applicant  
-**Primary Benchmark Artifact:** [`eval_2_results.json`](file:///e:/HYT/hyt-ats/eval_2_results.json) (200-Pair Human Golden Benchmark)  
-**Synthetic Stress Artifact:** [`check/eval_results.json`](file:///e:/HYT/hyt-ats/check/eval_results.json) (50-Pair AI Synthetic Edge Suite)  
-**Primary Evaluation Dataset:** [`data/golden/golden_labels.csv`](file:///e:/HYT/hyt-ats/data/golden/golden_labels.csv) (200 Hand-Calibrated Recruiter Pairs)  
+**Primary Benchmark Artifact:** [`eval_2_results.json`](eval_2_results.json) (200-Pair Human Golden Benchmark)  
+**Synthetic Stress Artifact:** [`check/eval_results.json`](check/eval_results.json) (50-Pair AI Synthetic Edge Suite)  
+**Primary Evaluation Dataset:** [`data/golden/golden_labels.csv`](data/golden/golden_labels.csv) (200 Hand-Calibrated Recruiter Pairs)  
 **Repository:** `hyt-ats`
 
 ---
@@ -25,6 +25,10 @@ In high-volume technical talent acquisition, screening systems are routinely mis
 * **No End-to-End LLM Decision Scoring:** The LLM was strictly forbidden from assigning numerical fit scores (0–100) or decision routes. Allowing an LLM to generate scores directly produces prompt sensitivity, non-deterministic temperature drift, and severe vulnerability to prompt injection. Gate 6 scoring is **100% deterministic arithmetic**.
 * **No Frontend GUI Distractions in Core Pipeline:** The system is engineered strictly as a headless, modular terminal CLI with UNIX piping and append-only JSONL audit logs. Adding web visual fluff during pipeline calibration distracts from parsing fidelity, verification depth, and mathematical determinism.
 * **No Cross-Domain Generalization:** The pipeline was focused exclusively on **Software Engineering & IT Systems**. Universal resume parsers fail on technical nuance (e.g., differentiating Java from JavaScript, or IT desktop support from distributed backend systems).
+
+### 1.3 System Architecture Blueprint
+
+![HYT ATS System Architecture Blueprint](docs/architecture_blueprint.png)
 
 ---
 
