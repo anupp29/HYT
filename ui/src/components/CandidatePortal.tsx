@@ -16,7 +16,13 @@ import {
   Briefcase,
   Check,
   ChevronDown,
-  X
+  X,
+  User,
+  Edit3,
+  Download,
+  Lightbulb,
+  BookOpen,
+  Target
 } from 'lucide-react';
 import { GithubIcon } from './Icons';
 import { CandidateRecord, JobDescription } from '../types/ats';
@@ -42,6 +48,13 @@ export const CandidatePortal: React.FC<CandidatePortalProps> = ({
   const [showScheduleModal, setShowScheduleModal] = useState<boolean>(false);
   const [isScheduled, setIsScheduled] = useState<boolean>(false);
   const [scheduledSlot, setScheduledSlot] = useState<string>('Tomorrow at 10:00 AM IST');
+
+  // Candidate Profile State
+  const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState<boolean>(false);
+  const [profileName, setProfileName] = useState<string>(CURRENT_CANDIDATE_USER.name || 'Bhushan Subhash Mehar');
+  const [profileEmail, setProfileEmail] = useState<string>(CURRENT_CANDIDATE_USER.email || 'bhushan.mehar@gmail.com');
+  const [resumeFileName, setResumeFileName] = useState<string>('bhushan_mehar_resume_2026.pdf');
+  const [resumeFileSize, setResumeFileSize] = useState<string>('1.2 MB');
 
   // Interactive proof artifacts state
   const [githubUrl, setGithubUrl] = useState<string>('https://github.com/bhushanmehar/moakmate');
@@ -177,8 +190,64 @@ export const CandidatePortal: React.FC<CandidatePortalProps> = ({
         </div>
       </div>
 
+      {/* Candidate 4 Stat Cards (Matching PDF Page 5, 6, 18) */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: 16,
+        marginBottom: 24
+      }}>
+        <div className="stat-card" style={{ padding: '16px 20px' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 4 }}>
+            Total Applications
+          </div>
+          <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
+            5
+          </div>
+          <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2 }}>
+            Across 5 companies
+          </div>
+        </div>
+
+        <div className="stat-card" style={{ padding: '16px 20px', borderLeft: '3px solid #10B981' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#10B981', textTransform: 'uppercase', marginBottom: 4 }}>
+            Shortlisted
+          </div>
+          <div style={{ fontSize: 26, fontWeight: 800, color: '#10B981', fontFamily: 'var(--font-mono)' }}>
+            2
+          </div>
+          <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2 }}>
+            Ready for technical interview
+          </div>
+        </div>
+
+        <div className="stat-card" style={{ padding: '16px 20px', borderLeft: '3px solid #F59E0B' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#F59E0B', textTransform: 'uppercase', marginBottom: 4 }}>
+            Under Review
+          </div>
+          <div style={{ fontSize: 26, fontWeight: 800, color: '#F59E0B', fontFamily: 'var(--font-mono)' }}>
+            2
+          </div>
+          <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2 }}>
+            Engineering evaluation in progress
+          </div>
+        </div>
+
+        <div className="stat-card" style={{ padding: '16px 20px', borderLeft: '3px solid #EF4444' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#EF4444', textTransform: 'uppercase', marginBottom: 4 }}>
+            Not Shortlisted
+          </div>
+          <div style={{ fontSize: 26, fontWeight: 800, color: '#EF4444', fontFamily: 'var(--font-mono)' }}>
+            1
+          </div>
+          <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2 }}>
+            Criteria mismatch feedback shared
+          </div>
+        </div>
+      </div>
+
       {/* Main Grid: Pipeline Audit Progress & Proof Artifacts */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.45fr 1fr', gap: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.45fr 1fr', gap: 24, marginBottom: 28 }}>
         {/* Left Column: 12-Gate Audit Progress Tracker */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           {/* Active Job Selector Tabs (if multiple applied) */}
@@ -608,6 +677,457 @@ export const CandidatePortal: React.FC<CandidatePortalProps> = ({
           </div>
         </div>
       </div>
+
+      {/* SECTION: My Applications (from PDF Page 6 & 18) */}
+      <div style={{
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border-subtle)',
+        borderRadius: 'var(--radius-lg)',
+        padding: 24,
+        marginBottom: 28,
+        boxShadow: 'var(--shadow-sm)'
+      }}>
+        <div style={{ marginBottom: 18 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px 0' }}>
+            My Applications
+          </h2>
+          <p style={{ fontSize: 13, color: 'var(--text-tertiary)', margin: 0 }}>
+            Track the status of your applications and see where you stand across hiring pipelines.
+          </p>
+        </div>
+
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 13 }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-tertiary)', fontSize: 11.5, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                <th style={{ padding: '10px 14px', fontWeight: 600 }}>Job Title</th>
+                <th style={{ padding: '10px 14px', fontWeight: 600 }}>Company</th>
+                <th style={{ padding: '10px 14px', fontWeight: 600 }}>Applied On</th>
+                <th style={{ padding: '10px 14px', fontWeight: 600 }}>Status</th>
+                <th style={{ padding: '10px 14px', fontWeight: 600 }}>Match Score</th>
+                <th style={{ padding: '10px 14px', fontWeight: 600, textAlign: 'right' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { id: 'app-1', jobId: jobs[0]?.job_id || 'job-swe-01', title: 'Software Engineer', company: 'TechNova Solutions', date: '12 Nov 2024', status: 'Shortlisted', color: '#10B981', score: 92 },
+                { id: 'app-2', jobId: 'job-da-02', title: 'Data Analyst', company: 'DataSense Analytics', date: '10 Nov 2024', status: 'Under Review', color: '#F59E0B', score: 76 },
+                { id: 'app-3', jobId: 'job-pm-03', title: 'Product Manager', company: 'InnoTech Labs', date: '05 Nov 2024', status: 'Not Shortlisted', color: '#EF4444', score: 35 },
+                { id: 'app-4', jobId: 'job-ml-04', title: 'Machine Learning Engineer', company: 'AIWorks', date: '28 Oct 2024', status: 'Shortlisted', color: '#10B981', score: 88 },
+                { id: 'app-5', jobId: 'job-be-05', title: 'Backend Developer', company: 'CloudTech', date: '20 Oct 2024', status: 'Under Review', color: '#F59E0B', score: 68 }
+              ].map(app => {
+                const isSelected = selectedJobId === app.jobId;
+                return (
+                  <tr 
+                    key={app.id}
+                    style={{
+                      borderBottom: '1px solid var(--border-subtle)',
+                      background: isSelected ? 'rgba(2, 133, 250, 0.04)' : 'transparent',
+                      transition: 'background 0.15s ease'
+                    }}
+                    className="hover-card"
+                  >
+                    <td style={{ padding: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Briefcase size={14} color="var(--primary-600)" />
+                        <span>{app.title}</span>
+                      </div>
+                    </td>
+                    <td style={{ padding: '14px', color: 'var(--text-secondary)' }}>
+                      {app.company}
+                    </td>
+                    <td style={{ padding: '14px', color: 'var(--text-tertiary)', fontSize: 12.5 }}>
+                      {app.date}
+                    </td>
+                    <td style={{ padding: '14px' }}>
+                      <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 5,
+                        padding: '3px 10px',
+                        borderRadius: 'var(--radius-full)',
+                        fontSize: 12,
+                        fontWeight: 700,
+                        background: `${app.color}18`,
+                        color: app.color,
+                        border: `1px solid ${app.color}35`
+                      }}>
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: app.color }} />
+                        {app.status}
+                      </span>
+                    </td>
+                    <td style={{ padding: '14px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ 
+                          width: 36, 
+                          height: 24, 
+                          borderRadius: 4, 
+                          background: app.score >= 80 ? 'rgba(16, 185, 129, 0.15)' : app.score >= 60 ? 'rgba(245, 158, 11, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                          color: app.score >= 80 ? '#10B981' : app.score >= 60 ? '#F59E0B' : '#EF4444',
+                          fontWeight: 800,
+                          fontSize: 12,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontFamily: 'var(--font-mono)'
+                        }}>
+                          {app.score}%
+                        </div>
+                        <span style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>
+                          {app.score >= 80 ? 'High Match' : app.score >= 60 ? 'Moderate' : 'Low Match'}
+                        </span>
+                      </div>
+                    </td>
+                    <td style={{ padding: '14px', textAlign: 'right' }}>
+                      <button
+                        className="btn-secondary"
+                        onClick={() => {
+                          const targetJob = jobs.find(j => j.job_id === app.jobId);
+                          if (targetJob) {
+                            setSelectedJobId(targetJob.job_id);
+                          }
+                          window.scrollTo({ top: 120, behavior: 'smooth' });
+                          setProofToast(`Viewing ${app.title} at ${app.company}`);
+                          setTimeout(() => setProofToast(null), 3000);
+                        }}
+                        style={{ padding: '5px 12px', fontSize: 12, fontWeight: 600 }}
+                      >
+                        {isSelected ? 'Currently Viewing' : 'View Details'}
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* SECTION: Profile & Resume Management (from PDF Page 6 & 18) */}
+      <div style={{
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border-subtle)',
+        borderRadius: 'var(--radius-lg)',
+        padding: 24,
+        marginBottom: 28,
+        boxShadow: 'var(--shadow-sm)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
+          <div>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px 0' }}>
+              Candidate Profile
+            </h2>
+            <p style={{ fontSize: 13, color: 'var(--text-tertiary)', margin: 0 }}>
+              Keep your profile and verified resume updated to get grounded job recommendations.
+            </p>
+          </div>
+
+          <button 
+            className="btn-secondary"
+            onClick={() => setIsEditProfileModalOpen(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '7px 14px' }}
+          >
+            <Edit3 size={13} />
+            <span>Edit Profile</span>
+          </button>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
+          {/* User Bio Card */}
+          <div style={{
+            background: 'var(--bg-surface-subtle)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 'var(--radius-md)',
+            padding: 18,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 16
+          }}>
+            <div style={{
+              width: 52,
+              height: 52,
+              borderRadius: 'var(--radius-full)',
+              background: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)',
+              color: '#FFFFFF',
+              fontWeight: 800,
+              fontSize: 20,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)'
+            }}>
+              {profileName.charAt(0)}
+            </div>
+
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 2 }}>
+                {profileName}
+              </div>
+              <div style={{ fontSize: 12.5, color: 'var(--text-secondary)', marginBottom: 4, textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                {profileEmail}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11.5, color: 'var(--text-tertiary)' }}>
+                <span>Bengaluru, India</span>
+                <span>•</span>
+                <span>Full Stack & AI Engineer</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Uploaded Resume Card */}
+          <div style={{
+            background: 'var(--bg-surface-subtle)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 'var(--radius-md)',
+            padding: 18,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 14
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+              <div style={{
+                width: 42,
+                height: 42,
+                borderRadius: 'var(--radius-md)',
+                background: 'rgba(2, 133, 250, 0.1)',
+                border: '1px solid rgba(2, 133, 250, 0.25)',
+                color: 'var(--primary-600)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <FileText size={20} />
+              </div>
+
+              <div style={{ minWidth: 0 }}>
+                <div style={{ 
+                  fontSize: 13, 
+                  fontWeight: 700, 
+                  color: 'var(--text-primary)', 
+                  whiteSpace: 'nowrap', 
+                  overflow: 'hidden', 
+                  textOverflow: 'ellipsis',
+                  maxWidth: 200
+                }}>
+                  {resumeFileName}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11.5, color: '#10B981', marginTop: 2 }}>
+                  <CheckCircle2 size={12} />
+                  <span>{resumeFileSize} • ATS Verified</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label 
+                className="btn-secondary"
+                style={{
+                  cursor: 'pointer',
+                  padding: '7px 14px',
+                  fontSize: 12.5,
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6
+                }}
+              >
+                <UploadCloud size={13} />
+                <span>Replace Resume</span>
+                <input 
+                  type="file" 
+                  accept=".pdf,.docx" 
+                  style={{ display: 'none' }} 
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setResumeFileName(file.name);
+                      setResumeFileSize(`${(file.size / (1024 * 1024)).toFixed(1)} MB`);
+                      setProofToast(`Resume "${file.name}" uploaded & parsed!`);
+                      setTimeout(() => setProofToast(null), 3500);
+                    }
+                  }}
+                />
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION: Tips to Get Hired Faster (from PDF Page 6 & 18) */}
+      <div style={{
+        marginBottom: 32
+      }}>
+        <div style={{ marginBottom: 16 }}>
+          <h2 style={{ fontSize: 17, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 4px 0' }}>
+            Tips to Get Hired Faster
+          </h2>
+          <p style={{ fontSize: 12.5, color: 'var(--text-tertiary)', margin: 0 }}>
+            Improve your application profile and pass deterministic verification checks.
+          </p>
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gap: 16
+        }}>
+          {[
+            {
+              icon: FileText,
+              iconColor: '#0285FA',
+              title: 'Keep Your Resume Updated',
+              desc: 'Showcase your latest skills, verified projects, and measurable impact metrics.'
+            },
+            {
+              icon: User,
+              iconColor: '#8B5CF6',
+              title: 'Complete Your Profile',
+              desc: 'Add verified GitHub commits, live demo URLs, and comprehensive education background.'
+            },
+            {
+              icon: Target,
+              iconColor: '#10B981',
+              title: 'Apply to Relevant Jobs',
+              desc: 'Use role requirements to focus on positions where your skills align 80%+.'
+            },
+            {
+              icon: Clock,
+              iconColor: '#F59E0B',
+              title: 'Track Your Status',
+              desc: 'Stay informed about your progress in real time as hiring teams advance evaluations.'
+            }
+          ].map((tip, idx) => {
+            const TipIcon = tip.icon;
+            return (
+              <div 
+                key={idx}
+                style={{
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: 18,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 10
+                }}
+              >
+                <div style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 'var(--radius-md)',
+                  background: `${tip.iconColor}15`,
+                  border: `1px solid ${tip.iconColor}30`,
+                  color: tip.iconColor,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <TipIcon size={18} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
+                    {tip.title}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>
+                    {tip.desc}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* EDIT PROFILE MODAL */}
+      {isEditProfileModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsEditProfileModalOpen(false)}>
+          <div 
+            className="modal-content"
+            style={{ maxWidth: 480 }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="modal-header-bar">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Edit3 size={17} color="var(--primary-600)" />
+                <h3 style={{ fontSize: 16, fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+                  Edit Candidate Profile
+                </h3>
+              </div>
+              <button className="icon-button" onClick={() => setIsEditProfileModalOpen(false)}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="modal-body-scroll" style={{ padding: 22, gap: 16 }}>
+              <div>
+                <label style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--text-primary)', display: 'block', marginBottom: 6 }}>
+                  Full Name:
+                </label>
+                <input 
+                  type="text"
+                  value={profileName}
+                  onChange={e => setProfileName(e.target.value)}
+                  className="search-input"
+                  style={{ width: '100%', height: 38, fontSize: 13 }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--text-primary)', display: 'block', marginBottom: 6 }}>
+                  Email Address:
+                </label>
+                <input 
+                  type="email"
+                  value={profileEmail}
+                  onChange={e => setProfileEmail(e.target.value)}
+                  className="search-input"
+                  style={{ width: '100%', height: 38, fontSize: 13 }}
+                />
+              </div>
+
+              <div style={{ 
+                background: 'var(--bg-surface-subtle)', 
+                border: '1px solid var(--border-subtle)', 
+                borderRadius: 'var(--radius-md)', 
+                padding: 12,
+                fontSize: 12,
+                color: 'var(--text-tertiary)'
+              }}>
+                ℹ️ Note: Profile edits sync automatically with all your active and pending job applications.
+              </div>
+            </div>
+
+            <div style={{
+              padding: '14px 22px',
+              borderTop: '1px solid var(--border-subtle)',
+              background: 'var(--bg-surface-subtle)',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: 10
+            }}>
+              <button 
+                type="button" 
+                className="btn-secondary"
+                onClick={() => setIsEditProfileModalOpen(false)}
+              >
+                Cancel
+              </button>
+              <button 
+                type="button" 
+                className="btn-primary"
+                onClick={() => {
+                  setIsEditProfileModalOpen(false);
+                  setProofToast('Profile updated successfully!');
+                  setTimeout(() => setProofToast(null), 3500);
+                }}
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* SCHEDULE INTERVIEW MODAL */}
       {showScheduleModal && (

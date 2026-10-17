@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Briefcase, 
   Users, 
@@ -19,8 +19,14 @@ import {
   Award,
   Zap,
   Lock,
-  MessageSquare
+  MessageSquare,
+  Mail,
+  Eye,
+  EyeOff,
+  Scale,
+  X
 } from 'lucide-react';
+import { GithubIcon, LinkedinIcon } from './Icons';
 import { JobDescription } from '../types/ats';
 
 interface HomePageProps {
@@ -38,6 +44,11 @@ export const HomePage: React.FC<HomePageProps> = ({
   onExploreJobs,
   jobs
 }) => {
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
+  const [loginRole, setLoginRole] = useState<'candidate' | 'recruiter'>('candidate');
+  const [loginEmail, setLoginEmail] = useState<string>('candidate@huntyourtribe.com');
+  const [loginPassword, setLoginPassword] = useState<string>('••••••••••••');
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-app)', color: 'var(--text-primary)' }}>
       {/* Top Navigation */}
@@ -106,12 +117,30 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
 
         {/* Right Dual Login Quick-Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <button 
+            className="btn-secondary"
+            onClick={() => setIsLoginModalOpen(true)}
+            style={{ 
+              padding: '8px 14px', 
+              fontSize: 13, 
+              fontWeight: 600, 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 6,
+              background: 'transparent',
+              color: '#FFF',
+              border: '1px solid var(--border-subtle)'
+            }}
+          >
+            <span>Sign In</span>
+          </button>
+
           <button 
             className="btn-secondary"
             onClick={onEnterCandidate}
             style={{ 
-              padding: '8px 16px', 
+              padding: '8px 15px', 
               fontSize: 13, 
               fontWeight: 600, 
               display: 'flex', 
@@ -130,7 +159,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             className="btn-primary"
             onClick={onEnterRecruiter}
             style={{ 
-              padding: '8px 18px', 
+              padding: '8px 16px', 
               fontSize: 13, 
               fontWeight: 700, 
               display: 'flex', 
@@ -139,7 +168,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             }}
           >
             <Users size={14} />
-            <span>Recruiter Login</span>
+            <span>Recruiter ATS</span>
           </button>
         </div>
       </header>
@@ -499,6 +528,135 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
+      {/* SECTION: What Makes HuntYourTribe Different? (from PDF Pages 7, 13, 15) */}
+      <section style={{ maxWidth: 1080, margin: '0 auto', padding: '20px 24px 60px' }}>
+        <div style={{ textAlign: 'center', marginBottom: 36 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--primary-600)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
+            Transparent AI Architecture
+          </div>
+          <h2 style={{ fontSize: 30, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
+            What Makes HuntYourTribe Different?
+          </h2>
+          <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginTop: 8, maxWidth: 640, margin: '8px auto 0' }}>
+            We replace subjective keyword filtering with deterministic evidence verification, auditable scoring ledgers, and fairness audits.
+          </p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
+          {[
+            {
+              icon: ShieldCheck,
+              iconColor: '#10B981',
+              title: 'Resume Truth Scanner',
+              desc: 'Detects hidden white text, invisible font sizes, prompt injection delimiters, and suspicious formatting artifacts.'
+            },
+            {
+              icon: Layers,
+              iconColor: '#0285FA',
+              title: 'Verifiable Evidence Graph',
+              desc: 'See exactly which candidate submission quote supports every awarded point with verbatim character offsets.'
+            },
+            {
+              icon: Sliders,
+              iconColor: '#8B5CF6',
+              title: 'What-If Simulation Engine',
+              desc: 'Simulate weight changes live (must-haves vs nice-to-haves) and audit rank shifts before finalizing hiring decisions.'
+            },
+            {
+              icon: Scale,
+              iconColor: '#EC4899',
+              title: 'Fairness & Bias Testing',
+              desc: 'Continuous perturbation checks across gender, names, and college tiers verify zero algorithmic disparity.'
+            },
+            {
+              icon: Award,
+              iconColor: '#F59E0B',
+              title: 'Evaluation & Benchmarks',
+              desc: 'Empirically tested on 200+ labelled pairs against keyword overlap and TF-IDF baselines with published F1 and NDCG scores.'
+            },
+            {
+              icon: Zap,
+              iconColor: '#3B82F6',
+              title: 'Adversarial Test Suite',
+              desc: 'Battle-tested against tricky adversarial resumes, jailbreak injections, and edge-case prompt manipulations.'
+            }
+          ].map((card, idx) => {
+            const CardIcon = card.icon;
+            return (
+              <div 
+                key={idx}
+                style={{
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: 22,
+                  display: 'flex',
+                  gap: 16
+                }}
+                className="hover-card"
+              >
+                <div style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 'var(--radius-md)',
+                  background: `${card.iconColor}15`,
+                  border: `1px solid ${card.iconColor}30`,
+                  color: card.iconColor,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <CardIcon size={22} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 6px 0' }}>
+                    {card.title}
+                  </h3>
+                  <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
+                    {card.desc}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Platform Impact Stats Bar (from PDF Pages 7, 13, 15) */}
+        <div style={{
+          marginTop: 40,
+          background: 'linear-gradient(135deg, rgba(2, 133, 250, 0.08) 0%, rgba(16, 185, 129, 0.05) 100%)',
+          border: '1px solid var(--border-subtle)',
+          borderRadius: 'var(--radius-xl)',
+          padding: '24px 32px',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: 24,
+          textAlign: 'center'
+        }}>
+          <div>
+            <div style={{ fontSize: 28, fontWeight: 800, color: '#0285FA', fontFamily: 'var(--font-mono)' }}>500+</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginTop: 2 }}>Companies Hiring</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 28, fontWeight: 800, color: '#10B981', fontFamily: 'var(--font-mono)' }}>10,000+</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginTop: 2 }}>Verified Job Seekers</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 28, fontWeight: 800, color: '#8B5CF6', fontFamily: 'var(--font-mono)' }}>50,000+</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginTop: 2 }}>Resumes Processed</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 28, fontWeight: 800, color: '#F59E0B', fontFamily: 'var(--font-mono)' }}>150-250</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginTop: 2 }}>Labelled Ground Truth Pairs</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 28, fontWeight: 800, color: '#10B981', fontFamily: 'var(--font-mono)' }}>95%</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginTop: 2 }}>Evaluation Accuracy</div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer style={{
         borderTop: '1px solid var(--border-subtle)',
@@ -516,11 +674,274 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
 
         <div style={{ display: 'flex', gap: 20, fontSize: 13, color: '#9CA3AF' }}>
-          <span style={{ cursor: 'pointer' }} onClick={onEnterRecruiter}>Recruiter Login</span>
-          <span style={{ cursor: 'pointer' }} onClick={onEnterCandidate}>Candidate Portal</span>
-          <span style={{ cursor: 'pointer' }} onClick={onOpenTour}>Product Tour</span>
+          <span style={{ cursor: 'pointer' }} onClick={() => { setLoginRole('recruiter'); setIsLoginModalOpen(true); }}>
+            Recruiter Sign In
+          </span>
+          <span style={{ cursor: 'pointer' }} onClick={() => { setLoginRole('candidate'); setIsLoginModalOpen(true); }}>
+            Candidate Portal
+          </span>
+          <span style={{ cursor: 'pointer' }} onClick={onOpenTour}>
+            Product Tour
+          </span>
         </div>
       </footer>
+
+      {/* ROLE-BASED LOGIN MODAL (Matching PDF Pages 4, 10, 16) */}
+      {isLoginModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsLoginModalOpen(false)}>
+          <div 
+            className="modal-content"
+            style={{ maxWidth: 460, borderRadius: 'var(--radius-xl)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div style={{
+              padding: '24px 28px 16px',
+              borderBottom: '1px solid var(--border-subtle)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                  <Layers size={18} color="var(--primary-600)" />
+                  <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>
+                    Login to HuntYourTribe
+                  </span>
+                </div>
+                <div style={{ fontSize: 12.5, color: 'var(--text-tertiary)' }}>
+                  Select your role to continue
+                </div>
+              </div>
+
+              <button className="icon-button" onClick={() => setIsLoginModalOpen(false)}>
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="modal-body-scroll" style={{ padding: '24px 28px', gap: 18 }}>
+              {/* Role Toggle Selector Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div 
+                  onClick={() => {
+                    setLoginRole('candidate');
+                    setLoginEmail('candidate@huntyourtribe.com');
+                  }}
+                  style={{
+                    border: loginRole === 'candidate' ? '2px solid #0285FA' : '1px solid var(--border-subtle)',
+                    background: loginRole === 'candidate' ? 'rgba(2, 133, 250, 0.08)' : 'var(--bg-surface-subtle)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '14px 12px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <div style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    background: loginRole === 'candidate' ? '#0285FA' : 'rgba(255,255,255,0.06)',
+                    color: '#FFF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <UserCheck size={16} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+                      Candidate
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                      Looking for a job
+                    </div>
+                  </div>
+                </div>
+
+                <div 
+                  onClick={() => {
+                    setLoginRole('recruiter');
+                    setLoginEmail('rohan.mehta@huntyourtribe.com');
+                  }}
+                  style={{
+                    border: loginRole === 'recruiter' ? '2px solid #0285FA' : '1px solid var(--border-subtle)',
+                    background: loginRole === 'recruiter' ? 'rgba(2, 133, 250, 0.08)' : 'var(--bg-surface-subtle)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '14px 12px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <div style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    background: loginRole === 'recruiter' ? '#0285FA' : 'rgba(255,255,255,0.06)',
+                    color: '#FFF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <Users size={16} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+                      HR Recruiter
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                      Hiring talent
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Email Input */}
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>
+                  Email
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <Mail size={15} color="var(--text-muted)" style={{ position: 'absolute', left: 12, top: 12 }} />
+                  <input 
+                    type="email"
+                    value={loginEmail}
+                    onChange={e => setLoginEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="search-input"
+                    style={{ width: '100%', height: 40, paddingLeft: 36, fontSize: 13 }}
+                  />
+                </div>
+              </div>
+
+              {/* Password Input */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)' }}>
+                    Password
+                  </label>
+                  <a 
+                    href="#" 
+                    onClick={e => { e.preventDefault(); alert('Password reset link sent to ' + loginEmail); }}
+                    style={{ fontSize: 11.5, color: 'var(--primary-600)', textDecoration: 'none' }}
+                  >
+                    Forgot password?
+                  </a>
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <Lock size={15} color="var(--text-muted)" style={{ position: 'absolute', left: 12, top: 12 }} />
+                  <input 
+                    type={showPassword ? 'text' : 'password'}
+                    value={loginPassword}
+                    onChange={e => setLoginPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="search-input"
+                    style={{ width: '100%', height: 40, paddingLeft: 36, paddingRight: 36, fontSize: 13 }}
+                  />
+                  <button 
+                    type="button" 
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{ position: 'absolute', right: 10, top: 10, background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+                  >
+                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => {
+                  setIsLoginModalOpen(false);
+                  if (loginRole === 'candidate') {
+                    onEnterCandidate();
+                  } else {
+                    onEnterRecruiter();
+                  }
+                }}
+                style={{
+                  width: '100%',
+                  height: 42,
+                  justifyContent: 'center',
+                  fontSize: 14,
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginTop: 4
+                }}
+              >
+                <span>Login as {loginRole === 'candidate' ? 'Candidate' : 'Recruiter'}</span>
+                <ArrowRight size={15} />
+              </button>
+
+              {/* Secure & Private Guarantee */}
+              <div style={{
+                background: 'rgba(16, 185, 129, 0.08)',
+                border: '1px solid rgba(16, 185, 129, 0.25)',
+                borderRadius: 'var(--radius-md)',
+                padding: '10px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10
+              }}>
+                <ShieldCheck size={18} color="#10B981" style={{ flexShrink: 0 }} />
+                <div style={{ fontSize: 11.5, color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                  <strong style={{ color: '#10B981' }}>Secure & Private: </strong>
+                  Your credentials and candidate submissions are evaluated deterministically without sharing PII data.
+                </div>
+              </div>
+
+              {/* Social Login Separator */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '4px 0' }}>
+                <div style={{ flex: 1, height: 1, background: 'var(--border-subtle)' }} />
+                <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>or continue with</span>
+                <div style={{ flex: 1, height: 1, background: 'var(--border-subtle)' }} />
+              </div>
+
+              {/* Social Login Buttons */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => {
+                    setIsLoginModalOpen(false);
+                    if (loginRole === 'candidate') onEnterCandidate();
+                    else onEnterRecruiter();
+                  }}
+                  style={{ justifyContent: 'center', fontSize: 12, padding: '8px 10px', gap: 8 }}
+                >
+                  <Globe size={14} color="#EA4335" />
+                  <span>Google</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => {
+                    setIsLoginModalOpen(false);
+                    if (loginRole === 'candidate') onEnterCandidate();
+                    else onEnterRecruiter();
+                  }}
+                  style={{ justifyContent: 'center', fontSize: 12, padding: '8px 10px', gap: 8 }}
+                >
+                  <LinkedinIcon size={14} color="#0A66C2" />
+                  <span>LinkedIn</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
