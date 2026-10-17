@@ -1113,8 +1113,7 @@ export const CURRENT_HR_USER = {
   role: "Lead Technical Recruiter",
   company: "HuntYourTribe",
   avatar_initial: "V",
-  avatar_color: "#2563EB",
-  avatar_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
+  avatar_color: "#2563EB"
 };
 
 export const CURRENT_CANDIDATE_USER = {

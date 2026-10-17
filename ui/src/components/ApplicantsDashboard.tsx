@@ -20,7 +20,8 @@ import {
   Layers,
   Edit,
   Sliders,
-  Mail
+  Mail,
+  ExternalLink
 } from 'lucide-react';
 import { CandidateRecord, CandidateStage, DecisionType, JobDescription } from '../types/ats';
 
@@ -523,16 +524,30 @@ export const ApplicantsDashboard: React.FC<ApplicantsDashboardProps> = ({
                     )}
                   </div>
 
-                  {/* Move Dropdown */}
-                  <div style={{ position: 'relative' }}>
-                    <button 
-                      className="btn-primary"
-                      onClick={() => setOpenMoveDropdownId(openMoveDropdownId === cand.candidate_id ? null : cand.candidate_id)}
-                      style={{ padding: '6px 14px', fontSize: 12.5 }}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <button
+                      className="btn-secondary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(`/resume/${cand.candidate_id}`, '_blank');
+                      }}
+                      style={{ padding: '6px 12px', fontSize: 12.5, display: 'inline-flex', alignItems: 'center', gap: 5 }}
+                      title="Open dedicated resume view in new tab"
                     >
-                      <span>Move</span>
-                      <ChevronDown size={12} />
+                      <ExternalLink size={12} />
+                      <span>Resume ↗</span>
                     </button>
+
+                    {/* Move Dropdown */}
+                    <div style={{ position: 'relative' }}>
+                      <button 
+                        className="btn-primary"
+                        onClick={() => setOpenMoveDropdownId(openMoveDropdownId === cand.candidate_id ? null : cand.candidate_id)}
+                        style={{ padding: '6px 14px', fontSize: 12.5 }}
+                      >
+                        <span>Move</span>
+                        <ChevronDown size={12} />
+                      </button>
 
                     {openMoveDropdownId === cand.candidate_id && (
                       <div style={{
@@ -570,6 +585,7 @@ export const ApplicantsDashboard: React.FC<ApplicantsDashboardProps> = ({
                       </div>
                     )}
                   </div>
+                </div>
                 </div>
               </div>
             ))
@@ -635,13 +651,22 @@ export const ApplicantsDashboard: React.FC<ApplicantsDashboardProps> = ({
                           fontWeight: 600,
                           color: 'var(--text-primary)'
                         }}>
-                          <span style={{ width: 7, height: 7, borderRadius: '50%', background: getStageDot(cand.stage) }} />
+                          <span style={{ width: 7, height: 7, borderRadius: '50%', background: getStageDot(cand.stage as CandidateStage) }} />
                           {cand.stage}
                         </span>
                       </td>
 
                       <td style={{ textAlign: 'right' }} onClick={e => e.stopPropagation()}>
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                          <button
+                            className="btn-secondary"
+                            style={{ padding: '5px 10px', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                            onClick={() => window.open(`/resume/${cand.candidate_id}`, '_blank')}
+                            title="Open dedicated resume view in new tab"
+                          >
+                            <ExternalLink size={12} />
+                            <span>Resume</span>
+                          </button>
                           <button 
                             className="btn-secondary" 
                             style={{ padding: '5px 10px', fontSize: 12 }}

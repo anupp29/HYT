@@ -1,250 +1,242 @@
 /**
- * HYT ATS — Frontend API Client
- * Seamlessly connects React UI to the Python FastAPI backend engine (:8000).
+ * HuntYourTribe ATS API Client
+ * Connects directly to Isolated API2 backend at http://localhost:1234
  */
 
-import { CandidateRecord, JobDescription, CandidateStage, DecisionType } from '../types/ats';
+import {
+  PipelineStats,
+  JobDescription,
+  CandidateRecord,
+  ApplicantsResponse,
+  ScoringWeights,
+  EvaluationData,
+  ExecutiveReport,
+  CandidateStage
+} from '../types/ats';
 import { MOCK_JOBS, MOCK_CANDIDATES } from '../data/mockdata';
 
-const BASE_URL = '/api';
+const API_BASE = 'http://localhost:1234/api';
 
-export interface BackendHealth {
-  status: string;
-  service: string;
-  version: string;
-  total_jds: number;
-  total_resumes_in_corpus: number;
-  llm_providers: Record<string, any>;
+export class ApiError extends Error {
+  code?: string;
+  status: number;
+  constructor(message: string, status: number, code?: string) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.code = code;
+  }
 }
 
-export interface AnalyticsData {
-  total_applicants: number;
-  decision_breakdown: {
-    AUTO_ADVANCE: number;
-    ESCALATE: number;
-    AUTO_REJECT: number;
-  };
-  avg_score: number;
-  escalation_rate: number;
-  advance_rate: number;
-  rejection_rate: number;
-  integrity_flag_rate: number;
-  avg_time_to_decision_ms: number;
+async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  const url = `${API_BASE}${endpoint}`;
+  try {
+    const res = await fetch(url, {
+      ...options,
+      headers: {
+        'Accept': 'application/json',
+        ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+        ...options.headers
+      }
+    });
+
+    if (!res.ok) {
+      let detail = `Request failed with status ${res.status}`;
+      try {
+        const errJson = await res.json();
+        if (errJson.detail) detail = errJson.detail;
+      } catch {
+        detail = res.statusText || detail;
+      }
+      throw new ApiError(detail, res.status);
+    }
+
+    return await res.json() as T;
+  } catch (err: any) {
+    if (err instanceof ApiError) throw err;
+    throw new ApiError(err.message || 'Unable to connect to ATS backend on port 1234', 503);
+  }
 }
 
 export const api = {
-  /**
-   * Health and LLM status probe
-   */
-  async checkHealth(): Promise<BackendHealth | null> {
+  // 1. Health
+  checkHealth: async () => {
     try {
-      const res = await fetch(`${BASE_URL}/health`);
-      if (!res.ok) return null;
-      return await res.json();
-    } catch (e) {
-      console.warn('Backend not reachable:', e);
+      return await request<{ status: string; port: number; database: any; pipeline_active: boolean }>('/health');
+    } catch {
       return null;
     }
   },
 
-  /**
-   * Fetch all jobs from backend (with fallback)
-   */
-  async getJobs(): Promise<JobDescription[]> {
+  // 2. Stats
+  getStats: async (): Promise<PipelineStats> => {
+    return request<PipelineStats>('/stats');
+  },
+
+  // 3. Jobs
+  getJobs: async (): Promise<JobDescription[]> => {
     try {
-      const res = await fetch(`${BASE_URL}/jobs`);
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          return data;
-        }
+      const liveJobs = await request<JobDescription[]>('/jobs');
+      if (Array.isArray(liveJobs) && liveJobs.length > 0) {
+        return liveJobs;
       }
     } catch (e) {
-      console.warn('Error fetching jobs, falling back:', e);
+      console.warn('Backend fetch jobs failed, using reference fallback:', e);
     }
     return MOCK_JOBS;
   },
 
-  /**
-   * Fetch specific job details
-   */
-  async getJob(jobId: string): Promise<JobDescription | null> {
+  getJob: async (jobId: string): Promise<JobDescription> => {
     try {
-      const res = await fetch(`${BASE_URL}/jobs/${jobId}`);
-      if (res.ok) return await res.json();
-    } catch (e) {
-      console.warn('Error fetching job details:', e);
+      return await request<JobDescription>(`/jobs/${jobId}`);
+    } catch {
+      return MOCK_JOBS.find(j => j.job_id === jobId) || MOCK_JOBS[0];
     }
-    return MOCK_JOBS.find(j => j.job_id === jobId) || null;
   },
 
-  /**
-   * Create or update a Job Description
-   */
-  async createJob(jobData: Partial<JobDescription> & { raw_text?: string }): Promise<JobDescription> {
+  createJob: async (payload: Partial<JobDescription>): Promise<JobDescription> => {
     try {
-      const res = await fetch(`${BASE_URL}/jobs`, {
+      return await request<JobDescription>('/jobs', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(jobData)
+        body: JSON.stringify(payload)
       });
-      if (res.ok) {
-        return await res.json();
-      }
     } catch (e) {
-      console.warn('Failed to persist job on backend:', e);
+      console.warn('Create job fallback:', e);
+      return {
+        job_id: payload.job_id || `job-${Date.now()}`,
+        title: payload.title || 'Software Engineer',
+        company: payload.company || 'HuntYourTribe',
+        location: payload.location || 'Remote',
+        seniority_level: payload.seniority_level || 'mid',
+        min_years_experience: payload.min_years_experience || 2,
+        must_have_skills: payload.must_have_skills || ['React', 'TypeScript'],
+        nice_to_have_skills: payload.nice_to_have_skills || ['FastAPI', 'Docker'],
+        education_requirement: payload.education_requirement || "Bachelor's degree",
+        remote_policy: payload.remote_policy || 'remote',
+        posted_at: 'Just now',
+        active: true,
+        applicant_count: 0,
+        description: payload.description || ''
+      };
     }
-    const fallback: JobDescription = {
-      job_id: `job-${Date.now().toString(16)}`,
-      title: jobData.title || 'Software Engineer',
-      company: jobData.company || 'HuntYourTribe',
-      location: jobData.location || 'Remote',
-      seniority_level: (jobData.seniority_level as any) || 'mid',
-      min_years_experience: jobData.min_years_experience || 2,
-      must_have_skills: jobData.must_have_skills || ['Python', 'SQL'],
-      nice_to_have_skills: jobData.nice_to_have_skills || ['Docker', 'AWS'],
-      description: jobData.description || 'Engineered software solutions.',
-      education_requirement: jobData.education_requirement || "Bachelor's Degree",
-      remote_policy: (jobData.remote_policy as any) || 'remote',
-      content_hash: `hash_${Date.now()}`,
-      posted_at: 'Just now',
-      active: true,
-      applicant_count: 0,
-      total_applicants: 0,
-      persona: 'Technical Recruiter',
-    };
-    return fallback;
   },
 
-  /**
-   * Fetch candidates for a target role
-   */
-  async getCandidates(jobId?: string, stage?: string, decision?: string, search?: string): Promise<CandidateRecord[]> {
-    try {
-      const params = new URLSearchParams();
-      if (jobId && jobId !== 'All') params.append('job_id', jobId);
-      if (stage && stage !== 'All') params.append('stage', stage);
-      if (decision && decision !== 'All') params.append('decision', decision);
-      if (search) params.append('search', search);
+  // 4. Scoring Weights
+  getWeights: async (jobId: string): Promise<{ job_id: string; weights: ScoringWeights; is_custom: boolean }> => {
+    return request<{ job_id: string; weights: ScoringWeights; is_custom: boolean }>(`/jobs/${jobId}/weights`);
+  },
 
-      const res = await fetch(`${BASE_URL}/candidates?${params.toString()}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          return data;
-        }
+  updateWeights: async (jobId: string, weights: ScoringWeights): Promise<{ success: boolean; weights: ScoringWeights }> => {
+    return request<{ success: boolean; weights: ScoringWeights }>(`/jobs/${jobId}/weights`, {
+      method: 'POST',
+      body: JSON.stringify({ weights })
+    });
+  },
+
+  resetWeights: async (jobId: string): Promise<{ success: boolean; weights: ScoringWeights }> => {
+    return request<{ success: boolean; weights: ScoringWeights }>(`/jobs/${jobId}/weights/reset`, {
+      method: 'POST'
+    });
+  },
+
+  // 5. Applicants
+  getJobApplicants: async (
+    jobId: string,
+    params: {
+      page?: number;
+      page_size?: number;
+      search?: string;
+      stage?: string;
+      decision?: string;
+      sort?: string;
+    } = {}
+  ): Promise<ApplicantsResponse> => {
+    const sp = new URLSearchParams();
+    if (params.page) sp.set('page', params.page.toString());
+    if (params.page_size) sp.set('page_size', params.page_size.toString());
+    if (params.search) sp.set('search', params.search);
+    if (params.stage && params.stage !== 'All') sp.set('stage', params.stage);
+    if (params.decision && params.decision !== 'All') sp.set('decision', params.decision);
+    if (params.sort) sp.set('sort', params.sort);
+
+    const query = sp.toString() ? `?${sp.toString()}` : '';
+    return request<ApplicantsResponse>(`/jobs/${jobId}/applicants${query}`);
+  },
+
+  getCandidates: async (jobId: string): Promise<CandidateRecord[]> => {
+    try {
+      const resp = await api.getJobApplicants(jobId, { page_size: 100 });
+      if (resp && resp.items && resp.items.length > 0) {
+        return resp.items;
       }
     } catch (e) {
-      console.warn('Using fallback candidates:', e);
+      console.warn('Backend fetch candidates failed, using reference candidates:', e);
     }
     return MOCK_CANDIDATES;
   },
 
-  /**
-   * Fetch specific candidate details with full evidence ledger
-   */
-  async getCandidate(candidateId: string, jobId?: string): Promise<CandidateRecord | null> {
-    try {
-      const params = new URLSearchParams();
-      if (jobId) params.append('job_id', jobId);
-      const res = await fetch(`${BASE_URL}/candidates/${candidateId}?${params.toString()}`);
-      if (res.ok) return await res.json();
-    } catch (e) {
-      console.warn('Error fetching candidate:', e);
-    }
-    return MOCK_CANDIDATES.find(c => c.candidate_id === candidateId) || null;
+  getApplicantDetail: async (jobId: string, candidateId: string): Promise<CandidateRecord> => {
+    return request<CandidateRecord>(`/jobs/${jobId}/applicants/${candidateId}`);
   },
 
-  /**
-   * Update candidate stage (drag/drop or dropdown)
-   */
-  async updateCandidateStage(candidateId: string, stage: CandidateStage, jobId?: string): Promise<boolean> {
+  getCandidateStandalone: async (candidateId: string): Promise<CandidateRecord> => {
     try {
-      const params = new URLSearchParams();
-      if (jobId) params.append('job_id', jobId);
-      const res = await fetch(`${BASE_URL}/candidates/${candidateId}/stage?${params.toString()}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stage })
-      });
-      return res.ok;
-    } catch (e) {
-      console.warn('Failed to update stage on backend:', e);
-      return false;
+      return await request<CandidateRecord>(`/candidates/${candidateId}`);
+    } catch {
+      // Fallback search in mock candidates
+      const found = MOCK_CANDIDATES.find(c => c.candidate_id === candidateId || c.candidate_id === `cand-${candidateId}`);
+      if (found) return found;
+      throw new Error(`Candidate ${candidateId} not found`);
     }
   },
 
-  /**
-   * Recruiter overrides an AI decision
-   */
-  async overrideDecision(
+  // 6. Recruiter Decision
+  recordDecision: async (
+    jobId: string,
     candidateId: string,
-    decision: DecisionType,
-    reason: string,
-    jobId?: string,
-    recruiter: string = 'human_recruiter'
-  ): Promise<boolean> {
-    try {
-      const res = await fetch(`${BASE_URL}/candidates/${candidateId}/override`, {
+    decision: 'Shortlisted' | 'Under Review' | 'Rejected' | 'Escalated' | string,
+    reason: string = 'Recruiter decision via ATS workflow',
+    recruiter: string = 'Vishal Joshi'
+  ): Promise<{ success: boolean; candidate_id: string; new_stage: string }> => {
+    return request<{ success: boolean; candidate_id: string; new_stage: string }>(
+      `/jobs/${jobId}/applicants/${candidateId}/decision`,
+      {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          job_id: jobId,
-          decision,
-          reason,
-          recruiter
-        })
-      });
-      return res.ok;
+        body: JSON.stringify({ decision, reason, recruiter })
+      }
+    );
+  },
+
+  updateCandidateStage: async (candidateId: string, stage: CandidateStage | string, jobId?: string) => {
+    if (!jobId) return;
+    try {
+      await api.recordDecision(jobId, candidateId, stage, `Stage updated to ${stage}`, 'Vishal Joshi');
     } catch (e) {
-      console.warn('Failed to record override on backend:', e);
-      return false;
+      console.warn('Record decision error:', e);
     }
   },
 
-  /**
-   * Get Gate Trace for GateShieldModal
-   */
-  async getGateTrace(candidateId: string, jobId?: string): Promise<any> {
-    try {
-      const params = new URLSearchParams();
-      if (jobId) params.append('job_id', jobId);
-      const res = await fetch(`${BASE_URL}/candidates/${candidateId}/gate-trace?${params.toString()}`);
-      if (res.ok) return await res.json();
-    } catch (e) {
-      console.warn('Failed to get gate trace:', e);
-    }
-    return null;
+  // 7. Executive Report
+  generateReport: async (jobId: string): Promise<ExecutiveReport> => {
+    return request<ExecutiveReport>(`/jobs/${jobId}/report`, {
+      method: 'POST'
+    });
   },
 
-  /**
-   * Apply & Screen Candidate with resume file
-   */
-  async applyCandidate(formData: FormData): Promise<CandidateRecord | null> {
-    try {
-      const res = await fetch(`${BASE_URL}/candidates/apply`, {
-        method: 'POST',
-        body: formData
-      });
-      if (res.ok) return await res.json();
-    } catch (e) {
-      console.warn('Failed candidate apply submission:', e);
-    }
-    return null;
+  getExportCsvUrl: (jobId: string): string => {
+    return `${API_BASE}/jobs/${jobId}/export-csv`;
   },
 
-  /**
-   * Fetch Analytics metrics
-   */
-  async getAnalytics(jobId?: string): Promise<AnalyticsData | null> {
-    try {
-      const params = new URLSearchParams();
-      if (jobId && jobId !== 'All') params.append('job_id', jobId);
-      const res = await fetch(`${BASE_URL}/analytics?${params.toString()}`);
-      if (res.ok) return await res.json();
-    } catch (e) {
-      console.warn('Failed to fetch analytics:', e);
-    }
-    return null;
+  // 8. Evaluation
+  getEvaluation: async (): Promise<EvaluationData> => {
+    return request<EvaluationData>('/evaluation');
+  },
+
+  // 9. Candidate Apply
+  applyCandidate: async (formData: FormData): Promise<CandidateRecord> => {
+    return request<CandidateRecord>('/candidates/apply', {
+      method: 'POST',
+      body: formData
+    });
   }
 };

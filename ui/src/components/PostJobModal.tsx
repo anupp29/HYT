@@ -61,7 +61,7 @@ export const PostJobModal: React.FC<PostJobModalProps> = ({
       setSeniority(jobToEdit.seniority_level || 'senior');
       setMinExp(jobToEdit.min_years_experience || 4);
       setLocation(jobToEdit.location || 'Bengaluru, India');
-      setRemotePolicy(jobToEdit.remote_policy || 'remote');
+      setRemotePolicy((jobToEdit.remote_policy as any) || 'remote');
       setDescription(jobToEdit.description || '');
       setMustHaves(jobToEdit.must_have_skills || ['React', 'TypeScript', 'Node.js']);
     } else {

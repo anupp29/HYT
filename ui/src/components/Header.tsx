@@ -1,24 +1,18 @@
 import React from 'react';
 import { 
-  Briefcase, 
-  Users, 
-  Moon, 
-  Sun, 
   ChevronRight, 
-  Building
+  ChevronLeft,
+  Moon, 
+  Sun,
+  Sidebar as SidebarIcon
 } from 'lucide-react';
-import { CURRENT_HR_USER } from '../data/mockdata';
 
 interface HeaderProps {
   currentView: 'jobs' | 'applicants' | 'candidate-explore-jobs' | 'analytics' | string;
   currentJobTitle?: string;
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
-  activeRole: 'hr' | 'candidate';
-  onSwitchRole: (role: 'hr' | 'candidate') => void;
   onNavigate: (view: any) => void;
-  onOpenSignals?: () => void;
-  onOpenTour?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -26,108 +20,86 @@ export const Header: React.FC<HeaderProps> = ({
   currentJobTitle = "Senior Full Stack Engineer",
   theme,
   onToggleTheme,
-  activeRole,
-  onSwitchRole,
   onNavigate
 }) => {
   return (
-    <header className="top-header">
-      <div className="header-left">
-        <div className="breadcrumbs">
-          <span 
-            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700 }}
-            onClick={() => onNavigate('applicants')}
-            title="HuntYourTribe ATS"
-          >
-            <Building size={16} /> HuntYourTribe
-          </span>
-          <ChevronRight size={14} />
-          {activeRole === 'hr' ? (
-            currentView === 'jobs' ? (
-              <span className="breadcrumb-active">Job Postings</span>
-            ) : currentView === 'analytics' ? (
-              <span className="breadcrumb-active">Pipeline Analytics & Benchmarks</span>
-            ) : (
-              <>
-                <span 
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => onNavigate('jobs')}
-                >
-                  Jobs
-                </span>
-                <ChevronRight size={14} />
-                <span className="breadcrumb-active">{currentJobTitle}</span>
-              </>
-            )
-          ) : (
-            <span className="breadcrumb-active">Apply & Screen Resume</span>
-          )}
+    <header style={{
+      height: '56px',
+      backgroundColor: '#FFFFFF',
+      borderBottom: '1px solid #E7E5E4',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '0 24px',
+      position: 'sticky',
+      top: 0,
+      zIndex: 30
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13.5px', color: '#78716C' }}>
+        {/* Sidebar Icon matching reference */}
+        <div style={{ display: 'flex', alignItems: 'center', color: '#191918', marginRight: '4px' }}>
+          <SidebarIcon size={18} />
         </div>
+
+        {currentView === 'jobs' ? (
+          <span style={{ color: '#191918', fontWeight: 600 }}>
+            Jobs
+          </span>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              onClick={() => onNavigate('jobs')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                background: 'transparent',
+                border: 'none',
+                color: '#44403C',
+                fontWeight: 500,
+                cursor: 'pointer',
+                fontSize: '13.5px',
+                padding: 0
+              }}
+              onMouseEnter={e => e.currentTarget.style.color = '#191918'}
+              onMouseLeave={e => e.currentTarget.style.color = '#44403C'}
+            >
+              <ChevronLeft size={16} />
+              <span>Back</span>
+            </button>
+            <span>|</span>
+            <span 
+              onClick={() => onNavigate('applicants')}
+              style={{ cursor: 'pointer', color: '#78716C' }}
+            >
+              Applicants
+            </span>
+            <ChevronRight size={14} color="#A8A29E" />
+            <span style={{ color: '#191918', fontWeight: 600 }}>
+              {currentJobTitle}
+            </span>
+          </div>
+        )}
       </div>
 
-      <div className="header-right">
-        {/* Role Switcher Pill */}
-        <div className="role-switcher">
-          <button 
-            className={`role-switch-btn ${activeRole === 'hr' ? 'active' : ''}`}
-            onClick={() => {
-              onSwitchRole('hr');
-              onNavigate('applicants');
-            }}
-            title="Switch to Recruiter Dashboard"
-          >
-            <Users size={14} />
-            <span>Recruiter</span>
-          </button>
-          <button 
-            className={`role-switch-btn ${activeRole === 'candidate' ? 'active' : ''}`}
-            onClick={() => {
-              onSwitchRole('candidate');
-              onNavigate('candidate-explore-jobs');
-            }}
-            title="Upload Candidate Resume"
-          >
-            <Briefcase size={14} />
-            <span>Apply</span>
-          </button>
-        </div>
-
-        {/* Theme Toggle */}
-        <button 
-          className="icon-button"
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <button
           onClick={onToggleTheme}
           title={theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          style={{
+            background: 'transparent',
+            border: '1px solid #E7E5E4',
+            borderRadius: '6px',
+            padding: '6px',
+            color: '#78716C',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
         >
-          {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
         </button>
-
-        {/* User Profile Snippet */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingLeft: 8 }}>
-          <div 
-            style={{ 
-              width: 30, 
-              height: 30, 
-              borderRadius: '50%', 
-              background: CURRENT_HR_USER.avatar_color,
-              color: '#FFF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 700,
-              fontSize: 12
-            }}
-          >
-            {CURRENT_HR_USER.avatar_initial}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
-            <span style={{ fontSize: 13, fontWeight: 600 }}>
-              {CURRENT_HR_USER.name}
-            </span>
-            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-              Recruiter
-            </span>
-          </div>
-        </div>
       </div>
     </header>
   );

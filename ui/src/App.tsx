@@ -5,51 +5,93 @@ import { JobPostingsView } from './components/JobPostingsView';
 import { ApplicantsDashboard } from './components/ApplicantsDashboard';
 import { CandidateDetailModal } from './components/CandidateDetailModal';
 import { PostJobModal } from './components/PostJobModal';
+import { SignalsModal } from './components/SignalsModal';
+import { StagesModal } from './components/StagesModal';
 import { GateShieldModal } from './components/GateShieldModal';
 import { CandidateExploreJobs } from './components/CandidateExploreJobs';
-import { AnalyticsView } from './components/AnalyticsView';
+import { ResumePreviewPage } from './components/ResumePreviewPage';
 import { MOCK_JOBS, MOCK_CANDIDATES } from './data/mockdata';
 import { CandidateRecord, CandidateStage, JobDescription } from './types/ats';
-import { api, BackendHealth } from './services/api';
+import { api } from './services/api';
+import './styles/index.css';
 
 export const App: React.FC = () => {
+  // Check if opened as dedicated resume preview tab (/resume/:id or ?resume=:id)
+  const [resumeCandidateId, setResumeCandidateId] = useState<string | null>(() => {
+    const pathname = window.location.pathname;
+    if (pathname.startsWith('/resume/')) {
+      const parts = pathname.split('/resume/')[1].split('/');
+      return parts[0] || null;
+    }
+    const params = new URLSearchParams(window.location.search);
+    return params.get('resume');
+  });
+
+  // Listen to browser popstate navigation
+  useEffect(() => {
+    const onPop = () => {
+      const pathname = window.location.pathname;
+      if (pathname.startsWith('/resume/')) {
+        const parts = pathname.split('/resume/')[1].split('/');
+        setResumeCandidateId(parts[0] || null);
+      } else {
+        const params = new URLSearchParams(window.location.search);
+        setResumeCandidateId(params.get('resume'));
+      }
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
   // Navigation & Role State
   const [activeRole, setActiveRole] = useState<'hr' | 'candidate'>('hr');
-  const [currentView, setCurrentView] = useState<'jobs' | 'applicants' | 'candidate-explore-jobs' | 'analytics'>('applicants');
+  const [currentView, setCurrentView] = useState<'jobs' | 'applicants' | 'candidate-explore-jobs' | 'analytics'>('jobs');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState<boolean>(true);
 
   // Data State
   const [jobs, setJobs] = useState<JobDescription[]>(MOCK_JOBS);
   const [selectedJob, setSelectedJob] = useState<JobDescription>(MOCK_JOBS[0]);
   const [candidates, setCandidates] = useState<CandidateRecord[]>(MOCK_CANDIDATES);
   const [appliedJobIds, setAppliedJobIds] = useState<string[]>(['2234533717']);
-  const [backendStatus, setBackendStatus] = useState<BackendHealth | null>(null);
 
-  // Modals & Drawers (6-Core surface)
+  // Modals & Drawers
   const [selectedCandidate, setSelectedCandidate] = useState<CandidateRecord | null>(null);
   const [isCandidateModalOpen, setIsCandidateModalOpen] = useState<boolean>(false);
   const [isPostJobModalOpen, setIsPostJobModalOpen] = useState<boolean>(false);
   const [editingJob, setEditingJob] = useState<JobDescription | null>(null);
+  const [isSignalsModalOpen, setIsSignalsModalOpen] = useState<boolean>(false);
+  const [isStagesModalOpen, setIsStagesModalOpen] = useState<boolean>(false);
   const [isGateShieldModalOpen, setIsGateShieldModalOpen] = useState<boolean>(false);
 
-  // Initial load: Fetch real Jobs & Health from FastAPI backend
+  // If dedicated resume route active, render ResumePreviewPage directly
+  if (resumeCandidateId) {
+    return (
+      <ResumePreviewPage
+        candidateId={resumeCandidateId}
+        onClose={() => {
+          setResumeCandidateId(null);
+          if (window.opener) {
+            window.close();
+          } else {
+            window.history.pushState({}, '', '/');
+          }
+        }}
+      />
+    );
+  }
+
+  // Initial load: Fetch real Jobs from port 1234
   useEffect(() => {
     let isMounted = true;
     const initData = async () => {
       try {
-        const health = await api.checkHealth();
-        if (isMounted && health) {
-          setBackendStatus(health);
-        }
-
         const liveJobs = await api.getJobs();
         if (isMounted && liveJobs && liveJobs.length > 0) {
           setJobs(liveJobs);
           setSelectedJob(liveJobs[0]);
         }
       } catch (e) {
-        console.warn('Backend initial fetch notice:', e);
+        console.warn('Initial jobs fetch notice:', e);
       }
     };
     initData();
@@ -57,21 +99,22 @@ export const App: React.FC = () => {
   }, []);
 
   // Sync candidates when selectedJob changes
-  useEffect(() => {
-    let isMounted = true;
-    const loadCandidates = async () => {
-      if (!selectedJob?.job_id) return;
-      try {
-        const liveCands = await api.getCandidates(selectedJob.job_id);
-        if (isMounted && liveCands) {
-          setCandidates(liveCands);
-        }
-      } catch (e) {
-        console.warn('Error syncing candidates for job:', e);
+  const loadCandidatesForJob = async (jobId: string) => {
+    if (!jobId) return;
+    try {
+      const liveCands = await api.getCandidates(jobId);
+      if (liveCands && liveCands.length > 0) {
+        setCandidates(liveCands);
       }
-    };
-    loadCandidates();
-    return () => { isMounted = false; };
+    } catch (e) {
+      console.warn('Error syncing candidates for job:', e);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedJob?.job_id) {
+      loadCandidatesForJob(selectedJob.job_id);
+    }
   }, [selectedJob?.job_id]);
 
   // Sync Theme attribute
@@ -79,8 +122,8 @@ export const App: React.FC = () => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  // Handle stage update
-  const handleUpdateStage = async (candidateId: string, stage: CandidateStage) => {
+  // Handle stage update (persists to SQLite decision_overrides & applicant_metadata)
+  const handleUpdateStage = async (candidateId: string, stage: CandidateStage | string) => {
     setCandidates(prev => prev.map(c => {
       if (c.candidate_id === candidateId) {
         return { ...c, stage };
@@ -89,10 +132,9 @@ export const App: React.FC = () => {
     }));
 
     if (selectedCandidate && selectedCandidate.candidate_id === candidateId) {
-      setSelectedCandidate({ ...selectedCandidate, stage });
+      setSelectedCandidate(prev => prev ? { ...prev, stage } : null);
     }
 
-    // Persist to SQLite backend
     await api.updateCandidateStage(candidateId, stage, selectedJob?.job_id);
   };
 
@@ -123,65 +165,56 @@ export const App: React.FC = () => {
     setIsPostJobModalOpen(false);
   };
 
+  // Handle running signals (updates weights on backend and refreshes scores)
+  const handleRunSignals = async (target: 'suggested' | 'all') => {
+    if (selectedJob?.job_id) {
+      // Reload candidates with updated weights
+      await loadCandidatesForJob(selectedJob.job_id);
+    }
+    setIsSignalsModalOpen(false);
+  };
+
   // Handle candidate applying with proof to an open job
   const handleCandidateApply = async (job: JobDescription, applicationData: any) => {
     if (!appliedJobIds.includes(job.job_id)) {
       setAppliedJobIds(prev => [...prev, job.job_id]);
     }
-    // Re-fetch candidates for this job
-    const refreshed = await api.getCandidates(job.job_id);
-    if (refreshed) {
-      setCandidates(refreshed);
-    }
+    await loadCandidatesForJob(job.job_id);
     setCurrentView('applicants');
   };
 
   return (
-    <div className="app-container">
-      {/* Sleek Dark Left Sidebar */}
+    <div className="app-container" style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-app)' }}>
+      {/* Dark Obsidian Left Sidebar matching Screenshot (305) */}
       <Sidebar 
         currentView={currentView}
         onNavigate={view => {
           if (view === 'candidate-explore-jobs') {
             setActiveRole('candidate');
             setCurrentView('candidate-explore-jobs');
-          } else if (view === 'jobs' || view === 'applicants' || view === 'analytics') {
+          } else if (view === 'jobs' || view === 'applicants') {
             setActiveRole('hr');
             setCurrentView(view);
           }
         }}
         activeRole={activeRole}
-        onOpenSignals={() => {}}
         onOpenGateShield={() => setIsGateShieldModalOpen(true)}
-        onOpenTour={() => {}}
-        isExpanded={isSidebarExpanded}
-        onToggleExpand={() => setIsSidebarExpanded(!isSidebarExpanded)}
       />
 
-      {/* Main App Content Viewport */}
-      <div className="main-wrapper">
+      {/* Main Content Area */}
+      <div className="main-wrapper" style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto' }}>
         <Header 
           currentView={currentView}
-          currentJobTitle={selectedJob.title}
+          currentJobTitle={selectedJob ? selectedJob.title : "Software Engineer"}
           theme={theme}
           onToggleTheme={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-          activeRole={activeRole}
-          onSwitchRole={role => {
-            setActiveRole(role);
-            setCurrentView(role === 'hr' ? 'applicants' : 'candidate-explore-jobs');
-          }}
-          onNavigate={view => {
-            if (view === 'jobs' || view === 'applicants' || view === 'analytics' || view === 'candidate-explore-jobs') {
-              setCurrentView(view);
-            }
-          }}
-          onOpenSignals={() => {}}
-          onOpenTour={() => {}}
+          onNavigate={view => setCurrentView(view)}
         />
 
-        {/* Core 6-Surface View Switcher */}
+        {/* Core Views matching Reference Screenshots */}
         {activeRole === 'hr' ? (
           currentView === 'jobs' ? (
+            /* Screenshot (305) — Job Postings View */
             <JobPostingsView 
               jobs={jobs}
               onSelectJob={handleSelectJob}
@@ -194,9 +227,8 @@ export const App: React.FC = () => {
                 setIsPostJobModalOpen(true);
               }}
             />
-          ) : currentView === 'analytics' ? (
-            <AnalyticsView />
           ) : (
+            /* Screenshot (298), (303), (304), 013310 — Applicants Dashboard */
             <ApplicantsDashboard 
               job={selectedJob}
               jobs={jobs}
@@ -204,13 +236,12 @@ export const App: React.FC = () => {
               candidates={candidates}
               onSelectCandidate={handleSelectCandidate}
               onUpdateStage={handleUpdateStage}
-              onOpenSignals={() => {}}
+              onOpenSignals={() => setIsSignalsModalOpen(true)}
               onEditJob={() => {
                 setEditingJob(selectedJob);
                 setIsPostJobModalOpen(true);
               }}
-              onOpenStages={() => {}}
-              onOpenOutreach={() => {}}
+              onOpenStages={() => setIsStagesModalOpen(true)}
               onScreenCandidate={(newCand) => {
                 setCandidates(prev => [newCand, ...prev.filter(c => c.candidate_id !== newCand.candidate_id)]);
                 setSelectedCandidate(newCand);
@@ -223,12 +254,15 @@ export const App: React.FC = () => {
             jobs={jobs}
             appliedJobIds={appliedJobIds}
             onApplyJob={handleCandidateApply}
-            onNavigateToApplications={() => setCurrentView('applicants')}
+            onNavigateToApplications={() => {
+              setActiveRole('hr');
+              setCurrentView('applicants');
+            }}
           />
         )}
       </div>
 
-      {/* Candidate Detail Modal / Drawer with 12-Gate Evidence Ledger */}
+      {/* Candidate Detail Modal matching Screenshot (299)-(302) */}
       <CandidateDetailModal 
         candidate={selectedCandidate}
         candidatesList={candidates}
@@ -238,7 +272,21 @@ export const App: React.FC = () => {
         onUpdateStage={handleUpdateStage}
       />
 
-      {/* Create / Edit Job Modal */}
+      {/* Signals Modal matching Screenshot 013332 & 013336 */}
+      <SignalsModal 
+        isOpen={isSignalsModalOpen}
+        onClose={() => setIsSignalsModalOpen(false)}
+        onRunSignals={handleRunSignals}
+      />
+
+      {/* Stages Modal matching Screenshot 013319 */}
+      <StagesModal 
+        isOpen={isStagesModalOpen}
+        onClose={() => setIsStagesModalOpen(false)}
+        candidates={candidates}
+      />
+
+      {/* Post a Job Modal matching Screenshot 013402 */}
       <PostJobModal 
         isOpen={isPostJobModalOpen}
         onClose={() => {
