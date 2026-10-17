@@ -20,30 +20,37 @@ import {
   Layers,
   Edit,
   Sliders,
-  Mail
+  Mail,
+  ExternalLink
 } from 'lucide-react';
 import { CandidateRecord, CandidateStage, DecisionType, JobDescription } from '../types/ats';
 
 interface ApplicantsDashboardProps {
   job: JobDescription;
+  jobs?: JobDescription[];
+  onSelectJob?: (job: JobDescription) => void;
   candidates: CandidateRecord[];
   onSelectCandidate: (candidate: CandidateRecord) => void;
   onUpdateStage: (candidateId: string, stage: CandidateStage) => void;
-  onOpenSignals: () => void;
+  onOpenSignals?: () => void;
   onEditJob: () => void;
   onOpenStages?: () => void;
   onOpenOutreach?: () => void;
+  onScreenCandidate?: (candidate: CandidateRecord) => void;
 }
 
 export const ApplicantsDashboard: React.FC<ApplicantsDashboardProps> = ({
   job,
+  jobs,
+  onSelectJob,
   candidates,
   onSelectCandidate,
   onUpdateStage,
   onOpenSignals,
   onEditJob,
   onOpenStages,
-  onOpenOutreach
+  onOpenOutreach,
+  onScreenCandidate
 }) => {
   // State
   const [activeTab, setActiveTab] = useState<string>('Suggested');
@@ -141,11 +148,44 @@ export const ApplicantsDashboard: React.FC<ApplicantsDashboardProps> = ({
       {/* Top Header Row Matching Screenshot (303) and 013310 */}
       <div className="page-header-row">
         <div>
-          <div className="job-title-group">
+          <div className="job-title-group" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div className="job-logo-box">
               <Building2 size={20} />
             </div>
-            <h1 className="page-title">{job.title}</h1>
+            {jobs && jobs.length > 1 && onSelectJob ? (
+              <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+                <select
+                  value={job.job_id}
+                  onChange={(e) => {
+                    const found = jobs.find(j => j.job_id === e.target.value);
+                    if (found) onSelectJob(found);
+                  }}
+                  style={{
+                    fontSize: 22,
+                    fontWeight: 700,
+                    color: 'var(--text-primary)',
+                    background: 'transparent',
+                    border: 'none',
+                    borderBottom: '2px solid var(--border-subtle)',
+                    padding: '2px 28px 4px 4px',
+                    cursor: 'pointer',
+                    outline: 'none',
+                    appearance: 'none',
+                    fontFamily: 'inherit'
+                  }}
+                  title="Switch between Benchmark Roles"
+                >
+                  {jobs.map(j => (
+                    <option key={j.job_id} value={j.job_id} style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)' }}>
+                      {j.title} — {j.company}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown size={18} style={{ position: 'absolute', right: 4, pointerEvents: 'none', color: 'var(--text-tertiary)' }} />
+              </div>
+            ) : (
+              <h1 className="page-title">{job.title}</h1>
+            )}
           </div>
 
           <div className="job-meta-row">
@@ -484,16 +524,30 @@ export const ApplicantsDashboard: React.FC<ApplicantsDashboardProps> = ({
                     )}
                   </div>
 
-                  {/* Move Dropdown */}
-                  <div style={{ position: 'relative' }}>
-                    <button 
-                      className="btn-primary"
-                      onClick={() => setOpenMoveDropdownId(openMoveDropdownId === cand.candidate_id ? null : cand.candidate_id)}
-                      style={{ padding: '6px 14px', fontSize: 12.5 }}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <button
+                      className="btn-secondary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(`/resume/${cand.candidate_id}`, '_blank');
+                      }}
+                      style={{ padding: '6px 12px', fontSize: 12.5, display: 'inline-flex', alignItems: 'center', gap: 5 }}
+                      title="Open dedicated resume view in new tab"
                     >
-                      <span>Move</span>
-                      <ChevronDown size={12} />
+                      <ExternalLink size={12} />
+                      <span>Resume ↗</span>
                     </button>
+
+                    {/* Move Dropdown */}
+                    <div style={{ position: 'relative' }}>
+                      <button 
+                        className="btn-primary"
+                        onClick={() => setOpenMoveDropdownId(openMoveDropdownId === cand.candidate_id ? null : cand.candidate_id)}
+                        style={{ padding: '6px 14px', fontSize: 12.5 }}
+                      >
+                        <span>Move</span>
+                        <ChevronDown size={12} />
+                      </button>
 
                     {openMoveDropdownId === cand.candidate_id && (
                       <div style={{
@@ -531,6 +585,7 @@ export const ApplicantsDashboard: React.FC<ApplicantsDashboardProps> = ({
                       </div>
                     )}
                   </div>
+                </div>
                 </div>
               </div>
             ))
@@ -596,13 +651,22 @@ export const ApplicantsDashboard: React.FC<ApplicantsDashboardProps> = ({
                           fontWeight: 600,
                           color: 'var(--text-primary)'
                         }}>
-                          <span style={{ width: 7, height: 7, borderRadius: '50%', background: getStageDot(cand.stage) }} />
+                          <span style={{ width: 7, height: 7, borderRadius: '50%', background: getStageDot(cand.stage as CandidateStage) }} />
                           {cand.stage}
                         </span>
                       </td>
 
                       <td style={{ textAlign: 'right' }} onClick={e => e.stopPropagation()}>
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                          <button
+                            className="btn-secondary"
+                            style={{ padding: '5px 10px', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                            onClick={() => window.open(`/resume/${cand.candidate_id}`, '_blank')}
+                            title="Open dedicated resume view in new tab"
+                          >
+                            <ExternalLink size={12} />
+                            <span>Resume</span>
+                          </button>
                           <button 
                             className="btn-secondary" 
                             style={{ padding: '5px 10px', fontSize: 12 }}

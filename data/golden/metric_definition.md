@@ -3,7 +3,7 @@
 **Document Version:** 1.0.0  
 **Domain Focus:** Software Engineering & Information Technology (SDE Intern / Graduate 2027 ATS Evaluation Benchmark)  
 **Author:** Lead Technical Recruiter & Evaluation Architect, HYT ATS  
-**Target File:** `e:\HYT\hyt-ats\data\golden\golden_labels.csv`  
+**Target File:** [`data/golden/golden_labels.csv`](golden_labels.csv)  
 
 ---
 

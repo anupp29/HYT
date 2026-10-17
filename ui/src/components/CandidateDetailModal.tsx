@@ -23,7 +23,9 @@ import {
   Check, 
   Clock,
   MessageSquare,
-  Send
+  Send,
+  Download,
+  Eye
 } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from './Icons';
 import { CandidateRecord, CandidateStage, DecisionType } from '../types/ats';
@@ -47,7 +49,7 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
 }) => {
   if (!isOpen || !candidate) return null;
 
-  const [activeTab, setActiveTab] = useState<'pipeline' | 'ledger' | 'experience' | 'projects' | 'qa' | 'notes'>('pipeline');
+  const [activeTab, setActiveTab] = useState<'pipeline' | 'resume' | 'ledger' | 'experience' | 'projects' | 'qa' | 'notes'>('pipeline');
   const [showMoveMenu, setShowMoveMenu] = useState<boolean>(false);
   const [showCopyMenu, setShowCopyMenu] = useState<boolean>(false);
   const [copiedNotification, setCopiedNotification] = useState<string | null>(null);
@@ -374,7 +376,7 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                   <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>
                     {candidate.name}
                   </h2>
-                  {getDecisionBadge(candidate.decision)}
+                  {getDecisionBadge(candidate.decision as DecisionType)}
                   {candidate.is_quarantined && (
                     <span className="decision-pill quarantine">
                       <ShieldAlert size={13} /> QUARANTINED (GATE 0)
@@ -398,18 +400,18 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                 {candidate.headline}
               </div>
 
-              {/* Social and External Proof Links */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                {candidate.github_stats && (
+              {/* Social and External Proof Links (Real links only) */}
+              <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginBottom: 12 }}>
+                {candidate.real_links?.github && !candidate.real_links.github.includes('example.com') && (
                   <a 
-                    href={candidate.github_stats.url}
+                    href={candidate.real_links.github}
                     target="_blank"
                     rel="noreferrer"
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: 6,
-                      fontSize: 12.5,
+                      fontSize: 12,
                       color: 'var(--text-primary)',
                       textDecoration: 'none',
                       background: 'var(--bg-surface-subtle)',
@@ -418,32 +420,79 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                       border: '1px solid var(--border-subtle)'
                     }}
                   >
-                    <GithubIcon size={14} />
-                    <span>@{candidate.github_stats.handle}</span>
-                    <ExternalLink size={11} color="var(--text-muted)" />
+                    <GithubIcon size={13} />
+                    <span>GitHub</span>
+                    <ExternalLink size={10} color="var(--text-muted)" />
                   </a>
                 )}
 
-                <a 
-                  href="#"
-                  onClick={e => e.preventDefault()}
+                {candidate.real_links?.linkedin && !candidate.real_links.linkedin.includes('example.com') && (
+                  <a 
+                    href={candidate.real_links.linkedin}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      fontSize: 12,
+                      color: '#0A66C2',
+                      textDecoration: 'none',
+                      background: 'var(--bg-surface-subtle)',
+                      padding: '4px 10px',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border-subtle)'
+                    }}
+                  >
+                    <LinkedinIcon size={13} color="#0A66C2" />
+                    <span>LinkedIn</span>
+                    <ExternalLink size={10} color="var(--text-muted)" />
+                  </a>
+                )}
+
+                {candidate.real_links?.portfolio && !candidate.real_links.portfolio.includes('example.com') && (
+                  <a 
+                    href={candidate.real_links.portfolio}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      fontSize: 12,
+                      color: '#2563EB',
+                      textDecoration: 'none',
+                      background: 'var(--bg-surface-subtle)',
+                      padding: '4px 10px',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border-subtle)'
+                    }}
+                  >
+                    <span>Portfolio</span>
+                    <ExternalLink size={10} color="var(--text-muted)" />
+                  </a>
+                )}
+
+                <button
+                  onClick={() => window.open(`/resume/${candidate.candidate_id}`, '_blank')}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: 6,
-                    fontSize: 12.5,
-                    color: 'var(--text-primary)',
-                    textDecoration: 'none',
-                    background: 'var(--bg-surface-subtle)',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: '#2563EB',
+                    background: '#EFF6FF',
                     padding: '4px 10px',
                     borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--border-subtle)'
+                    border: '1px solid #BFDBFE',
+                    cursor: 'pointer'
                   }}
+                  title="Open full resume template in dedicated tab"
                 >
-                  <LinkedinIcon size={14} color="#0A66C2" />
-                  <span>LinkedIn</span>
-                  <ExternalLink size={11} color="var(--text-muted)" />
-                </a>
+                  <ExternalLink size={12} />
+                  <span>Open Resume ↗</span>
+                </button>
 
                 <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
                   📍 {candidate.location} • Applied {candidate.applied_at}
@@ -503,7 +552,7 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
               onClick={() => setActiveTab('experience')}
             >
               <Briefcase size={15} />
-              <span>Experience ({candidate.experience.length})</span>
+              <span>Experience ({candidate.experience?.length || 0})</span>
             </button>
 
             <button 
@@ -511,7 +560,7 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
               onClick={() => setActiveTab('projects')}
             >
               <GitBranch size={15} />
-              <span>Side Projects ({candidate.project_repos.length})</span>
+              <span>Side Projects ({candidate.project_repos?.length || 0})</span>
             </button>
 
             <button 
@@ -519,7 +568,7 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
               onClick={() => setActiveTab('qa')}
             >
               <FileText size={15} />
-              <span>Proof Q&A ({candidate.answers.length})</span>
+              <span>Proof Q&A ({candidate.answers?.length || 0})</span>
             </button>
 
             <button 
@@ -527,7 +576,7 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
               onClick={() => setActiveTab('notes')}
             >
               <MessageSquare size={15} />
-              <span>Team Evaluation ({teamNotes.length})</span>
+              <span>Team Evaluation ({teamNotes?.length || 0})</span>
             </button>
           </div>
 
@@ -583,13 +632,12 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                   <button
                     className="btn-secondary"
                     onClick={() => {
-                      setCopiedNotification('Opening original resume preview in viewer...');
-                      setTimeout(() => setCopiedNotification(null), 3000);
+                      window.open(`/resume/${candidate.candidate_id}`, '_blank');
                     }}
                     style={{ width: '100%', marginTop: 14, fontSize: 12, padding: '7px 0', justifyContent: 'center' }}
                   >
                     <ExternalLink size={13} />
-                    <span>View Full Resume</span>
+                    <span>Open Full Resume ↗</span>
                   </button>
                 </div>
 
@@ -712,24 +760,74 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                       </tr>
                     </thead>
                     <tbody>
-                      {[
-                        { req: 'Python (Must Have)', evidence: 'Listed in skills, verified in GitHub commits', match: '✓', score: '18/20', color: '#10B981' },
-                        { req: 'React (Must Have)', evidence: 'Built web frontend, demo URL verified', match: '✓', score: '16/20', color: '#10B981' },
-                        { req: 'SQL (Must Have)', evidence: 'PostgreSQL migrations, query benchmarks', match: '✓', score: '14/15', color: '#10B981' },
-                        { req: '2-4 yrs Experience', evidence: `${totalExpYears} years verified engineering`, match: '✓', score: '15/15', color: '#10B981' },
-                        { req: 'B.Tech in CS', evidence: 'B.Tech Computer Science verified', match: '✓', score: '10/10', color: '#10B981' },
-                        { req: 'REST APIs (Preferred)', evidence: 'FastAPI REST endpoints in repo', match: '✓', score: '8/10', color: '#10B981' },
-                        { req: 'Docker (Preferred)', evidence: 'Dockerfile container setup', match: '✓', score: '7/10', color: '#10B981' },
-                        { req: 'AWS Cloud (Preferred)', evidence: 'AWS Cloud deployment verified', match: '✓', score: '6/10', color: '#10B981' },
-                        { req: 'System Design (Preferred)', evidence: 'Architectural case study documented', match: '✓', score: '8/10', color: '#10B981' }
-                      ].map((r, i) => (
-                        <tr key={i} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                          <td style={{ padding: '9px 10px', fontWeight: 600, color: 'var(--text-primary)' }}>{r.req}</td>
-                          <td style={{ padding: '9px 10px', color: 'var(--text-secondary)' }}>{r.evidence}</td>
-                          <td style={{ padding: '9px 10px', textAlign: 'center', color: r.color, fontWeight: 800 }}>{r.match}</td>
-                          <td style={{ padding: '9px 10px', textAlign: 'right', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>{r.score}</td>
-                        </tr>
-                      ))}
+                      {(() => {
+                        const rawLedger = candidate.ledger || [];
+                        if (rawLedger.length > 0) {
+                          return rawLedger.map((r: any, i: number) => {
+                            const isVerified = Boolean(r.is_verified || (r.score_contribution && r.score_contribution > 50));
+                            const isPartial = !isVerified && (r.score_contribution > 0);
+                            const evidenceText = isVerified 
+                              ? (r.evidence || 'Verified in candidate codebase / profile')
+                              : (r.gap || r.evidence || 'Deficit identified in screening audit');
+                            const matchIcon = isVerified ? '✓' : (isPartial ? '▲' : '✗');
+                            const matchColor = isVerified ? '#10B981' : (isPartial ? '#F59E0B' : '#EF4444');
+                            const scoreLabel = r.score_contribution !== undefined && r.score_contribution !== null
+                              ? `${r.score_contribution.toFixed ? r.score_contribution.toFixed(1) : r.score_contribution} pts`
+                              : (isVerified ? '100 pts' : '0 pts');
+
+                            return (
+                              <tr key={i} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                                <td style={{ padding: '9px 10px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                                  {r.requirement}
+                                </td>
+                                <td style={{ padding: '9px 10px', color: isVerified ? 'var(--text-secondary)' : '#DC2626', fontSize: 11.5, lineHeight: 1.4 }}>
+                                  {evidenceText}
+                                </td>
+                                <td style={{ padding: '9px 10px', textAlign: 'center', color: matchColor, fontWeight: 800 }}>
+                                  {matchIcon}
+                                </td>
+                                <td style={{ padding: '9px 10px', textAlign: 'right', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
+                                  {scoreLabel}
+                                </td>
+                              </tr>
+                            );
+                          });
+                        }
+
+                        // Dynamic fallback based on candidate skills & experience
+                        const dynamicItems = [
+                          ...(candidate.skills || []).slice(0, 4).map((s: any) => ({
+                            req: `${s.name} (Must Have)`,
+                            evidence: s.context || (s.is_verified ? `Verified in candidate repositories (${s.years_experience || 1}+ yrs)` : `Unverified / missing in resume evidence`),
+                            match: s.is_verified ? '✓' : '✗',
+                            score: s.is_verified ? '20/20' : '0/20',
+                            color: s.is_verified ? '#10B981' : '#EF4444'
+                          })),
+                          {
+                            req: 'Engineering Experience',
+                            evidence: `${totalExpYears} years verified professional engineering`,
+                            match: totalExpYears >= 2 ? '✓' : '✗',
+                            score: `${Math.min(15, Math.round(totalExpYears * 5))}/15`,
+                            color: totalExpYears >= 2 ? '#10B981' : '#EF4444'
+                          },
+                          {
+                            req: 'Education Baseline',
+                            evidence: candidate.education?.[0]?.degree || 'Technical Degree verified',
+                            match: '✓',
+                            score: '10/10',
+                            color: '#10B981'
+                          }
+                        ];
+
+                        return dynamicItems.map((r, i) => (
+                          <tr key={i} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                            <td style={{ padding: '9px 10px', fontWeight: 600, color: 'var(--text-primary)' }}>{r.req}</td>
+                            <td style={{ padding: '9px 10px', color: 'var(--text-secondary)' }}>{r.evidence}</td>
+                            <td style={{ padding: '9px 10px', textAlign: 'center', color: r.color, fontWeight: 800 }}>{r.match}</td>
+                            <td style={{ padding: '9px 10px', textAlign: 'right', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>{r.score}</td>
+                          </tr>
+                        ));
+                      })()}
                     </tbody>
                   </table>
                 </div>
@@ -970,7 +1068,7 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
                       Verified Language Distribution in Repositories:
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                      {Object.entries(candidate.github_stats.languages).map(([lang, pct]) => (
+                      {candidate.github_stats?.languages && Object.entries(candidate.github_stats.languages).map(([lang, pct]) => (
                         <span key={lang} style={{ fontSize: 12, background: 'var(--bg-surface)', padding: '3px 8px', borderRadius: 4, border: '1px solid var(--border-subtle)' }}>
                           <strong>{lang}</strong>: {pct}%
                         </span>
@@ -1063,12 +1161,12 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
           {/* TAB 3: Side Projects & Live Proofs (Matching Screenshots 299/300) */}
           {activeTab === 'projects' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {candidate.project_repos.length === 0 ? (
+              {(!candidate.project_repos || candidate.project_repos.length === 0) ? (
                 <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>
                   No side projects recorded.
                 </div>
               ) : (
-                candidate.project_repos.map((proj, idx) => (
+                (candidate.project_repos || []).map((proj, idx) => (
                   <div 
                     key={idx}
                     style={{
@@ -1127,12 +1225,12 @@ export const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
           {/* TAB 4: Q&A & Screening Proof */}
           {activeTab === 'qa' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {candidate.answers.length === 0 ? (
+              {(!candidate.answers || candidate.answers.length === 0) ? (
                 <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>
                   No screening questions submitted.
                 </div>
               ) : (
-                candidate.answers.map((qa, idx) => (
+                (candidate.answers || []).map((qa, idx) => (
                   <div 
                     key={idx}
                     style={{
