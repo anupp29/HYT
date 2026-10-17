@@ -2,7 +2,7 @@
 > High-Reliability, Deterministic 12-Gate Applicant Screening, Adversarial Defense & Candidate Ranking Layer
 
 **HuntYourTribe (HYT) — Graduate 2027 SDE Intern Take-Home Engineering Deliverable**  
-**Applicant:** Anup Patil ([@anupp29](https://github.com/anupp29)) $\cdot$ Email: [ramitkaul1@gmail.com](mailto:ramitkaul1@gmail.com)  
+**Applicant:** Anup Patil ([@anupp29](https://github.com/anupp29))
 **Submission Deadline:** Saturday, 17 Oct 2026, 11:59 PM IST  
 **Domain Focus:** Software Engineering & IT Infrastructure  
 **Core Principles:** 100% Deterministic scoring arithmetic (no LLM score guessing), Structural Recall Bias, physical PII redaction, multi-provider LLM support with offline local capability.
@@ -94,6 +94,68 @@ HYT ATS enforces an architectural separation of concerns: LLMs perform structura
         ▼
  [Gate 10: Ranking Engine]    ────► Hierarchical decision-bucket leaderboard (ADVANCE -> ESCALATE -> REJECT)
 ```
+
+---
+
+## 🖥️ Interactive Recruiter Cockpit (UI Walkthrough)
+
+The HYT ATS includes an enterprise recruiter dashboard (`ui/`, built with React 18, Vite, and TypeScript) backed by an async FastAPI backend (`api/main.py`). It provides complete visibility into candidate scores, decision funnels, live GitHub OSINT audits, and the immutable evidence ledger.
+
+### 1. Applicants Triage & Decision Funnel
+Visualizes conversion funnels, score distribution histograms, and actionable candidate buckets (`AUTO_ADVANCE`, `ESCALATE`, `AUTO_REJECT`).
+
+![Applicants Pipeline (Card View)](screenshots/07_applicants_dashboard_card_view.png)
+*Figure 2: Applicants Dashboard with stage conversion funnels, triage search, and real-time score filters.*
+
+---
+
+### 2. High-Density Cohort Ranking (Table View)
+Allows enterprise recruiters to sort and inspect large candidate pools by deterministic fit score, verified skills count, years of experience, and decision flags.
+
+![Applicants Pipeline (Table View)](screenshots/08_applicants_dashboard_table_view.png)
+*Figure 3: Deterministic Leaderboard Table View with candidate badges and instant audit drawer triggers.*
+
+---
+
+### 3. Dynamic Candidate Inspection & 12-Gate Audit Drawer
+Clicking any candidate opens the comprehensive audit drawer, providing an explainable, step-by-step breakdown of how the candidate traversed Gates 0 through 11.
+
+![Candidate Inspection & Dynamic Evidence Ledger](screenshots/09_candidate_detail_modal_dynamic_ledger.png)
+*Figure 4: Candidate Detail Modal displaying Gate 0–11 status, score distribution breakdown, and grounded recruiter explanation.*
+
+---
+
+### 4. Mandatory Evidence Ledger & Verbatim Citations
+Every point scored traces directly to verbatim resume citations or identifies explicit requirement gaps. Unverified claims receive partial or zero credit.
+
+![Mandatory Evidence Ledger](screenshots/04_resume_mandatory_evidence_ledger.png)
+*Figure 5: The Immutable Evidence Ledger citing exact resume lines for verified skills, seniority gaps, and education baseline.*
+
+---
+
+### 5. Live OSINT & GitHub Project Verification (Gate 4)
+Cross-checks candidate claims against real-world developer footprints by querying the GitHub API for commits, pull requests, stargazers, and primary repository languages.
+
+![Live Project & GitHub Verification](screenshots/02_resume_projects_verification.png)
+*Figure 6: Gate 4 Developer Footprint Verification showing live repository language analysis and portfolio HTTP checks.*
+
+---
+
+### 6. Candidate Profile & 5-Dimensional Deterministic Scorecard
+Displays the mathematical breakdown across the 5 dimensions: Technical Competencies (0.45), Experience & Trajectory (0.25), Seniority & Scope (0.15), Education (0.10), and Location (0.05).
+
+![Candidate Scorecard & 5-Dimension Audit](screenshots/03_resume_scorecard_audit.png)
+*Figure 7: 5-Dimensional Deterministic Fit Scorecard with zero LLM scoring involvement.*
+
+---
+
+### 7. Requisition Management & Signals Configuration
+Recruiters can inspect active benchmark jobs, tune gate sensitivity thresholds, and configure interview signal weights without touching source code.
+
+| Job Requisitions Dashboard | 12-Gate Signals & Calibration |
+| :---: | :---: |
+| ![Job Postings Dashboard](screenshots/10_job_postings_dashboard.png) | ![Signals & Calibration Modal](screenshots/11_signals_configuration_modal.png) |
+| *Figure 8A: Benchmark Job Postings View* | *Figure 8B: Dynamic Gate Calibration Settings* |
 
 ---
 
