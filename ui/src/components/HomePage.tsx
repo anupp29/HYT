@@ -353,16 +353,16 @@ export const HomePage: React.FC<HomePageProps> = ({
                 Candidate Proof-of-Work Portal
               </h2>
               <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 20 }}>
-                Never get filtered by keyword bots. Explore open roles, calculate your profile-to-job match score, submit public code repos, and track your 12-Gate audit live.
+                Never get filtered by keyword bots. Explore open roles, see your real-time profile match, showcase your actual code and deployed apps, and track your application status live.
               </p>
 
               {/* Bullet Checklist */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 26 }}>
                 {[
-                  'Live Cosine Match scoreline based on verified skills & tech stack',
-                  'Gate 4 GitHub code audit (commit history & language distributions)',
-                  'Live deployed application ping test (HTTP 200 OK verification)',
-                  'Full application preview before submitting',
+                  'Live Profile Match score based on your verified skills and experience',
+                  'Showcase real GitHub code repositories & commit history',
+                  'Verify live working web deployments in real-time',
+                  'Full application scenario preview before submitting',
                   'Direct technical interview scheduling with hiring teams'
                 ].map((item, idx) => (
                   <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13, color: 'var(--text-primary)' }}>

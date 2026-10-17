@@ -38,7 +38,7 @@ export const CandidatePortal: React.FC<CandidatePortalProps> = ({
   appliedJobsList = [jobs[0]]
 }) => {
   const [selectedJobId, setSelectedJobId] = useState<string>(appliedJobsList[0]?.job_id || jobs[0]?.job_id);
-  const [expandedGate, setExpandedGate] = useState<number | null>(6);
+  const [expandedMilestone, setExpandedMilestone] = useState<number | null>(3);
   const [showScheduleModal, setShowScheduleModal] = useState<boolean>(false);
   const [isScheduled, setIsScheduled] = useState<boolean>(false);
   const [scheduledSlot, setScheduledSlot] = useState<string>('Tomorrow at 10:00 AM IST');
@@ -55,46 +55,48 @@ export const CandidatePortal: React.FC<CandidatePortalProps> = ({
 
   const activeJob = jobs.find(j => j.job_id === selectedJobId) || jobs[0];
 
-  const gateDetails = [
+  const applicationMilestones = [
     {
-      gate: 0,
-      title: "Gate 0: Security & Anti-Bluffing Integrity Shield",
-      status: "PASS",
-      badge: "Clean • 21.0:1 Contrast",
-      summary: "Zero prompt injection payloads detected. Zero hidden 0.1pt font layers found. PDF byte structure authentic.",
-      evidence: "Verified with deterministic byte frequency analysis. Clean contrast ratio 21.0:1 exceeds WCAG AA safety threshold."
+      id: 0,
+      title: "1. Application & Proof Submitted",
+      status: "COMPLETED",
+      badge: "Received",
+      summary: "Your resume, GitHub code repository, and live web demo link were successfully received.",
+      details: "All submitted documents and proof links are attached to your application profile."
     },
     {
-      gate: 2,
-      title: "Gate 2: Privacy & PII Sanitization",
-      status: "PASS",
-      badge: "Anonymized",
-      summary: "Candidate phone number and physical address sanitized to protect privacy during initial algorithmic evaluation.",
-      evidence: "Sanitized fields: phone_number, postal_address. Public proof artifacts preserved: GitHub handle @bhushanmehar."
+      id: 1,
+      title: "2. Technical Review & Verification",
+      status: "COMPLETED",
+      badge: "Verified",
+      summary: "Your GitHub repository code activity and live web deployment have been authenticated.",
+      details: "Code repository commits and live deployment responsiveness verified."
     },
     {
-      gate: 4,
-      title: "Gate 4: GitHub Public Repository Verification",
-      status: "PASS",
-      badge: "Verified Code Base",
-      summary: "Verified 142 public commits across TypeScript (48.2%) and Python (34.8%) matching required job skills.",
-      evidence: "Primary Repository: github.com/bhushanmehar/moakmate (★ 14 stars). Recent commit activity confirmed in lookback window."
+      id: 2,
+      title: "3. Hiring Team Review",
+      status: "COMPLETED",
+      badge: "Shortlisted",
+      summary: "The engineering team evaluated your profile and shortlisted you for technical discussion.",
+      details: "Your technical depth and project implementation match the role criteria."
     },
     {
-      gate: 6,
-      title: "Gate 6: Evidence Ledger & Deterministic Fit Scoring",
-      status: "PASS",
-      badge: `Score: ${currentCandidate.final_score.toFixed(1)} / 100`,
-      summary: "React, Node.js, and PostgreSQL verified with verbatim quotes in the Evidence Ledger. Hard failures: 0/5.",
-      evidence: "Verbatim Ledger Quote: 'Developed Moakmate with React 18, Server-Sent Events, and Postgres schema design for real-time exam questions.' (Character offset [1420:1580])."
+      id: 3,
+      title: "4. Technical Interview",
+      status: isScheduled ? "SCHEDULED" : "READY",
+      badge: isScheduled ? "Confirmed" : "Action Required",
+      summary: isScheduled
+        ? `Confirmed for ${scheduledSlot}. Calendar invitation sent to your email.`
+        : "You are invited for a 45-minute technical conversation. Select your preferred interview slot below.",
+      details: "A 45-minute architectural walkthrough and deep-dive into your submitted case study."
     },
     {
-      gate: 7,
-      title: "Gate 7: Deterministic Policy Engine",
-      status: "PASS",
-      badge: "AUTO_ADVANCE",
-      summary: "Deterministic rule triggered: Score >= 75.0 AND Gate 0 Clean AND Must-Haves Satisfied → Decision: AUTO_ADVANCE.",
-      evidence: "Candidate automatically advanced to recruiter review and technical interview invitation pipeline."
+      id: 4,
+      title: "5. Final Decision & Offer",
+      status: "UPCOMING",
+      badge: "Pending Interview",
+      summary: "Final evaluation and offer decision following your technical interview.",
+      details: "Expect an update from the hiring team within 48 business hours after the interview."
     }
   ];
 
@@ -148,13 +150,13 @@ export const CandidatePortal: React.FC<CandidatePortalProps> = ({
             minWidth: 170
           }}>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.8)', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600 }}>
-              Current Pipeline Stage
+              Application Status
             </div>
-            <div style={{ fontSize: 18, fontWeight: 800, marginTop: 4, color: '#10B981' }}>
-              ✓ {currentCandidate.stage}
+            <div style={{ fontSize: 17, fontWeight: 800, marginTop: 4, color: '#10B981' }}>
+              ✓ Shortlisted for Interview
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>
-              Fit Score: {currentCandidate.final_score.toFixed(1)}/100
+            <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.85)', marginTop: 2 }}>
+              Stage: {isScheduled ? 'Interview Confirmed' : 'Ready to Schedule'}
             </div>
           </div>
 
@@ -253,7 +255,7 @@ export const CandidatePortal: React.FC<CandidatePortalProps> = ({
             </div>
           </div>
 
-          {/* Real-time 12-Gate Audit Timeline */}
+          {/* Real-time Application Status & Milestones */}
           <div style={{
             background: 'var(--bg-surface)',
             border: '1px solid var(--border-subtle)',
@@ -264,27 +266,29 @@ export const CandidatePortal: React.FC<CandidatePortalProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div>
                 <h3 style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8, margin: 0 }}>
-                  <ShieldCheck size={18} color="#10B981" />
-                  12-Gate Screening Pipeline Audit
+                  <CheckCircle2 size={18} color="#10B981" />
+                  Application Progress & Status
                 </h3>
                 <p style={{ fontSize: 12.5, color: 'var(--text-tertiary)', margin: '4px 0 0' }}>
-                  Audited automatically against your submitted code and proof artifacts.
+                  Track your hiring milestones, verification, and interview schedule.
                 </p>
               </div>
 
               <span style={{ fontSize: 12, color: '#10B981', fontWeight: 700, background: 'rgba(16, 185, 129, 0.08)', padding: '3px 8px', borderRadius: 4 }}>
-                All 5 Automated Gates Passed
+                Status: Shortlisted for Interview
               </span>
             </div>
 
             {/* Stepper Timeline with Interactive Expanders */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {gateDetails.map(step => {
-                const isExpanded = expandedGate === step.gate;
+              {applicationMilestones.map(milestone => {
+                const isExpanded = expandedMilestone === milestone.id;
+                const isDone = milestone.status === 'COMPLETED';
+                const isActive = milestone.status === 'READY' || milestone.status === 'SCHEDULED';
 
                 return (
                   <div 
-                    key={step.gate}
+                    key={milestone.id}
                     style={{
                       border: '1px solid var(--border-subtle)',
                       borderRadius: 'var(--radius-md)',
@@ -294,7 +298,7 @@ export const CandidatePortal: React.FC<CandidatePortalProps> = ({
                     }}
                   >
                     <div 
-                      onClick={() => setExpandedGate(isExpanded ? null : step.gate)}
+                      onClick={() => setExpandedMilestone(isExpanded ? null : milestone.id)}
                       style={{
                         padding: '12px 16px',
                         cursor: 'pointer',
@@ -309,8 +313,9 @@ export const CandidatePortal: React.FC<CandidatePortalProps> = ({
                           width: 24,
                           height: 24,
                           borderRadius: '50%',
-                          background: '#10B981',
-                          color: '#FFF',
+                          background: isDone ? '#10B981' : isActive ? 'var(--primary-600)' : 'var(--bg-surface-subtle)',
+                          color: isDone || isActive ? '#FFF' : 'var(--text-muted)',
+                          border: isDone || isActive ? 'none' : '1px solid var(--border-subtle)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -318,14 +323,14 @@ export const CandidatePortal: React.FC<CandidatePortalProps> = ({
                           fontWeight: 800,
                           flexShrink: 0
                         }}>
-                          ✓
+                          {isDone ? '✓' : milestone.id + 1}
                         </div>
                         <div>
                           <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--text-primary)' }}>
-                            {step.title}
+                            {milestone.title}
                           </div>
                           <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
-                            {step.summary}
+                            {milestone.summary}
                           </div>
                         </div>
                       </div>
@@ -334,12 +339,12 @@ export const CandidatePortal: React.FC<CandidatePortalProps> = ({
                         <span style={{
                           fontSize: 11,
                           fontWeight: 700,
-                          background: 'rgba(16, 185, 129, 0.1)',
-                          color: '#10B981',
+                          background: isDone ? 'rgba(16, 185, 129, 0.1)' : isActive ? 'rgba(2, 133, 250, 0.1)' : 'var(--bg-surface-subtle)',
+                          color: isDone ? '#10B981' : isActive ? 'var(--primary-600)' : 'var(--text-muted)',
                           padding: '2px 8px',
                           borderRadius: 'var(--radius-sm)'
                         }}>
-                          {step.badge}
+                          {milestone.badge}
                         </span>
                         <ChevronDown 
                           size={15} 
@@ -361,8 +366,8 @@ export const CandidatePortal: React.FC<CandidatePortalProps> = ({
                         color: 'var(--text-secondary)',
                         lineHeight: 1.5
                       }}>
-                        <strong style={{ color: 'var(--text-primary)' }}>Audit Evidence: </strong>
-                        {step.evidence}
+                        <strong style={{ color: 'var(--text-primary)' }}>Stage Details: </strong>
+                        {milestone.details}
                       </div>
                     )}
                   </div>
@@ -440,7 +445,7 @@ export const CandidatePortal: React.FC<CandidatePortalProps> = ({
                     Public Code Repository
                   </span>
                   <span style={{ fontSize: 11, color: '#10B981', fontWeight: 700 }}>
-                    ✓ Gate 4 Audited
+                    ✓ Verified Code
                   </span>
                 </div>
                 <a 
@@ -515,7 +520,7 @@ export const CandidatePortal: React.FC<CandidatePortalProps> = ({
                     Resume Document
                   </span>
                   <span style={{ fontSize: 11, color: '#10B981', fontWeight: 700 }}>
-                    ✓ Clean Gate 0
+                    ✓ Uploaded & Verified
                   </span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>

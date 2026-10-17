@@ -328,7 +328,7 @@ export const CandidateExploreJobs: React.FC<CandidateExploreJobsProps> = ({
         </span>
 
         <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
-          ⚡ Match score calculated live using verified skill & experience vectors
+          ⚡ Matches calculated based on your technical skills and experience
         </span>
       </div>
 
@@ -444,7 +444,7 @@ export const CandidateExploreJobs: React.FC<CandidateExploreJobsProps> = ({
                         }}
                       >
                         <Check size={14} />
-                        <span>Applied • View 12-Gate Audit</span>
+                        <span>Applied • View Status</span>
                       </button>
                     ) : (
                       <button 
@@ -466,53 +466,52 @@ export const CandidateExploreJobs: React.FC<CandidateExploreJobsProps> = ({
                   </div>
                 </div>
 
-                {/* Real-time Match Scoreline (Cosine Similarity Breakdown) */}
+                {/* Basic, Clean Profile Match Scoreline */}
                 <div style={{
                   background: 'var(--bg-surface-subtle)',
                   border: '1px solid var(--border-subtle)',
                   borderRadius: 'var(--radius-md)',
-                  padding: '12px 16px',
+                  padding: '10px 16px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   flexWrap: 'wrap',
-                  gap: 12
+                  gap: 10
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
-                        Match With Your Profile:
-                      </span>
-                      <span style={{
-                        background: match.color === '#10B981' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(2, 133, 250, 0.15)',
-                        color: match.color,
-                        padding: '3px 10px',
-                        borderRadius: 'var(--radius-full)',
-                        fontSize: 13,
-                        fontWeight: 800,
-                        fontFamily: 'var(--font-mono)'
-                      }}>
-                        {match.score}% ({match.level})
-                      </span>
-                    </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                    <span style={{
+                      background: match.color === '#10B981' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(2, 133, 250, 0.15)',
+                      color: match.color,
+                      padding: '3px 10px',
+                      borderRadius: 'var(--radius-full)',
+                      fontSize: 12.5,
+                      fontWeight: 800
+                    }}>
+                      {Math.round(match.score)}% Match • {match.level}
+                    </span>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 12, color: 'var(--text-secondary)' }}>
-                      <span>
-                        <strong>Skills:</strong> {match.matchingMustHaves.length}/{job.must_have_skills.length} verified
-                      </span>
-                      <span>•</span>
-                      <span>
-                        <strong>Experience:</strong> {candidateExperience} yrs vs {job.min_years_experience} yrs req
-                      </span>
-                    </div>
+                    <span style={{ fontSize: 12.5, color: 'var(--text-secondary)' }}>
+                      Matching skills: <strong>{match.matchingMustHaves.join(', ') || 'General engineering'}</strong>
+                    </span>
                   </div>
 
-                  <span 
-                    style={{ fontSize: 12, color: 'var(--primary-600)', cursor: 'pointer', fontWeight: 600 }}
+                  <button 
+                    type="button"
                     onClick={() => setIsConfigureProfileOpen(true)}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--primary-600)',
+                      fontSize: 12,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 4
+                    }}
                   >
-                    Adjust Skills Profile ⚙
-                  </span>
+                    <span>Update Your Skills ⚙</span>
+                  </button>
                 </div>
 
                 {/* Description snippet */}
@@ -779,7 +778,7 @@ export const CandidateExploreJobs: React.FC<CandidateExploreJobsProps> = ({
               {/* Must-Haves */}
               <div>
                 <h4 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
-                  Non-Negotiable Proof Criteria (Gate 6 Evidence Ledger)
+                  Required Technical Skills
                 </h4>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                   {selectedJobForDetail.must_have_skills.map(s => (
@@ -807,7 +806,7 @@ export const CandidateExploreJobs: React.FC<CandidateExploreJobsProps> = ({
               {/* Nice to Haves */}
               <div>
                 <h4 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
-                  Nice-to-Have Bonus Signals
+                  Bonus & Preferred Skills
                 </h4>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                   {selectedJobForDetail.nice_to_have_skills.map(s => (
@@ -838,7 +837,7 @@ export const CandidateExploreJobs: React.FC<CandidateExploreJobsProps> = ({
               justifyContent: 'space-between'
             }}>
               <span style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>
-                Evaluated deterministically with 12-Gate screening
+                Evaluated on verified code and proof of work
               </span>
 
               <button 
@@ -945,10 +944,10 @@ export const CandidateExploreJobs: React.FC<CandidateExploreJobsProps> = ({
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                     <div>
                       <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
-                        Step 1: Upload Authentic Resume Document
+                        Step 1: Upload Your Resume
                       </h3>
                       <p style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>
-                        Gate 0 Integrity Shield scans the document byte structure for hidden 0pt text layers and prompt injections. Gate 2 automatically masks PII (phone, home address) to ensure unbiased evaluation.
+                        Attach your authentic resume. Your contact details are masked during initial technical review to ensure fair, unbiased evaluation.
                       </p>
                     </div>
 
@@ -965,11 +964,11 @@ export const CandidateExploreJobs: React.FC<CandidateExploreJobsProps> = ({
                         {resumeFile}
                       </div>
                       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
-                        PDF format • 1.2 MB • Scanned clean by Gate 0 Shield
+                        PDF format • 1.2 MB • Ready for review
                       </div>
                     </div>
 
-                    {/* Gate 0 & 2 Preview Box */}
+                    {/* Preview Box */}
                     <div style={{
                       background: 'var(--bg-surface)',
                       border: '1px solid var(--border-subtle)',
@@ -981,10 +980,10 @@ export const CandidateExploreJobs: React.FC<CandidateExploreJobsProps> = ({
                       gap: 8
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#10B981', fontWeight: 600 }}>
-                        <ShieldCheck size={16} /> Gate 0 Integrity Scan Passed (Contrast Ratio 21.0:1)
+                        <Check size={16} /> Resume Document Authenticated
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-secondary)' }}>
-                        <Check size={14} color="#10B981" /> Gate 2 Privacy: Personal phone and home address masked before recruiter scoring.
+                        <Check size={14} color="#10B981" /> Privacy Protection: Personal phone and home address are sanitized before technical review.
                       </div>
                     </div>
                   </div>
@@ -998,7 +997,7 @@ export const CandidateExploreJobs: React.FC<CandidateExploreJobsProps> = ({
                         Step 2: Connect Public GitHub Code Repository
                       </h3>
                       <p style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>
-                        Gate 4 directly verifies public commit velocity, code structure, and programming languages against claimed must-haves.
+                        Showcase real production code, commit history, and technical architecture matching the role.
                       </p>
                     </div>
 
@@ -1150,23 +1149,23 @@ export const CandidateExploreJobs: React.FC<CandidateExploreJobsProps> = ({
                       fontSize: 12.5,
                       color: 'var(--primary-700)'
                     }}>
-                      ⚡ Your response will be analyzed for concrete technical depth (data structures, concurrency, schema contracts) and cited directly in the 12-Gate Evidence Ledger.
+                      ⚡ Your response will be reviewed by the engineering team for architectural reasoning and design trade-offs.
                     </div>
                   </div>
                 )}
 
-                {/* STEP 5: APPLICATION SCENARIO PREVIEW (RECRUITER VIEW) */}
+                {/* STEP 5: APPLICATION PREVIEW */}
                 {applyStep === 5 && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
                     <div>
                       <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#10B981', textTransform: 'uppercase' }}>
-                        <Eye size={12} /> Recruiter View Preview
+                        <Eye size={12} /> Application Preview
                       </div>
                       <h3 style={{ fontSize: 17, fontWeight: 800, color: 'var(--text-primary)', margin: '2px 0 4px' }}>
                         Step 5: Review Application Before Submission
                       </h3>
                       <p style={{ fontSize: 13, color: 'var(--text-tertiary)', margin: 0 }}>
-                        Here is the exact evidence dossier and 12-Gate evaluation the hiring team will receive:
+                        Review your profile and attached proof artifacts before submitting to the hiring team:
                       </p>
                     </div>
 
@@ -1187,7 +1186,7 @@ export const CandidateExploreJobs: React.FC<CandidateExploreJobsProps> = ({
                             Front end Developer, AI ML enthusiastic, Unity Developer
                           </div>
                           <div style={{ fontSize: 11.5, color: 'var(--text-tertiary)', marginTop: 2 }}>
-                            📍 Pune, Maharashtra, India • Contact: +91 ••••••••84 (Gate 2 Masked)
+                            📍 Pune, Maharashtra, India • Contact: +91 ••••••••84 (Privacy Protected)
                           </div>
                         </div>
 
@@ -1201,10 +1200,10 @@ export const CandidateExploreJobs: React.FC<CandidateExploreJobsProps> = ({
                             fontWeight: 800,
                             fontFamily: 'var(--font-mono)'
                           }}>
-                            {calculateMatch(jobToApply).score}% MATCH
+                            {Math.round(calculateMatch(jobToApply).score)}% MATCH
                           </span>
                           <div style={{ fontSize: 11, color: '#10B981', fontWeight: 700, marginTop: 4 }}>
-                            ✓ Predicted AUTO_ADVANCE
+                            ✓ Strong Candidate Match
                           </div>
                         </div>
                       </div>
@@ -1213,10 +1212,10 @@ export const CandidateExploreJobs: React.FC<CandidateExploreJobsProps> = ({
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginTop: 12 }}>
                         <div style={{ background: 'var(--bg-surface-subtle)', padding: 12, borderRadius: 6, border: '1px solid var(--border-subtle)' }}>
                           <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                            Gate 0 Integrity & PDF Audit
+                            Resume Document
                           </div>
                           <div style={{ fontSize: 12.5, fontWeight: 700, color: '#10B981', marginTop: 4 }}>
-                            ✓ 21:1 Clean Contrast • 0 Injections
+                            ✓ Verified & Ready
                           </div>
                           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
                             Doc: {resumeFile}
@@ -1225,7 +1224,7 @@ export const CandidateExploreJobs: React.FC<CandidateExploreJobsProps> = ({
 
                         <div style={{ background: 'var(--bg-surface-subtle)', padding: 12, borderRadius: 6, border: '1px solid var(--border-subtle)' }}>
                           <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                            Gate 4 Verified Public GitHub
+                            Public GitHub Repository
                           </div>
                           <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--text-primary)', marginTop: 4 }}>
                             {githubUrl.replace('https://github.com/', '@')}
@@ -1237,7 +1236,7 @@ export const CandidateExploreJobs: React.FC<CandidateExploreJobsProps> = ({
 
                         <div style={{ background: 'var(--bg-surface-subtle)', padding: 12, borderRadius: 6, border: '1px solid var(--border-subtle)' }}>
                           <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                            Gate 4 Live Deployed Software
+                            Live Deployed Application
                           </div>
                           <div style={{ fontSize: 12.5, fontWeight: 700, color: '#10B981', marginTop: 4 }}>
                             ✓ HTTP 200 OK (240ms)
@@ -1249,13 +1248,13 @@ export const CandidateExploreJobs: React.FC<CandidateExploreJobsProps> = ({
 
                         <div style={{ background: 'var(--bg-surface-subtle)', padding: 12, borderRadius: 6, border: '1px solid var(--border-subtle)' }}>
                           <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                            Gate 6 Evidence Ledger Citations
+                            Matching Key Skills
                           </div>
                           <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--text-primary)', marginTop: 4 }}>
-                            {calculateMatch(jobToApply).matchingMustHaves.length} Must-Haves Grounded
+                            {calculateMatch(jobToApply).matchingMustHaves.length} Required Skills Satisfied
                           </div>
                           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
-                            Hard failures: 0/5
+                            {calculateMatch(jobToApply).matchingMustHaves.join(', ')}
                           </div>
                         </div>
                       </div>

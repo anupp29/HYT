@@ -80,7 +80,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="breadcrumb-active">Explore Open Positions</span>
               </>
             ) : (
-              <span className="breadcrumb-active">My Applications & 12-Gate Audit</span>
+              <span className="breadcrumb-active">My Applications & Status</span>
             )
           )}
         </div>
